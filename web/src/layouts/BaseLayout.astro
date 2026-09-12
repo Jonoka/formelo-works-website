@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+interface Props { title: string; description: string; brandName: string }
+const { title, description, brandName } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="preview-notice">Concept preview · Placeholder branding · Not a live factory website</div>
+    <header class="site-header shell">
+      <a class="wordmark" href="/" aria-label={`${brandName} home`}>{brandName}</a>
+      <span class="edition">Development / 01</span>
+    </header>
+    <main id="main" tabindex="-1"><slot /></main>
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span class="wordmark">{brandName}</span>
+        <p>Local foundation preview. Manufacturing facts, approved imagery and contact channels are pending.</p>
+      </div>
+    </footer>
+  </body>
+</html>
