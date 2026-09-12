@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { loadEnvFile } from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 
@@ -8,6 +10,15 @@ const [tool, command, ...args] = process.argv.slice(2);
 const allowed = { astro: ['dev', 'preview', 'check', 'build'], sanity: ['dev', 'build'] };
 if (!allowed[tool]?.includes(command)) throw new Error('Unsupported project tool command.');
 const workspace = tool === 'astro' ? 'web' : 'studio';
+if (tool === 'sanity') {
+  // Fail before loading the CLI, prompting for an account or contacting Sanity.
+  for (const name of ['.env.local', '.env']) {
+    const path = fileURLToPath(new URL(`../studio/${name}`, import.meta.url));
+    if (existsSync(path)) loadEnvFile(path);
+  }
+  const { requireStudioEnvironment } = await import('../studio/environment.ts');
+  requireStudioEnvironment();
+}
 const require = createRequire(new URL(`../${workspace}/package.json`, import.meta.url));
 const manifestPath = require.resolve(`${tool}/package.json`);
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));

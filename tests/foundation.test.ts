@@ -49,6 +49,20 @@ test('planned ten-URL scope and process anchor are preserved', () => {
   assert.equal(routes.processLink, '/manufacturing/#production');
 });
 
+test('Studio dev and build fail before loading the CLI when configuration is missing', { timeout: 15000 }, () => {
+  for (const command of ['dev', 'build']) {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/run-tool.mjs', import.meta.url)), 'sanity', command], {
+      cwd: `${root}/studio`,
+      // Empty existing values prevent a local .env from activating a real account in this negative test.
+      env: { ...process.env, SANITY_STUDIO_PROJECT_ID: '', SANITY_STUDIO_DATASET: '', CI: 'true' },
+      encoding: 'utf8', timeout: 5000,
+    });
+    assert.equal(result.error, undefined);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stdout + result.stderr, /STUDIO_NOT_CONFIGURED/);
+  }
+});
+
 test('the real Astro build command rejects a production attempt', { timeout: 30000 }, () => {
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/run-tool.mjs', import.meta.url)), 'astro', 'build'], {
     cwd: `${root}/web`,

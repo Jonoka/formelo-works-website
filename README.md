@@ -41,7 +41,8 @@ git fetch origin
 git switch --track origin/feat/project-foundation
 npm ci
 npm run dev
-# 仅本机：http://127.0.0.1:4321
+# 打开终端打印的本机地址，默认 http://127.0.0.1:4321
+# 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
 PR 合并后直接使用 main。运行时固定为 Node **24.12.0**、npm **11.6.2**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
@@ -60,6 +61,8 @@ npm run preview
 ```
 
 `verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际生产构建阻断、HTML 和内链检查，以及开发 / 静态服务器的 Chromium 回归。构建输出仅在 `web/dist/`，Studio 不自动参与构建。
+
+完整验证已在 Linux CI 通过；Windows 本机的成功检查与内存 / 服务器启动限制单独记录。当前审计为 **0 高危 / 严重、4 个中危条目**（Sanity CLI 的 UUID 依赖链），不是零漏洞；版本取舍和未完成项见 [验证记录](docs/operations/dev-01-verification.md)。
 
 原文档和建仓安全测试仍保留；Python 3.9+、Git、Bash 为其前提，Linux CI 执行全套：
 

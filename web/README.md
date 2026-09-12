@@ -7,7 +7,8 @@
 ```bash
 npm ci
 npm run dev
-# 仅本机：http://127.0.0.1:4321
+# 打开终端打印的本机地址，默认 http://127.0.0.1:4321
+# 端口占用时 Astro 可能改用下一端口。
 npm run check
 npm test
 npm run build
