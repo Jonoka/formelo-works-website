@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-12",
+  "assets": [
+    {
+      "id": "REF-HOME-001",
+      "status": "approved_design_reference",
+      "path": "assets/reference/homepage-selected-v1.webp",
+      "sha256": "7298e4228091ed174f2855e75b4f4cb89f34814caa1d2fd6d3b39736356dd682",
+      "width": 768,
+      "height": 1152,
+      "source": "User-provided selected concept screenshot in this conversation",
+      "productionAllowed": false,
+      "role": "Visual target only; not a webpage or clean production image",
+      "alt": "Selected FORMELO WORKS desktop homepage concept",
+      "note": "Optimized 768x1152 viewing preview derived from the selected 1024x1536 PNG. Not the original image; reference only, never a production asset."
+    },
+    {
+      "id": "HERO-001",
+      "status": "pending_generation",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Unbranded cream T-shirt and charcoal hoodie still life, concrete setting",
+      "suggestedRatio": "approximately 1:1 desktop; mobile crop evaluated separately",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "CAT-TS-001",
+      "status": "pending_generation",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Cream unbranded T-shirt / neckline detail",
+      "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "CAT-HD-001",
+      "status": "pending_generation",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Charcoal unbranded hoodie / hood and seam detail",
+      "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "JOURNAL-QUOTE-001",
+      "status": "pending_generation",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Neutral garments and project preparation visual, no fictitious tech pack",
+      "suggestedRatio": "16:9",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "JOURNAL-MOQ-001",
+      "status": "pending_generation",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Garment assortment showing quantities conceptually, no numeric factory promise",
+      "suggestedRatio": "16:9",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "FACTORY-001",
+      "status": "awaiting_factory",
+      "path": null,
+      "productionAllowed": false,
+      "role": "Real factory / process photography supplied and approved by factory",
+      "suggestedRatio": "16:9",
+      "approval": "not yet reviewed",
+      "replacementRequiredBeforeLaunch": true
+    }
+  ]
+}

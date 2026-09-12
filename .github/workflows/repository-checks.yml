@@ -1,0 +1,26 @@
+name: Repository checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: repository-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Official actions/checkout v4 ref verified on 2026-09-11. No deploy step.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate documentation and assets
+        run: python3 scripts/check_repository.py
+      - name: Validate shell syntax
+        run: bash -n scripts/publish-github.sh
+      - name: Run offline bootstrap safety tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v

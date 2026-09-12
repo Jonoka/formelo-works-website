@@ -1,0 +1,51 @@
+{
+  "importedAt": "2026-09-12",
+  "method": "Three original Markdown files are byte-exact. The selected design is an optimized viewing preview. Original PNG and Word exports remain in the original conversation bootstrap ZIP; checksums below. No font files are distributed.",
+  "files": [
+    {
+      "originalFilename": "b2b-apparel-factory-prd-v1.0.md",
+      "repositoryPath": "docs/product/prd-v1.0.md",
+      "sha256": "84d6b254e46194654db11401baebde6554a67b30180a71ba5ca88a5a0909aac6",
+      "sizeBytes": 86021
+    },
+    {
+      "originalFilename": "b2b-apparel-website-plan-v2.md",
+      "repositoryPath": "docs/reference/website-plan-v2.0.md",
+      "sha256": "ff12a0fe60a7a6961d678e7a4ef5589b0d12595b6d68de0ca75ad5243c892920",
+      "sizeBytes": 29050
+    },
+    {
+      "originalFilename": "b2b-apparel-ui-ux-and-kickoff-v1.0.md",
+      "repositoryPath": "docs/reference/ui-ux-kickoff-v1.0.md",
+      "sha256": "6e3fcb2a2e148f6479932cd21a0bc34f3d78c5ec6b8df931b9053640f8909668",
+      "sizeBytes": 39041
+    },
+    {
+      "originalFilename": "ade56dd5-dc48-4e52-a16e-596e72d690b1.png",
+      "repositoryPath": "assets/reference/homepage-selected-v1.webp",
+      "sha256": "7298e4228091ed174f2855e75b4f4cb89f34814caa1d2fd6d3b39736356dd682",
+      "sizeBytes": 30488,
+      "transform": "Optimized 768x1152 WebP viewing preview from the 1024x1536 PNG. Not byte-identical to the original."
+    }
+  ],
+  "archiveOnly": [
+    {
+      "originalFilename": "b2b-apparel-factory-prd-v1.0.docx",
+      "sha256": "1c95b74a49263715ecfd5805f69cbe59879e684f530930aab101494e73be0f9e",
+      "sizeBytes": 104917,
+      "storage": "Original conversation bootstrap ZIP; not duplicated into this source repository."
+    },
+    {
+      "originalFilename": "b2b-apparel-ui-ux-and-kickoff-v1.0.docx",
+      "sha256": "c4eb0fb14d68a44f55861690454dbcf3e0e5ed47c6b83a5f0290bcbdf4e56a7d",
+      "sizeBytes": 62621,
+      "storage": "Original conversation bootstrap ZIP; not duplicated into this source repository."
+    },
+    {
+      "originalFilename": "ade56dd5-dc48-4e52-a16e-596e72d690b1.png",
+      "sha256": "b6e39e0204ada5e06b0bed5c657b8b776353eb6dd9582f70643fda8aae202cc4",
+      "sizeBytes": 2516151,
+      "storage": "Original conversation bootstrap ZIP; not duplicated into this source repository."
+    }
+  ]
+}

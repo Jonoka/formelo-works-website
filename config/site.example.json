@@ -1,0 +1,30 @@
+{
+  "status": "mock_configuration_not_connected_to_application",
+  "brand": {
+    "displayName": "FORMELO WORKS",
+    "shortName": "FORMELO",
+    "logoMode": "text",
+    "isProvisional": true
+  },
+  "site": {
+    "locale": "en",
+    "conceptMode": true,
+    "productionApproved": false,
+    "analyticsMode": "off",
+    "siteUrl": null
+  },
+  "contact": {
+    "email": null,
+    "whatsappDigits": null,
+    "emailEnabled": false,
+    "whatsappEnabled": false,
+    "verifiedAt": null
+  },
+  "factory": {
+    "legalName": null,
+    "publicAddress": null,
+    "capabilitiesConfirmed": false,
+    "defaultMoq": null
+  },
+  "conceptNotice": "Concept preview — AI-generated imagery and placeholder branding."
+}

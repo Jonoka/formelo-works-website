@@ -1,0 +1,112 @@
+{
+  "status": "planned_routes_not_implemented",
+  "defaultPreviewIndexable": false,
+  "pages": [
+    {
+      "id": "PG-01",
+      "path": "/",
+      "template": "Home",
+      "referenceCode": "WEB-HOME",
+      "productionIndexable": true,
+      "draftH1": "Custom apparel manufacturing for brands in motion"
+    },
+    {
+      "id": "PG-02",
+      "path": "/manufacturing/",
+      "template": "Manufacturing",
+      "referenceCode": "WEB-MANUFACTURING",
+      "productionIndexable": true,
+      "draftH1": "Custom clothing manufacturing"
+    },
+    {
+      "id": "PG-03",
+      "path": "/clothing/t-shirts/",
+      "template": "Category",
+      "referenceCode": "WEB-TSHIRTS",
+      "productionIndexable": true,
+      "draftH1": "Custom T-shirt manufacturing"
+    },
+    {
+      "id": "PG-04",
+      "path": "/clothing/hoodies/",
+      "template": "Category",
+      "referenceCode": "WEB-HOODIES",
+      "productionIndexable": true,
+      "draftH1": "Custom hoodie manufacturing"
+    },
+    {
+      "id": "PG-05",
+      "path": "/our-factory/",
+      "template": "Factory",
+      "referenceCode": "WEB-FACTORY",
+      "productionIndexable": true,
+      "draftH1": "Our factory"
+    },
+    {
+      "id": "PG-06",
+      "path": "/blog/",
+      "template": "BlogIndex",
+      "referenceCode": "WEB-BLOG",
+      "productionIndexable": true,
+      "draftH1": "Journal"
+    },
+    {
+      "id": "PG-07",
+      "path": "/contact/",
+      "template": "Contact",
+      "referenceCode": "WEB-CONTACT",
+      "productionIndexable": true,
+      "draftH1": "Contact our factory"
+    },
+    {
+      "id": "PG-08",
+      "path": "/privacy/",
+      "template": "Legal",
+      "referenceCode": null,
+      "productionIndexable": false,
+      "draftH1": "Privacy notice"
+    },
+    {
+      "id": "PG-09",
+      "path": "/blog/what-to-send-for-a-clothing-quote/",
+      "template": "Article",
+      "referenceCode": "WEB-QUOTE-GUIDE",
+      "productionIndexable": true,
+      "draftH1": "What to send before requesting a custom clothing quote"
+    },
+    {
+      "id": "PG-10",
+      "path": "/blog/moq-per-style-per-color/",
+      "template": "Article",
+      "referenceCode": "WEB-MOQ-GUIDE",
+      "productionIndexable": true,
+      "draftH1": "Clothing MOQ explained: per style, per color and mixed sizes"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "Clothing",
+      "children": [
+        "/clothing/t-shirts/",
+        "/clothing/hoodies/"
+      ]
+    },
+    {
+      "label": "Manufacturing",
+      "href": "/manufacturing/"
+    },
+    {
+      "label": "Our Factory",
+      "href": "/our-factory/"
+    },
+    {
+      "label": "Journal",
+      "href": "/blog/"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact/"
+    }
+  ],
+  "processLink": "/manufacturing/#production"
+}
