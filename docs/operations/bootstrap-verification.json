@@ -1,0 +1,36 @@
+{
+  "recordedAt": "2026-09-12",
+  "scope": "Local prepared package checks and offline mock-CLI tests; remote GitHub Actions and website tests are separate.",
+  "repository": "Jonoka/formelo-works-website",
+  "branch": "chore/project-bootstrap",
+  "baseCommit": "81b118bda75cb0925500b78b460a33c72ed254e6",
+  "localValidation": {
+    "status": "passed",
+    "checks": [
+      "Required documentation, configuration and scripts exist.",
+      "Three original Markdown files and the viewing preview match four SHA-256 records.",
+      "Planned routes: 10 URLs, eight templates, nine future indexable pages.",
+      "Provisional branding, unconfigured contacts, analytics off and concept flags checked.",
+      "Reference preview is 768x1152; original PNG stays in the source archive. Other assets remain pending.",
+      "New Markdown links and common credential/font-file exclusions checked (not exhaustive security scanning).",
+      "CI is a repository-check workflow, not website deployment."
+    ],
+    "errors": []
+  },
+  "shellSyntax": "passed: bash -n scripts/publish-github.sh",
+  "offlineTests": {
+    "result": "passed",
+    "count": 14,
+    "durationSeconds": 1.907,
+    "evidence": "docs/quality/bootstrap-offline-tests.txt",
+    "network": "Mock GitHub CLI; local bare Git repository only."
+  },
+  "scriptSha256": {
+    "scripts/check_repository.py": "5a70b4d1bf138c3a598316969406e457d4f67ae0c23509137245deee876935f2",
+    "scripts/publish-github.sh": "c7807f4af2a8ac9184c1ba0d31bc3b2e6eca2f8a767ffd835c9d2a47182f9f9c",
+    "tests/test_bootstrap.py": "a5614875ceeb5c640ed44a82b442e190634b772f4a511c8cc8dc5fdcbf5371fe"
+  },
+  "websiteTests": "not_run",
+  "deployment": "not_performed",
+  "hostedGitHubActions": "consult the PR checks; not inferred from local tests"
+}

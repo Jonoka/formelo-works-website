@@ -1,0 +1,24 @@
+name: Implementation task
+description: 一个明确范围内的实现或文档任务
+title: "[Task] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 目标与引用
+      description: 需求编号、设计决定、输入和期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 范围与明确不做
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收与证据
+      description: 测试命令、页面、视口、截图或输出
+    validations:
+      required: true

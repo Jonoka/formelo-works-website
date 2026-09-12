@@ -1,0 +1,19 @@
+test_create_failure_does_not_report_success (test_bootstrap.BootstrapSafetyTests.test_create_failure_does_not_report_success) ... ok
+test_duplicate_routes_are_rejected (test_bootstrap.BootstrapSafetyTests.test_duplicate_routes_are_rejected) ... ok
+test_existing_local_remote_is_preserved (test_bootstrap.BootstrapSafetyTests.test_existing_local_remote_is_preserved) ... ok
+test_existing_remote_repository_is_not_changed (test_bootstrap.BootstrapSafetyTests.test_existing_remote_repository_is_not_changed) ... ok
+test_invalid_repo_name_is_rejected (test_bootstrap.BootstrapSafetyTests.test_invalid_repo_name_is_rejected) ... ok
+test_live_placeholder_contact_is_rejected (test_bootstrap.BootstrapSafetyTests.test_live_placeholder_contact_is_rejected) ... ok
+test_missing_auth_stops_before_creation (test_bootstrap.BootstrapSafetyTests.test_missing_auth_stops_before_creation) ... ok
+test_missing_author_does_not_create_remote (test_bootstrap.BootstrapSafetyTests.test_missing_author_does_not_create_remote) ... ok
+test_network_error_is_not_treated_as_absence (test_bootstrap.BootstrapSafetyTests.test_network_error_is_not_treated_as_absence) ... ok
+test_non_main_branch_is_rejected (test_bootstrap.BootstrapSafetyTests.test_non_main_branch_is_rejected) ... ok
+test_public_visibility_blocks_push (test_bootstrap.BootstrapSafetyTests.test_public_visibility_blocks_push) ... ok
+test_success_uses_private_and_verifies_real_local_push (test_bootstrap.BootstrapSafetyTests.test_success_uses_private_and_verifies_real_local_push) ... ok
+test_tampered_original_is_rejected (test_bootstrap.BootstrapSafetyTests.test_tampered_original_is_rejected) ... ok
+test_wrong_account_stops_before_creation (test_bootstrap.BootstrapSafetyTests.test_wrong_account_stops_before_creation) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.907s
+
+OK

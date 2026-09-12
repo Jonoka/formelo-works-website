@@ -1,0 +1,14 @@
+* text=auto
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.docx binary
+# Immutable imports retain the original bytes across platforms
+docs/product/prd-v1.0.md -text
+docs/reference/website-plan-v2.0.md -text
+docs/reference/ui-ux-kickoff-v1.0.md -text

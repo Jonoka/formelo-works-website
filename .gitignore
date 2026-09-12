@@ -1,0 +1,32 @@
+# Local secrets and generated output
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.astro/
+**/.astro/
+.sanity/
+**/.sanity/
+coverage/
+playwright-report/
+test-results/
+.local/
+__pycache__/
+*.pyc
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Generated reports are not evidence until intentionally reviewed
+reports/local/
