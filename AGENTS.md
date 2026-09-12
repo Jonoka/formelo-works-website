@@ -11,7 +11,7 @@ Repository Markdown is the working documentation; imported v1 documents are snap
 - Factory-owned identity, English public site; website team owns web / SEO, factory owns sales and fulfillment.
 - Ten content URLs / eight templates. Use `config/routes.json`.
 - No inquiry forms, customer uploads, customer database, CRM, checkout, payments, order portal, chatbot API, or extra SEO pages without an explicit scope change.
-- Astro + TypeScript static site and a separate Sanity Studio are the intended stack. No application has been scaffolded in this bootstrap.
+- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. DEV-01 implements only the foundation homepage and engineering 404; Studio is an offline-testable schema/configuration skeleton, not a connected CMS.
 - Preserve the chosen serif editorial headings, warm off-white, charcoal, brick-red CTA, thin dividers, garment photography and dark footer. Fine spacing / contrast / mobile refinements are allowed; unrelated redesigns are not.
 
 ## Source and truth rules
@@ -37,10 +37,15 @@ If the environment only has read access, prepare a patch or archive and state th
 ## Current runnable checks
 
 ```bash
+npm ci
+npm exec -- playwright install chromium
+npm run verify
+npm audit --audit-level=high
 python3 scripts/check_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 bash -n scripts/publish-github.sh
 ```
 
-No `npm run dev` exists yet. First implementation task is DEV-01: scaffold Astro, choose compatible stable dependencies, commit lockfiles and record actual successful commands.
-After scaffolding, update this file and README with verified setup, build and test commands. Do not claim browser, CI, contact delivery or Sanity integration tests ran unless they actually did.
+Use Node 24.12.0 and npm 11.6.2, exact dependency versions and the single root package-lock.json. `npm run dev` serves only 127.0.0.1:4321. Browser tests require free ports 4321 / 4322 and start their own servers; do not reuse somebody else's running server.
+`npm run verify` covers type checking, unit/schema tests, an actual production-build rejection, static-output checks and Chromium tests of both dev and preview. Keep Python bootstrap tests runnable on Linux CI. Never treat these as full PRD or production acceptance.
+`DEPLOY_ENV=production`, unsupported content modes and analytics fail closed. No mocked Sanity project configuration is permitted in builds; tests may exercise invalid input without connecting to any service. Record actual command results in docs/operations/dev-01-verification.md. Do not claim browser, CI, contact delivery or live Sanity integration tests ran unless they actually did.

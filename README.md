@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前为**开发前项目基线**，不是已完成的网站。私有仓库 `Jonoka/formelo-works-website` 的初始化通过 `chore/project-bootstrap` 分支和 PR 交付；不自动合并、不部署、不扩大可见范围。
+> 当前为 **DEV-01 工程底座**，不是完整网站或可发布的工厂资料。私有仓库中的 `feat/project-foundation` 通过 PR 审阅；本轮只实现本地 mock 首页及工程 404，保留选定视觉，不自动合并或部署。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 
@@ -25,7 +25,9 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 已整理：三个完整原始 Markdown 文档、选定首页的 WebP 查看版、当前设计决定与变量、页面和资产清单、协作规则、检查脚本、离线测试及仓库检查 CI。
 **查看图为 768×1152，来自用户选定的 1024×1536 PNG，经过缩小及有损压缩。** PNG 原图和两份 Word 导出仍在原会话的 `formelo-works-website-bootstrap.zip`，未重复上传到 Git；原始及查看版哈希见 [导入清单](docs/reference/import-manifest.json)。Markdown 是后续维护依据。
 
-尚未实现 Astro 应用、Sanity 实例、独立高清无字服装素材、手机 / 品类设计稿、网站测试、真实渠道联调或部署。`web/` 和 `studio/` 只有职责说明，当前没有 `npm run dev`。
+`web/` 为可运行的 Astro + TypeScript 静态工程；`studio/` 为独立 Sanity 配置及四类内容模型骨架，尚未连接账号。共享内容类型、构建模式校验、单元 / schema / 静态产物 / 浏览器检查和 CI 位于仓库中。
+
+尚未交付完整十页、真实 Sanity 内容接入、正式业务文案、服装或工厂照片、真实渠道联调和部署。参考图不会进入网站发布目录，图片位置使用明确占位框；没有外部字体、分析脚本或假联系方式。实际检查结果及限制见 [DEV-01 验证记录](docs/operations/dev-01-verification.md)。
 
 ## 本地获取
 
@@ -34,14 +36,47 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 ```bash
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
-# 初始化 PR 尚未合并时执行：
+# DEV-01 PR 合并前，审阅功能分支：
 git fetch origin
-git switch --track origin/chore/project-bootstrap
-python3 scripts/check_repository.py
-python3 -m unittest discover -s tests -p 'test_*.py' -v
+git switch --track origin/feat/project-foundation
+npm ci
+npm run dev
+# 仅本机：http://127.0.0.1:4321
 ```
 
-PR 合并后直接使用 main。文档检查需要 Python 3.9+、Git 和 Bash；Node 版本及依赖在 DEV-01 实测后锁定。
+PR 合并后直接使用 main。运行时固定为 Node **24.12.0**、npm **11.6.2**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+
+## 检查与静态预览
+
+先停止占用 4321 / 4322 端口的本项目开发服务器；测试不会借用现有服务。
+
+```bash
+npm exec -- playwright install chromium
+npm run verify
+npm audit --audit-level=high
+# 单独检查：npm run check / npm test / npm run build / npm run test:browser
+# 查看已构建静态产物：
+npm run preview
+```
+
+`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际生产构建阻断、HTML 和内链检查，以及开发 / 静态服务器的 Chromium 回归。构建输出仅在 `web/dist/`，Studio 不自动参与构建。
+
+原文档和建仓安全测试仍保留；Python 3.9+、Git、Bash 为其前提，Linux CI 执行全套：
+
+```bash
+python3 scripts/check_repository.py
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+bash -n scripts/publish-github.sh
+```
+
+## 模式与安全边界
+
+默认 `DEPLOY_ENV=local`、`CONTENT_MODE=mock`、`CONCEPT_MODE=true`、`ANALYTICS_MODE=off`。根 `.env.local` / `.env` 可选，已有进程环境变量优先。`DEPLOY_ENV=production`、`CONTENT_MODE=sanity`、关闭 concept 或开启 analytics 都会报错，而不是回退或输出假的生产内容。
+
+所有 HTML 为 noindex，robots 禁抓；不生成假域名 canonical / sitemap。**这些措施不是公网访问控制：本轮没有任何部署，禁止上传 dist 到公共托管。**
+
+Sanity 必须由账号持有人提供真实授权的环境配置后才可启动，见 [Studio 说明](studio/README.md)。不要把 token 写入任何 `SANITY_STUDIO_` 前缀变量。完整架构见 [技术边界](docs/development/architecture.md)。
+
 `scripts/publish-github.sh` 是旧启动包的新建仓库工具；**本仓库已经存在，不要再运行它建仓**。
 
 ## 协作与发布
@@ -50,4 +85,4 @@ PR 合并后直接使用 main。文档检查需要 Python 3.9+、Git 和 Bash；
 当前连接已验证 GitHub API 写入；新会话仍须读取当前分支、提交与权限。聊天输出、本地文件、远端提交、CI 和网站部署是不同状态，分别记录。
 
 Git 保存代码、schema 与文档；Sanity 实际内容和图片另做备份。密钥只存安全环境。
-仓库保持 private，不添加开源许可证，不启用 Pages，不部署网站。CI 仅检查仓库资料，不代表网站验收通过。实际测试范围见 [验收说明](docs/quality/acceptance.md)。
+仓库保持 private，不添加开源许可证，不启用 Pages，不部署网站。CI 以只读权限运行仓库检查和工程回归，不使用 secrets 或部署动作；它不代表完整 PRD、真实联络或生产验收通过。实际测试范围见 [验收说明](docs/quality/acceptance.md)。
