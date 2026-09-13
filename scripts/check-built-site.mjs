@@ -33,9 +33,11 @@ for (const path of htmlFiles) {
   assert.doesNotMatch(html, /\son[a-z]+\s*=/i, `${name}: inline event handlers are not allowed`);
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(ids).size, ids.length, `${name}: duplicate element IDs`);
-  for (const script of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-    assert.match(script[1], /type="module"/, `${name}: only the local enhancement module is allowed`);
-    assert.match(script[1], /src="\/_astro\/[^"?#]+\.js"/, `${name}: enhancement must be a local compiled module`);
+  const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  assert.equal(scripts.length, 1, `${name}: exactly one local enhancement module is required`);
+  for (const script of scripts) {
+    assert.match(script[1], /(?:^|\s)type="module"(?:\s|$)/, `${name}: only the local enhancement module is allowed`);
+    assert.match(script[1], /(?:^|\s)src="\/_astro\/[^"?#]+\.js"(?:\s|$)/, `${name}: enhancement must be a local compiled module`);
     assert.equal(script[2].trim(), '', `${name}: no inline scripts`);
   }
   if (name === 'index.html') {
