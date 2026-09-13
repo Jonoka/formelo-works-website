@@ -96,6 +96,7 @@ export interface HomeDemoCategory {
 }
 // Local presentation data is not a persisted Sanity Page document.
 export interface HomePreview {
+  heroTitleLines: string[];
   eyebrow: string;
   heroImage: LocalPreviewImage;
   capabilities: HomeCapability[];

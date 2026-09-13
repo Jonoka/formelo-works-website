@@ -16,6 +16,7 @@ test('homepage concepts do not become confirmed categories or published articles
   const content = await loadContent('mock');
   assert.equal(content.homepagePreview.factsStatus, 'unconfirmed');
   assert.equal(content.home.title, 'Custom apparel manufacturing for brands in motion.');
+  assert.equal(content.homepagePreview.heroTitleLines.join(' '), content.home.title, 'Line-break hints must preserve the shared title');
   assert.deepEqual(content.homepagePreview.demonstrationCategories.map(item => item.anchor), ['t-shirts', 'hoodies']);
   assert.ok(content.homepagePreview.demonstrationCategories.every(item => item.status === 'demonstration_only'));
   assert.equal(content.homepagePreview.capabilities.length, 4);

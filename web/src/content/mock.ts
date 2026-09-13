@@ -34,6 +34,7 @@ export const mockContent: ContentSnapshot = {
   },
   // Separate local UI model: never serialized or tested as a Sanity document.
   homepagePreview: {
+    heroTitleLines: ['Custom apparel', 'manufacturing', 'for brands in motion.'],
     factsStatus: 'unconfirmed',
     eyebrow: 'Custom apparel / A manufacturing concept',
     heroImage: pendingImage('HERO-001', 'Garment image pending: the intended concept is a cream T-shirt with a charcoal hoodie. No product photograph is shown.'),

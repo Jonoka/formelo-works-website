@@ -8,11 +8,16 @@ async function screenshot(page: Page, info: TestInfo, name: string): Promise<voi
   const path = info.outputPath(`${name}.png`);
   await page.screenshot({ path, fullPage: true, animations: 'disabled' });
   await info.attach(name, { path, contentType: 'image/png' });
+  if (/^homepage-(1440|390)$/.test(name)) {
+    const viewportPath = info.outputPath(`${name}-viewport.png`);
+    await page.screenshot({ path: viewportPath, fullPage: false, animations: 'disabled' });
+    await info.attach(`${name}-viewport`, { path: viewportPath, contentType: 'image/png' });
+  }
 }
 
 for (const width of [320, 360, 390, 768, 1024, 1440]) {
   test(`homepage reflows at ${width}px`, async ({ page }, info) => {
-    await page.setViewportSize({ width, height: 900 });
+    await page.setViewportSize({ width, height: width < 768 ? 844 : 900 });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
     await noOverflow(page);
@@ -36,6 +41,18 @@ for (const width of [320, 360, 390, 768, 1024, 1440]) {
     if (info.project.name === 'preview') await screenshot(page, info, `homepage-${width}`);
   });
 }
+
+test('section heading words remain separated in the tablet layout', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page.goto('/');
+  for (const [id, text] of [
+    ['categories-heading', 'Apparel categories'], ['factory-heading', 'Behind the garment.'],
+    ['process-heading', 'A straightforward process'], ['journal-heading', 'Ideas, process and perspectives'],
+    ['faq-heading', 'A little clarity. A better brief.'],
+  ] as const) {
+    expect((await page.locator(`#${id}`).innerText()).replace(/\s+/g, ' ').trim()).toBe(text);
+  }
+});
 
 test('page metadata, disabled contact actions and local-only requests', async ({ page }) => {
   const externalRequests: string[] = [];
@@ -176,7 +193,7 @@ test('local placeholder image failures preserve captions, dimensions and usable 
 
 for (const width of [320, 1440]) {
   test(`long editorial copy and unbroken names reflow at ${width}px`, async ({ page }, info) => {
-    await page.setViewportSize({ width, height: 900 });
+    await page.setViewportSize({ width, height: width < 768 ? 844 : 900 });
     await page.goto('/');
     await page.locator('h1').evaluate(node => { node.textContent = 'Custom apparel manufacturing for independent brands preparing a detailed international collection brief.'; });
     await page.locator('.hero .intro').evaluate(node => { node.textContent = 'MaterialReferenceWithoutAnySpaces'.repeat(7) + ' A longer editorial paragraph to check wrapping without clipping or horizontal scrolling. '.repeat(3); });
