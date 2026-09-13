@@ -97,3 +97,26 @@ Windows 使用 `.local/runtime-review-20260913/` 中的官方便携包，仅对�
 本轮重新执行仓库检查退出 0；显式 Git Bash 的 `bash -n scripts/publish-github.sh` 退出 0。原有 Python 套件在 Windows 执行 14 项，整体退出 1（2 项失败）：夹具中的裸 `bash` 解析到不可用的 WSL，错误为 `execvpe(/bin/bash) failed`。其余负向用例的通过不能证明建仓脚本已经执行；Windows 套件不计通过，Linux CI 必须独立执行同一套测试。没有修改测试断言或系统 WSL 设置。
 
 独立 `npm audit --audit-level=high --json` 及一次重试均因注册表 TLS 连接中断退出 1，没有取得可用审计结果，不能把安装时的审计摘要替代独立审计成功。四个中危 UUID / Sanity CLI 链条仍保留原说明，是否有新告警以实际 CI 审计为准。完整 verify 与对应提交的 Linux CI 结果在下面继续追加。
+
+### Windows 完整回归与独立审计终态
+
+`npm run verify` 已完整退出 **0**，约 127.84 秒，未超时、未跳步：运行时一致性检查通过；Astro 0 errors / 0 warnings / 0 hints；Studio 与测试 TypeScript 检查通过；**16 项单元/schema 通过**；静态首页和 404 共 2 个 HTML、内链和片段检查通过；**18 项 Chromium 通过**（dev / preview 各 9 项，六档宽度、无 JS、禁用联系方式、实际 404）。本轮端口 4321 / 4322 检查为空闲，测试自行启停服务，没有借用他人服务器。该成功属于 Node 24.21.0 / npm 11.19.1，不改写前面的旧版 Windows 失败记录；也不据此断言历史故障都是旧 Node 引起。
+
+上述两次 TLS 失败后，再次实际运行未附加 JSON 参数的 `npm audit --audit-level=high`，本次 **退出 0**；报告只有 **4 个中危条目、0 高危/严重**，仍为 `uuid` → `typeid-js` → `@sanity/cli` → `sanity` 依赖传播。没有运行报告建议的强制修复。保存 `verify.log`、`verify-result.json`、两次失败审计日志和成功的 `audit-plain.log`；成功日志与失败日志分别保留。Windows 原有 Python 套件仍为环境性失败，不因 npm 回归通过而改记为成功。
+
+### Linux CI：运行时修正提交的完整证据
+
+已读取 [Actions 34745822643](https://github.com/Jonoka/formelo-works-website/actions/runs/34745822643) 的终态及两个 job 原始日志，`bootstrap`、`foundation` 均为 success。运行绑定 PR head **`0abc85bddca434e765a759253ae5cd4a36944ac6`**；日志显示实际 checkout 为临时合并提交 **`b9a5a6c3b77029e77ef7e4573b94b9d6f0497f6d`**，合并上述 head 与 `main@41a9e910ef42cd80f4d5540928bf6b307b8b0d2a`。这里明确区分 PR head 与实际测试树，不使用旧 PR 的绿色状态代替。
+
+| 检查 | 新运行时 Linux CI 实际结果 |
+|---|---|
+| 实际 Node / npm | `v24.21.0` / `11.19.1`，安装前及 verify 内的一致性检查都通过 |
+| `npm ci` | 成功，使用提交的单一根 lockfile |
+| `npm run verify` | 全部步骤退出 0；类型检查、16 项单元/schema、静态 2 页及内链、18 项 Chromium 全部通过 |
+| `npm audit --audit-level=high` | 退出 0；4 个中危，0 高危/严重；风险未消除 |
+| 仓库与 Bash 语法 | 均通过 |
+| 原有 Python 安全套件 | 14 项全部通过；与 Windows 的 WSL 失败分开记录 |
+
+CI 仍保留两类非阻断提示：锁定的 checkout action 声明 Node 20，GitHub 日志说明当前强制以 Node 24 执行；npm 提醒 esbuild 安装脚本尚未列入 allowScripts。它们没有被隐藏，也不代表项目运行在旧 Node 24.12.0；项目实际 Node/npm 已由脚本和日志验证。action 升级与更完整安装脚本策略可独立评审，本轮不放宽策略来消除提示。
+
+本节记录的是上述运行时修正提交；保存执行记录的后续文档提交仍需查看其自己的 Checks。最终 PR 最新 SHA 与对应新 run 的核验信息在同一 PR 的运行时复核评论中单独列明。整个修正没有改动视觉、页面、mock 业务数据、Sanity 模型或真实账户；没有部署、强制推送或合并。
