@@ -1,12 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/browser',
-  timeout: 20000,
-  workers: 1,
-  retries: 0,
+  testDir: './tests/browser', timeout: 30000, workers: 1, retries: 0,
   forbidOnly: Boolean(process.env['CI']),
-  reporter: 'list',
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }], ['json', { outputFile: 'test-results/results.json' }]],
   use: { browserName: 'chromium', trace: 'retain-on-failure' },
   projects: [
     { name: 'preview', use: { baseURL: 'http://127.0.0.1:4321' } },

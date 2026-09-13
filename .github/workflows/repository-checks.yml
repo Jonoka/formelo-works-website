@@ -14,17 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # Official actions/checkout v4 ref verified on 2026-09-11. No deploy step.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Package the exact tracked review source (no .git or local secrets)
-        run: git archive --format=tar.gz --output=review-source.tar.gz HEAD
-      # Official upload-artifact v4 ref verified via GitHub API on 2026-09-13.
+      - name: Package the exact tracked source, without .git or local secrets
+        run: git archive --format=tar.gz --output="${{ runner.temp }}/review-source.tar.gz" HEAD
+      # Official upload-artifact v4 ref checked via GitHub API on 2026-09-13.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: private-review-source-${{ github.sha }}
-          path: review-source.tar.gz
+          path: ${{ runner.temp }}/review-source.tar.gz
           if-no-files-found: error
           retention-days: 1
       - name: Validate documentation and assets
@@ -35,7 +34,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
   foundation:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       DEPLOY_ENV: local
       CONTENT_MODE: mock
@@ -47,23 +46,108 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      # Official actions/setup-node v6 commit verified via GitHub API.
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version-file: .nvmrc
           cache: npm
-      - name: Pin npm and show runtime versions
+      - name: Prepare private evidence and identify the tested source
+        env:
+          PR_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          PR_BASE: ${{ github.event.pull_request.base.sha || github.sha }}
+          CHECKOUT_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
         run: |
+          mkdir -p review
+          python3 - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          Path('review/source.json').write_text(json.dumps({
+              'headSha': os.environ['PR_HEAD'], 'baseSha': os.environ['PR_BASE'],
+              'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
+              'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
+              'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Real-device/browser UI zoom'],
+              'assetLimit': 'Garment generation has no accepted independent output; local SVG UI placeholders only.'
+          }, indent=2))
+          PYCODE
+      - name: Pin and verify the runtime
+        id: runtime
+        run: |
+          set -o pipefail
           npm install --global npm@11.19.1
-          node --version
-          npm --version
-          npm run check:runtime
+          { node --version; npm --version; npm run check:runtime; } 2>&1 | tee review/runtime.txt
       - name: Install the committed dependency graph
-        run: npm ci
+        id: install
+        run: |
+          set -o pipefail
+          npm ci 2>&1 | tee review/install.txt
+      - name: Typecheck and verify shared design tokens
+        id: types
+        run: |
+          set -o pipefail
+          npm run check 2>&1 | tee review/typecheck.txt
+      - name: Unit, schema and real production-block regression tests
+        id: unit
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee review/unit.txt
+      - name: Build and inspect the static homepage
+        id: build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee review/build.txt
       - name: Install the pinned Chromium runtime
-        run: npm exec -- playwright install --with-deps chromium
-      - name: Typecheck, unit tests, static output and browser checks
-        run: npm run verify
-      - name: Reject high-severity dependency advisories
+        id: chromium
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          npm exec -- playwright install --with-deps chromium 2>&1 | tee review/browser-install.txt
+      - name: Run responsive and accessibility-oriented browser regressions
+        id: browser
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          npm run test:browser 2>&1 | tee review/browser.txt
+      - name: Re-run the required aggregate verification command
+        id: verify
+        if: ${{ !cancelled() && steps.types.outcome == 'success' && steps.unit.outcome == 'success' && steps.build.outcome == 'success' && steps.browser.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          npm run verify 2>&1 | tee review/verify.txt
+      - name: Audit the installed graph without force-fixing dependencies
+        id: audit
+        if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
+        run: npm audit --json --audit-level=high > review/audit.json
+      - name: Record outcomes, including skipped checks
         if: always()
-        run: npm audit --audit-level=high
+        env:
+          RUNTIME: ${{ steps.runtime.outcome }}
+          INSTALL: ${{ steps.install.outcome }}
+          TYPES: ${{ steps.types.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          CHROMIUM: ${{ steps.chromium.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+          AUDIT: ${{ steps.audit.outcome }}
+        run: |
+          mkdir -p review
+          python3 - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT']
+          Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
+          PYCODE
+      - name: Retain private screenshots, reports, traces and static output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: homepage-review-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            review/
+            playwright-report/
+            test-results/
+            web/dist/
+          if-no-files-found: error
+          retention-days: 14

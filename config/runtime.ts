@@ -18,11 +18,11 @@ export function loadLocalEnvironment(): void {
   }
 }
 
-/** Fail closed before Astro creates a build. Production is deliberately unavailable in DEV-01. */
+/** Fail closed before Astro creates a build. Production remains deliberately unavailable in this concept preview. */
 export function readRuntime(env: Environment = process.env): RuntimeConfig {
   const deployEnv = env['DEPLOY_ENV'] ?? 'local';
   if (deployEnv === 'production') {
-    throw new Error('PRODUCTION_BLOCKED: DEV-01 has mock content, unconfirmed facts and no verified contact channels.');
+    throw new Error('PRODUCTION_BLOCKED: This concept preview has mock content, unconfirmed facts and no verified contact channels.');
   }
   if (deployEnv !== 'local' && deployEnv !== 'preview') {
     throw new Error('DEPLOY_ENV must be local, preview or production.');

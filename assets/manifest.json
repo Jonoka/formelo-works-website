@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-12",
+  "updatedAt": "2026-09-13",
   "assets": [
     {
       "id": "REF-HOME-001",
@@ -23,7 +23,19 @@
       "role": "Unbranded cream T-shirt and charcoal hoodie still life, concrete setting",
       "suggestedRatio": "approximately 1:1 desktop; mobile crop evaluated separately",
       "approval": "not yet reviewed",
-      "replacementRequiredBeforeLaunch": true
+      "replacementRequiredBeforeLaunch": true,
+      "generationStatus": "blocked_no_acceptable_independent_output",
+      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
+      "plannedWebWidths": [
+        480,
+        800,
+        1200
+      ],
+      "plannedWebFormats": [
+        "image/avif",
+        "image/webp"
+      ],
+      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
     },
     {
       "id": "CAT-TS-001",
@@ -33,7 +45,19 @@
       "role": "Cream unbranded T-shirt / neckline detail",
       "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
       "approval": "not yet reviewed",
-      "replacementRequiredBeforeLaunch": true
+      "replacementRequiredBeforeLaunch": true,
+      "generationStatus": "blocked_no_acceptable_independent_output",
+      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
+      "plannedWebWidths": [
+        360,
+        640,
+        960
+      ],
+      "plannedWebFormats": [
+        "image/avif",
+        "image/webp"
+      ],
+      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
     },
     {
       "id": "CAT-HD-001",
@@ -43,7 +67,19 @@
       "role": "Charcoal unbranded hoodie / hood and seam detail",
       "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
       "approval": "not yet reviewed",
-      "replacementRequiredBeforeLaunch": true
+      "replacementRequiredBeforeLaunch": true,
+      "generationStatus": "blocked_no_acceptable_independent_output",
+      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
+      "plannedWebWidths": [
+        360,
+        640,
+        960
+      ],
+      "plannedWebFormats": [
+        "image/avif",
+        "image/webp"
+      ],
+      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
     },
     {
       "id": "JOURNAL-QUOTE-001",
@@ -74,6 +110,24 @@
       "suggestedRatio": "16:9",
       "approval": "not yet reviewed",
       "replacementRequiredBeforeLaunch": true
+    },
+    {
+      "id": "UI-MEDIA-PENDING-001",
+      "status": "interface_placeholder",
+      "path": "web/public/media/image-pending.svg",
+      "sha256": "a6b4d3cc84cedfbe544b69f98141568798ebd5f51864107e421fd8364ba57b57",
+      "dimensions": {
+        "width": 1200,
+        "height": 900
+      },
+      "sizeBytes": 319,
+      "format": "image/svg+xml",
+      "source": "Hand-authored minimal SVG corner marks; not an AI-generated garment image.",
+      "usage": "Temporary neutral background for three labelled missing-media slots; not a substitute completion of HERO-001/CAT-TS-001/CAT-HD-001.",
+      "conceptStatus": "UI placeholder only; no garment or factory claim.",
+      "productionAllowed": false,
+      "replacementRequiredBeforeLaunch": true,
+      "replacement": "Replace with separate reviewed, unbranded garment assets and their real responsive variants. Keep the missing target assets pending until acceptance."
     }
   ]
 }

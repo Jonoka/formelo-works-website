@@ -1,9 +1,12 @@
 ---
-interface Props { id: string }
-const { id } = Astro.props;
+import Button from './Button.astro';
+interface Props { id: string; compact?: boolean }
+const { id, compact = false } = Astro.props;
 ---
-<div class="contact-actions" aria-describedby={id}>
-  <button class="button button-primary" type="button" disabled>Chat on WhatsApp</button>
-  <button class="button button-secondary" type="button" disabled>Email Our Factory</button>
+<div class:list={['pending-contact', { 'pending-contact-compact': compact }]}>
+  <div class="contact-actions" aria-describedby={id}>
+    <Button disabled describedBy={id}>Chat on WhatsApp <span aria-hidden="true">↗</span></Button>
+    <Button disabled variant="secondary" describedBy={id}>Email Our Factory</Button>
+  </div>
+  <p class="contact-note" id={id}>Contact details pending.{!compact && ' Email and WhatsApp are unavailable until the factory confirms its channels.'}</p>
 </div>
-<p class="contact-note" id={id}>Contact details pending. These buttons are unavailable until the factory confirms its channels.</p>

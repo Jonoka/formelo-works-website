@@ -30,3 +30,7 @@ Thumbs.db
 .vscode/
 # Generated reports are not evidence until intentionally reviewed
 reports/local/
+
+# Private CI review outputs are artifacts, not source inputs.
+review/
+review-source.tar.gz

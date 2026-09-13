@@ -68,10 +68,45 @@ export interface Article {
   referenceCode: string;
   seo: Seo;
 }
+/** Local preview media never impersonates the Sanity reference contract above. */
+export interface LocalPreviewImage {
+  source: 'local';
+  kind: 'concept' | 'placeholder';
+  assetId: string;
+  requiredAssetId: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  renditions: { src: string; width: number; height: number; format: 'image/avif' | 'image/webp' }[];
+  productionAllowed: false;
+}
+export interface HomeCapability {
+  title: string;
+  description: string;
+  icon: 'design' | 'sample' | 'production' | 'quality';
+}
+export interface HomeDemoCategory {
+  anchor: 't-shirts' | 'hoodies';
+  name: string;
+  description: string;
+  status: 'demonstration_only';
+  image: LocalPreviewImage;
+}
+export interface HomePage extends Page {
+  pageKey: 'home';
+  eyebrow: string;
+  heroImage: LocalPreviewImage;
+  capabilities: HomeCapability[];
+  demonstrationCategories: HomeDemoCategory[];
+  processSteps: { title: string; description: string }[];
+  journalTopics: string[];
+  factsStatus: 'unconfirmed';
+}
 export interface ContentSnapshot {
   source: 'mock';
   siteSettings: SiteSettings;
-  home: Page;
+  home: HomePage;
   categories: Category[];
   articles: Article[];
 }
