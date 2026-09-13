@@ -1,12 +1,6 @@
 import example from '../../../config/site.example.json';
-import type { ContentSnapshot, LocalPreviewImage } from '../../../shared/content';
-
-/** A UI placeholder, NOT a generated garment photograph or a Sanity asset. */
-const pendingImage = (requiredAssetId: string, alt: string): LocalPreviewImage => ({
-  source: 'local', kind: 'placeholder', assetId: 'UI-MEDIA-PENDING-001', requiredAssetId,
-  src: '/media/image-pending.svg', alt, width: 1200, height: 900,
-  renditions: [], productionAllowed: false,
-});
+import type { ContentSnapshot } from '../../../shared/content';
+import { localPreviewFromManifest } from './local-media';
 
 /** Proposed customer-facing copy is labelled as a concept; commercial facts remain null. */
 export const mockContent: ContentSnapshot = {
@@ -21,7 +15,7 @@ export const mockContent: ContentSnapshot = {
   home: {
     _type: 'page', pageKey: 'home',
     title: 'Custom apparel manufacturing for brands in motion.',
-    intro: 'For independent labels shaping their next collection. Explore a small-MOQ manufacturing concept, with capabilities, quantities and commercial terms still to be confirmed.',
+    intro: 'For independent labels shaping their next collection. Start with fabric, fit and finish — and build a clear brief for a direct conversation with the factory.',
     seo: {
       seoTitle: `${example.brand.displayName} — Custom apparel manufacturing concept`,
       seoDescription: 'An apparel manufacturing concept for independent brands. Provisional branding; factory capabilities, independent imagery and contact details are awaiting confirmation.',
@@ -29,24 +23,25 @@ export const mockContent: ContentSnapshot = {
     faqItems: [
       { question: 'What should I prepare for a clothing enquiry?', answer: 'Gather your sketches or reference images, intended fabrics, quantities by style and colour, size range, destination and target timing. This helps define the questions to confirm with the factory once contact channels are available.' },
       { question: 'Are minimum quantities and sampling times confirmed?', answer: 'Not yet. Minimum quantities, sample charges, lead times, available materials and production capabilities all require factory confirmation. This preview does not promise a quantity, price or delivery date.' },
-      { question: 'Are these actual products or factory photographs?', answer: 'No. T-shirts and hoodies are demonstration categories. Independent concept garment imagery is still pending, and the factory image area is an explicit placeholder. Any future AI-generated garment image must be labelled as a concept, not evidence of production.' },
+      { question: 'Are these actual products or factory photographs?', answer: 'No. T-shirts and hoodies are demonstration categories, not a catalogue of factory products. Each garment image area states whether a concept is shown or imagery is pending. Factory photography is awaiting verified originals. Concepts are not evidence of production.' },
     ],
   },
   // Separate local UI model: never serialized or tested as a Sanity document.
   homepagePreview: {
     heroTitleLines: ['Custom apparel', 'manufacturing', 'for brands in motion.'],
+    heroFactNote: 'Small-MOQ service concept. Capabilities, quantities and commercial terms are not yet factory-confirmed.',
     factsStatus: 'unconfirmed',
-    eyebrow: 'Custom apparel / A manufacturing concept',
-    heroImage: pendingImage('HERO-001', 'Garment image pending: the intended concept is a cream T-shirt with a charcoal hoodie. No product photograph is shown.'),
+    eyebrow: 'Custom apparel / For independent brands',
+    heroImage: localPreviewFromManifest('HERO-001', 'A cream T-shirt and charcoal hoodie, considered together.'),
     capabilities: [
-      { title: 'Design support', icon: 'design', description: 'Start with your sketches, fit references and finishing ideas. The scope of development support needs factory confirmation.' },
-      { title: 'Sampling', icon: 'sample', description: 'Define the fabric, fit and details to review in a sample. Availability, charges and timing are not yet confirmed.' },
-      { title: 'Small-MOQ planning', icon: 'production', description: 'Build your brief around styles, colours and size splits. Minimum quantities will need confirmation for your project.' },
-      { title: 'Quality checks', icon: 'quality', description: 'Set out the measurements and finish you expect. Inspection stages and acceptance criteria remain to be agreed.' },
+      { title: 'Design support', icon: 'design', description: 'Bring your sketches, fit references and finishing ideas into one clear starting point.' },
+      { title: 'Sampling', icon: 'sample', description: 'Define what a sample needs to resolve: the fabric, the fit and the finer details.' },
+      { title: 'Small-MOQ planning', icon: 'production', description: 'Plan styles, colours and size splits before asking which quantities are feasible.' },
+      { title: 'Quality checks', icon: 'quality', description: 'Set out the measurements, construction and finish you need to agree and review.' },
     ],
     demonstrationCategories: [
-      { anchor: 't-shirts', name: 'T-shirts', status: 'demonstration_only', description: 'Explore a direction for everyday jersey: silhouette, neckline, hand feel and finishing. This category is a demonstration, not a confirmed factory capability.', image: pendingImage('CAT-TS-001', 'T-shirt concept image pending. No garment or factory sample is shown.') },
-      { anchor: 'hoodies', name: 'Hoodies', status: 'demonstration_only', description: 'Consider shape, hood construction and the feel of the fabric. This category is a demonstration, not a confirmed factory capability.', image: pendingImage('CAT-HD-001', 'Hoodie concept image pending. No garment or factory sample is shown.') },
+      { anchor: 't-shirts', name: 'T-shirts', status: 'demonstration_only', description: 'Everyday jersey, thoughtfully considered. Start with silhouette, neckline and the feel of the fabric. Factory capability is unconfirmed.', image: localPreviewFromManifest('CAT-TS-001', 'A cream T-shirt with a relaxed silhouette and visible fabric texture.') },
+      { anchor: 'hoodies', name: 'Hoodies', status: 'demonstration_only', description: 'Volume, structure and comfort. Consider the hood shape, seams and weight of the fabric. Factory capability is unconfirmed.', image: localPreviewFromManifest('CAT-HD-001', 'A charcoal hoodie with a defined hood, seams and textured fabric.') },
     ],
     processSteps: [
       { title: 'Brief', description: 'Bring together your sketches, references, intended quantities and requirements.' },

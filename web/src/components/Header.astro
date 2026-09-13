@@ -1,12 +1,7 @@
 ---
+import { homepageNavigation, demonstrationNavigation } from '../content/navigation';
 interface Props { brandName: string }
 const { brandName } = Astro.props;
-const links = [
-  { label: 'Manufacturing', href: '/#capabilities' },
-  { label: 'Our Factory', href: '/#factory' },
-  { label: 'Journal', href: '/#journal' },
-  { label: 'Contact', href: '/#contact' },
-];
 ---
 <header class="site-header shell">
   <a class="wordmark" href="/" aria-label={`${brandName} home`}>{brandName}</a>
@@ -14,18 +9,17 @@ const links = [
     <details class="clothing-menu" data-nav-disclosure>
       <summary>Clothing <span class="disclosure-mark" aria-hidden="true"></span></summary>
       <ul class="clothing-menu-panel">
-        <li><a href="/#t-shirts">T-shirts <small>Demonstration category</small></a></li>
-        <li><a href="/#hoodies">Hoodies <small>Demonstration category</small></a></li>
+        {demonstrationNavigation.map(link => <li><a href={link.href}>{link.label} <small>Demonstration category</small></a></li>)}
       </ul>
     </details>
-    {links.map(link => <a href={link.href}>{link.label}</a>)}
+    {homepageNavigation.map(link => <a href={link.href}>{link.label}</a>)}
   </nav>
   <details class="mobile-nav" data-nav-disclosure>
     <summary>Menu <span class="disclosure-mark" aria-hidden="true"></span></summary>
     <nav aria-label="Mobile navigation">
       <p class="eyebrow">Clothing / Demonstration categories</p>
-      <a href="/#t-shirts">T-shirts</a><a href="/#hoodies">Hoodies</a>
-      {links.map(link => <a href={link.href}>{link.label}</a>)}
+      {demonstrationNavigation.map(link => <a href={link.href}>{link.label}</a>)}
+      {homepageNavigation.map(link => <a href={link.href}>{link.label}</a>)}
       <p class="navigation-note">Inner pages are not available yet. These links visit sections of the homepage.</p>
     </nav>
   </details>

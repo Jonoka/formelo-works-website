@@ -31,7 +31,11 @@ document.addEventListener('click', event => {
 });
 // A persistent caption and native alt text are the no-JS fallback; enhancement hides broken icons.
 for (const image of document.querySelectorAll<HTMLImageElement>('img[data-preview-image]')) {
-  const fail = () => { image.dataset['failed'] = 'true'; };
+  const fail = () => {
+    image.dataset['failed'] = 'true';
+    const notice = image.closest('figure')?.querySelector<HTMLElement>('[data-image-error]');
+    if (notice) notice.hidden = false;
+  };
   image.addEventListener('error', fail);
   if (image.complete && image.naturalWidth === 0) fail();
 }

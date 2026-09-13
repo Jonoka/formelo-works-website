@@ -69,6 +69,8 @@ export interface Article {
   referenceCode: string;
   seo: Seo;
 }
+export const homepageAssetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'] as const;
+export type HomepageAssetId = (typeof homepageAssetIds)[number];
 /** Local preview media never impersonates the Sanity reference contract above. */
 export interface LocalPreviewImage {
   source: 'local';
@@ -97,6 +99,7 @@ export interface HomeDemoCategory {
 // Local presentation data is not a persisted Sanity Page document.
 export interface HomePreview {
   heroTitleLines: string[];
+  heroFactNote: string;
   eyebrow: string;
   heroImage: LocalPreviewImage;
   capabilities: HomeCapability[];

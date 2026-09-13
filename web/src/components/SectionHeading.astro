@@ -1,0 +1,9 @@
+---
+interface Props { id: string; eyebrow: string; lines: string[]; note?: string }
+const { id, eyebrow, lines, note } = Astro.props;
+---
+<div class="section-heading">
+  <p class="eyebrow">{eyebrow}</p>
+  <h2 id={id}>{lines.map((line, index) => <Fragment>{index > 0 && <br />}{line}{index < lines.length - 1 && ' '}</Fragment>)}</h2>
+  {note && <p class="section-note">{note}</p>}
+</div>

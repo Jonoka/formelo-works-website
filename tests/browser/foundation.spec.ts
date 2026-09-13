@@ -29,6 +29,7 @@ for (const width of [320, 360, 390, 768, 1024, 1440]) {
     for (const image of await page.locator('img[data-preview-image]').all()) {
       await image.scrollIntoViewIfNeeded();
       await expect.poll(() => image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0)).toBe(true);
+      expect(await image.evaluate((node: HTMLImageElement) => Math.abs(node.naturalWidth / node.naturalHeight - Number(node.getAttribute('width')) / Number(node.getAttribute('height'))))).toBeLessThanOrEqual(0.015);
     }
     if (width < 768) {
       await page.locator('.footer-bottom').scrollIntoViewIfNeeded();
@@ -183,6 +184,8 @@ test('local placeholder image failures preserve captions, dimensions and usable 
   for (const figure of await page.locator('.preview-image').all()) {
     await figure.scrollIntoViewIfNeeded();
     await expect(figure.locator('img')).toHaveAttribute('data-failed', 'true');
+    await expect(figure.locator('[data-image-error]')).toBeVisible();
+    await expect(figure.locator('[data-image-error]')).toHaveText('Image could not be loaded.');
   }
   await expect(page.locator('.preview-image figcaption')).toHaveCount(3);
   for (const frame of await page.locator('.media-frame').all()) expect((await frame.boundingBox())?.height).toBeGreaterThan(200);
@@ -212,6 +215,36 @@ test('200-percent text resizing remains usable (not a real-device zoom claim)', 
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
   await noOverflow(page);
   await expect(page.locator('.faq-item > summary').first()).toBeVisible();
+});
+
+test('customer-facing copy and explicit fact status remain separate', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.hero .intro')).toContainText('fabric, fit and finish');
+  await expect(page.locator('.hero .fact-note')).toContainText('not yet factory-confirmed');
+  await expect(page.locator('.category-copy .eyebrow')).toHaveCount(2);
+  await expect(page.locator('#factory img')).toHaveCount(0);
+  for (const paragraph of await page.locator('.capability p, .category-copy > p:not(.eyebrow):not(.unavailable), .process-grid p').all()) {
+    expect(await paragraph.evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(16);
+  }
+});
+
+test('broken images without JavaScript retain labelled space and native FAQ', async ({ browser, baseURL }, info) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 }, ...(baseURL ? { baseURL } : {}) });
+  try {
+    const page = await context.newPage();
+    await page.route('**/media/**', route => route.abort());
+    await page.goto('/');
+    for (const figure of await page.locator('.preview-image').all()) {
+      await figure.scrollIntoViewIfNeeded();
+      await expect(figure.locator('figcaption')).toContainText('Image pending');
+      await expect(figure.locator('img')).toHaveAttribute('alt', /Image pending/);
+      expect((await figure.locator('.media-frame').boundingBox())?.height).toBeGreaterThan(200);
+    }
+    await page.locator('.faq-item > summary').first().click();
+    await expect(page.locator('.faq-item').first()).toHaveAttribute('open', '');
+    await noOverflow(page);
+    if (info.project.name === 'preview') await screenshot(page, info, 'homepage-image-failure-no-javascript');
+  } finally { await context.close(); }
 });
 
 test('unknown routes return an actual 404 rather than the homepage', async ({ page, request }) => {

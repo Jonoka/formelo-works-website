@@ -1,6 +1,16 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-13",
+  "updatedAt": "2026-09-14",
+  "homepageGenerationAttempt": {
+    "date": "2026-09-14",
+    "provider": "ChatGPT image generation",
+    "actualOutput": "One new text-free garment triptych, not three independent source images.",
+    "acceptedIndependentAssets": 0,
+    "importResult": "Blocked: import_conversation_files_to_project requires an explicitly trusted OAuth MCP client.",
+    "repositoryFilesImported": 0,
+    "disposition": "Not cropped, not served, not committed; do not count the triptych as HERO-001/CAT-TS-001/CAT-HD-001.",
+    "nextRequirement": "Three separate text-free source files and an authorized host-to-project attachment transfer; see docs/design/homepage-asset-handoff.md."
+  },
   "assets": [
     {
       "id": "REF-HOME-001",

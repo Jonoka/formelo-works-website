@@ -1,12 +1,17 @@
 * text=auto
+.gitattributes text eol=lf
 *.md text eol=lf
 *.json text eol=lf
 *.yml text eol=lf
 *.py text eol=lf
 *.sh text eol=lf
+# Hash-registered text image assets must keep identical bytes on Windows and CI.
+*.svg text eol=lf
 *.png binary
 *.jpg binary
 *.webp binary
+*.avif binary
+*.jpeg binary
 *.docx binary
 # Immutable imports retain the original bytes across platforms
 docs/product/prd-v1.0.md -text

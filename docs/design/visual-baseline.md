@@ -40,7 +40,7 @@ Logo 为字距较宽的文字标识。无需先做图形商标；品牌文字不
 
 目前仅有完整首页参考图；没有独立高清 Hero、类别图或工厂图。资产条目 `pending_generation` / `awaiting_factory` 不代表文件已经存在。
 下一轮生成同一色温 / 质感的无品牌服装图，保留原始与网页优化版本。参考图不得裁成含文字的小图冒充干净图片，不将原图作为页面背景还原。
-概念模式显示 `Concept preview — AI-generated imagery and placeholder branding.`；真实生产图片与证书仍等工厂提供。
+概念模式保留全局 preview / provisional / unconfirmed 说明；没有接入 AI 图时不声称页面已显示 AI 图。每个图片槽位持续显示准确的 pending 或 AI-generated concept 图注；真实生产图片与证书仍等工厂提供。
 
 ## 6. 可用性与视觉验证
 
@@ -48,3 +48,5 @@ Logo 为字距较宽的文字标识。无需先做图形商标；品牌文字不
 页面文字、链接、图标和装饰由 HTML / CSS / 可访问 SVG 实现；不使用整页图片 / canvas 截图替代正文。
 拒绝滚动劫持、开屏加载、鼠标特效、重视频。内容默认可见，减少动态效果时关闭非必要动画。
 实现后对照原图提交 1440px 桌面与 390px 手机截图，列出有意微调，不能仅凭“看起来高级”验收。
+
+本轮局部衔接见 [首页记录](homepage-handoff.md)，未完成独立素材及授权导入要求见 [素材交接](homepage-asset-handoff.md)。

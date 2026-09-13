@@ -47,6 +47,15 @@ for (const path of htmlFiles) {
     assert.match(html, /No articles have been published in this preview/, 'Journal must not masquerade as published content.');
     assert.equal((html.match(/class="faq-item"/g) ?? []).length, 3, 'Three native purchasing FAQs are required.');
     assert.equal((html.match(/<img\b/g) ?? []).length, 3, 'Three honest local media slots are required.');
+    const figures = [...html.matchAll(/<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi)];
+    assert.equal(figures.length, 3, 'All three media slots need persistent provenance captions.');
+    for (const [index, figure] of figures.entries()) {
+      assert.ok(figure[1].includes(`data-asset-id="${['HERO-001', 'CAT-TS-001', 'CAT-HD-001'][index]}"`), 'Unexpected homepage asset ID.');
+      assert.match(figure[1], /data-media-kind="(?:concept|placeholder)"/, 'Media status must be explicit.');
+      const concept = figure[1].includes('data-media-kind="concept"');
+      assert.ok(figure[2].includes(concept ? 'AI-generated garment concept — not a factory sample.' : 'Image pending — no garment photograph is shown.'), 'Media provenance caption does not match its state.');
+      if (concept) assert.doesNotMatch(figure[2], /src="[^"]+\.svg"/, 'A concept cannot be the old SVG placeholder.');
+    }
     for (const image of html.matchAll(/<img\b([^>]*)>/gi)) {
       assert.match(image[1], /width="[1-9]\d*"/);
       assert.match(image[1], /height="[1-9]\d*"/);

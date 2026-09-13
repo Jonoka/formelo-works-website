@@ -66,7 +66,8 @@ jobs:
               'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Real-device/browser UI zoom'],
-              'assetLimit': 'Garment generation has no accepted independent output; local SVG UI placeholders only.'
+              'assetLimit': 'No accepted independent garment assets imported; attachment transfer blocked by OAuth MCP client trust validation. Local SVG UI placeholders remain.',
+              'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'FACTORY-001']]
           }, indent=2))
           PYCODE
       - name: Pin and verify the runtime
@@ -149,5 +150,10 @@ jobs:
             playwright-report/
             test-results/
             web/dist/
+            assets/manifest.json
+            assets/reference/homepage-selected-v1.webp
+            docs/design/homepage-handoff.md
+            docs/design/homepage-asset-handoff.md
+            docs/operations/pr-3-homepage-review.md
           if-no-files-found: error
           retention-days: 14

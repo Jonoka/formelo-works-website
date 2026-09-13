@@ -9,12 +9,16 @@ import { imageSrcSet, validateLocalImage } from '../web/src/lib/images';
 import type { LocalPreviewImage } from '../shared/content';
 import tokens from '../docs/design/tokens.json';
 import manifest from '../assets/manifest.json';
+import { localPreviewFromManifest } from '../web/src/content/local-media';
+import { homepageNavigation, demonstrationNavigation, footerNavigation } from '../web/src/content/navigation';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
 test('homepage concepts do not become confirmed categories or published articles', async () => {
   const content = await loadContent('mock');
   assert.equal(content.homepagePreview.factsStatus, 'unconfirmed');
+  assert.match(content.homepagePreview.heroFactNote, /not yet factory-confirmed/);
+  assert.doesNotMatch(content.home.intro, /mock|CMS|Astro|placeholder|preview|not yet/i);
   assert.equal(content.home.title, 'Custom apparel manufacturing for brands in motion.');
   assert.equal(content.homepagePreview.heroTitleLines.join(' '), content.home.title, 'Line-break hints must preserve the shared title');
   assert.deepEqual(content.homepagePreview.demonstrationCategories.map(item => item.anchor), ['t-shirts', 'hoodies']);
@@ -63,7 +67,7 @@ test('unknown media providers and unsafe local paths fail closed', async () => {
 
 test('raster renditions are sorted by width and must match the source aspect ratio', async () => {
   const { homepagePreview } = await loadContent('mock');
-  const image: LocalPreviewImage = { ...homepagePreview.heroImage, kind: 'concept', src: '/media/test-source.webp',
+  const image: LocalPreviewImage = { ...homepagePreview.heroImage, kind: 'concept', assetId: 'HERO-001', src: '/media/test-source.webp',
     renditions: [
       { src: '/media/test-960.webp', width: 960, height: 720, format: 'image/webp' },
       { src: '/media/test-480.webp', width: 480, height: 360, format: 'image/webp' },
@@ -109,4 +113,70 @@ test('loading content also isolates mutable local preview state', async () => {
   const next = await loadContent('mock');
   assert.notEqual(next.homepagePreview.capabilities[0]!.title, first.homepagePreview.capabilities[0]!.title);
   assert.notEqual(next.homepagePreview.heroImage.src, first.homepagePreview.heroImage.src);
+});
+
+// Synthetic metadata only. No test fixture claims to be a generated or on-disk photograph.
+function conceptManifest() {
+  const data = structuredClone(manifest) as { assets: Record<string, unknown>[] };
+  const asset = data.assets.find(item => item['id'] === 'HERO-001')!;
+  Object.assign(asset, {
+    status: 'generated_concept', path: 'web/public/media/concepts/hero-1200.webp',
+    source: 'AI-generated concept', conceptStatus: 'concept_only', generationOutput: 'independent_image',
+    approval: 'pending_user_review', dimensions: { width: 1200, height: 1200 },
+    sourceImage: { path: 'assets/concepts/source/hero.png' },
+    renditions: [
+      { path: 'web/public/media/concepts/hero-800.webp', width: 800, height: 800, format: 'image/webp' },
+      { path: 'web/public/media/concepts/hero-480.webp', width: 480, height: 480, format: 'image/webp' },
+      { path: 'web/public/media/concepts/hero-800.avif', width: 800, height: 800, format: 'image/avif' },
+    ],
+  });
+  return { data, asset };
+}
+test('independent local concepts resolve through their manifest, never fake Sanity references', () => {
+  const { data } = conceptManifest();
+  const image = localPreviewFromManifest('HERO-001', 'A cream T-shirt and charcoal hoodie.', data);
+  assert.equal(image.kind, 'concept');
+  assert.equal(image.assetId, 'HERO-001');
+  assert.equal(image.productionAllowed, false);
+  assert.match(image.alt, /^AI-generated concept:/);
+  assert.match(image.alt, /Not a factory sample/);
+  assert.equal('asset' in image, false);
+  assert.equal(imageSrcSet(image, 'image/webp'), '/media/concepts/hero-480.webp 480w, /media/concepts/hero-800.webp 800w');
+  assert.equal(imageSrcSet(image, 'image/avif'), '/media/concepts/hero-800.avif 800w');
+});
+test('ready-but-invalid assets fail instead of falling back to placeholder data', () => {
+  for (const changes of [
+    { path: null }, { status: 'sanity' }, { source: 'Factory photograph' },
+    { generationOutput: 'triptych' }, { conceptStatus: 'production' }, { approval: 'approved_product' },
+    { productionAllowed: true }, { replacementRequiredBeforeLaunch: false }, { renditions: [] },
+    { sourceImage: { path: 'assets/reference/homepage-selected-v1.webp' } },
+    { path: 'web/public/media/../reference.webp' },
+  ]) {
+    const { data, asset } = conceptManifest();
+    Object.assign(asset, changes);
+    assert.throws(() => localPreviewFromManifest('HERO-001', 'Synthetic fixture.', data));
+  }
+});
+test('missing, duplicate or contradictory pending manifest entries are rejected', () => {
+  assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', { assets: [] }));
+  const { data, asset } = conceptManifest();
+  data.assets.push({ ...asset });
+  assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', data), /Duplicate/);
+  const pending = structuredClone(manifest) as { assets: Record<string, unknown>[] };
+  pending.assets.find(item => item['id'] === 'HERO-001')!['path'] = 'web/public/media/not-generated.webp';
+  assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', pending), /Pending asset/);
+});
+test('rendition format cannot disagree with extension or impersonate a placeholder', () => {
+  const { data, asset } = conceptManifest();
+  asset['renditions'] = [{ path: 'web/public/media/concepts/hero-800.avif', width: 800, height: 800, format: 'image/webp' }];
+  assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', data), /Invalid or duplicate/);
+  const valid = localPreviewFromManifest('HERO-001', 'Fixture.', conceptManifest().data);
+  assert.throws(() => validateLocalImage({ ...valid, assetId: 'UI-MEDIA-PENDING-001' }), /impersonate/);
+});
+test('shared navigation exposes only current homepage anchors', () => {
+  const anchors = new Set(['capabilities', 'factory', 'journal', 'contact', 't-shirts', 'hoodies', 'production']);
+  for (const link of [...homepageNavigation, ...demonstrationNavigation, ...footerNavigation]) {
+    assert.ok(link.href.startsWith('/#'));
+    assert.ok(anchors.has(link.href.slice(2)));
+  }
 });

@@ -28,7 +28,7 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
             .map(id => `<section id="${id}"></section>`).join('') +
           '<p>No articles have been published in this preview</p>' +
           '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
-          '<img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="lazy">'.repeat(3)
+          ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'].map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="lazy"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('')
         : '';
       writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${bodySuffix}${script}</body></html>`);
     }
@@ -78,4 +78,10 @@ test('external modules still cannot make API requests', () => {
   const result = runFixture(validScript, '', 'fetch("/fixture-api")');
   assert.notEqual(result.status, 0);
   assert.match(result.output, /must not make network\/API requests/);
+});
+
+test('static checker rejects adding an unlabelled fourth image slot', () => {
+  const result = runFixture(validScript, '<img src="/media/pending.svg" width="1200" height="900" alt="Unlabelled extra">');
+  assert.notEqual(result.status, 0);
+  assert.match(result.output, /Three honest local media slots/);
 });

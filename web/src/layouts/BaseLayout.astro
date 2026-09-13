@@ -16,7 +16,7 @@ const { title, description, brandName, home = false } = Astro.props;
   </head>
   <body class:list={{ 'has-mobile-contact': home }}>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="preview-notice">Concept preview — placeholder branding, unconfirmed factory details and independent imagery pending.</div>
+    <div class="preview-notice">Concept preview — provisional branding and unconfirmed factory capabilities. Not a production catalogue.</div>
     <Header brandName={brandName} />
     <main id="main" tabindex="-1"><slot /></main>
     <Footer brandName={brandName} home={home} />

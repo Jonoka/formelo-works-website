@@ -8,12 +8,16 @@ export function validateLocalImage(image: LocalPreviewImage): void {
       !Number.isSafeInteger(image.width) || !Number.isSafeInteger(image.height) || image.width <= 0 || image.height <= 0) {
     throw new Error('Invalid local preview image; no source fallback is permitted.');
   }
+  if (image.kind === 'concept' && (image.assetId !== image.requiredAssetId || image.src.endsWith('.svg'))) {
+    throw new Error('Invalid local preview image: concepts cannot impersonate placeholders.');
+  }
   const seen = new Set<string>();
   for (const variant of image.renditions) {
     const key = `${variant.format}:${variant.width}`;
     if (!localPath.test(variant.src) || !['image/avif', 'image/webp'].includes(variant.format) ||
         !Number.isSafeInteger(variant.width) || !Number.isSafeInteger(variant.height) ||
-        variant.width <= 0 || variant.height <= 0 || variant.width > image.width ||
+        variant.width <= 0 || variant.height <= 0 || variant.width > image.width || variant.height > image.height ||
+        !variant.src.endsWith(variant.format === 'image/avif' ? '.avif' : '.webp') ||
         Math.abs(variant.width / variant.height - image.width / image.height) > 0.015 || seen.has(key)) {
       throw new Error('Invalid or duplicate local image rendition.');
     }

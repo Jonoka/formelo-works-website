@@ -24,5 +24,5 @@ const webp = imageSrcSet(image, 'image/webp');
         data-preview-image />
     </picture>
   </div>
-  <figcaption>{image.kind === 'placeholder' ? 'Image pending — no garment photograph is shown.' : 'AI-generated garment concept — not a factory sample.'}</figcaption>
+  <figcaption>{image.kind === 'placeholder' ? 'Image pending — no garment photograph is shown.' : 'AI-generated garment concept — not a factory sample.'}<span data-image-error hidden> Image could not be loaded.</span></figcaption>
 </figure>

@@ -32,6 +32,59 @@ def project_paths(root: Path):
             yield Path(directory) / name
 
 
+def validate_generated_asset(asset: dict[str, Any], root: Path) -> list[str]:
+    """Verify declared local concept files. Browser tests still verify actual image decoding."""
+    errors: list[str] = []
+    try:
+        assert asset['status'] == 'generated_concept'
+        assert asset['source'] == 'AI-generated concept'
+        assert asset['conceptStatus'] == 'concept_only'
+        assert asset['generationOutput'] == 'independent_image'
+        assert asset['productionAllowed'] is False and asset['replacementRequiredBeforeLaunch'] is True
+        assert asset['approval'] == 'pending_user_review'
+        dimensions = asset['dimensions']
+        variants = asset['renditions']
+        assert isinstance(variants, list) and variants
+        source = asset['sourceImage']
+        files = [dict(asset, **dimensions), source, *variants]
+        seen: set[tuple[str, int]] = set()
+        for index, item in enumerate(files):
+            width, height = item['width'], item['height']
+            assert type(width) is int and type(height) is int and width > 0 and height > 0
+            path = item['path']
+            prefix = 'assets/concepts/source/' if index == 1 else 'web/public/media/concepts/'
+            assert isinstance(path, str) and path.startswith(prefix) and '..' not in path and '\\' not in path
+            file = (root / path).resolve()
+            assert root.resolve() in file.parents and not (root / path).is_symlink()
+            data = file.read_bytes()
+            assert len(data) == item['sizeBytes'] and len(data) > 0
+            assert hashlib.sha256(data).hexdigest() == item['sha256']
+            fmt = item['format']
+            if fmt == 'image/webp':
+                assert path.endswith('.webp') and data[:4] == b'RIFF' and data[8:12] == b'WEBP'
+                assert struct.unpack('<I', data[4:8])[0] + 8 == len(data)
+            elif fmt == 'image/avif':
+                assert path.endswith('.avif') and data[4:8] == b'ftyp' and b'avif' in data[8:40]
+            elif index == 1 and fmt == 'image/png':
+                assert path.endswith('.png') and data.startswith(b'\x89PNG\r\n\x1a\n')
+            elif index == 1 and fmt == 'image/jpeg':
+                assert path.endswith('.jpg') and data.startswith(b'\xff\xd8') and data.endswith(b'\xff\xd9')
+            else:
+                raise ValueError('Unsupported concept file format')
+            if index != 1:
+                assert abs(width / height - dimensions['width'] / dimensions['height']) <= 0.015
+                assert width <= source['width'] and height <= source['height']
+            if index >= 2:
+                key = (fmt, width)
+                assert key not in seen
+                seen.add(key)
+                assert width <= dimensions['width'] and height <= dimensions['height']
+        assert any(item['format'] == 'image/webp' for item in variants)
+    except (AssertionError, KeyError, OSError, TypeError, ValueError, struct.error) as exc:
+        errors.append('Invalid generated concept files or provenance: ' + str(asset.get('id')) + ' ' + str(exc))
+    return errors
+
+
 def validate(root: Path) -> dict[str, Any]:
     root = root.resolve()
     errors: list[str] = []
@@ -97,6 +150,8 @@ def validate(root: Path) -> dict[str, Any]:
         require(len({a['id'] for a in assets}) == len(assets), 'Duplicate asset IDs.')
         for asset in assets:
             require(asset['productionAllowed'] is False, 'No current concept/reference asset is approved for production.')
+            if asset['status'] == 'generated_concept':
+                errors.extend(validate_generated_asset(asset, root))
             if asset['path'] is not None:
                 data = safe_path(asset['path']).read_bytes()
                 require(hashlib.sha256(data).hexdigest() == asset['sha256'], 'Asset checksum mismatch: ' + asset['id'])
@@ -108,7 +163,7 @@ def validate(root: Path) -> dict[str, Any]:
         require(image[12:16] == b'VP8 ' and image[23:26] == b'\x9d\x01\x2a', 'Unexpected preview encoding.')
         require(tuple(v & 0x3fff for v in struct.unpack('<HH', image[26:30])) == (768, 1152), 'Preview dimensions changed.')
         read_json('docs/design/tokens.json')
-        checks.append('Reference preview is 768x1152; original PNG stays in the source archive. Other assets remain pending.')
+        checks.append('Reference preview is 768x1152; pending states are explicit; any ready local concepts require independently sourced files, hashes and web renditions.')
 
         token_patterns = [
             re.compile(r'gh[pousr]_[A-Za-z0-9]{30,}'),
