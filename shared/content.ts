@@ -45,6 +45,7 @@ export interface Page {
   intro: string;
   seo: Seo;
   faqItems: Faq[];
+  heroImage?: ApprovedImage;
 }
 /** These are starter contracts, not a declaration of production content completeness. */
 export interface Category {
@@ -93,8 +94,8 @@ export interface HomeDemoCategory {
   status: 'demonstration_only';
   image: LocalPreviewImage;
 }
-export interface HomePage extends Page {
-  pageKey: 'home';
+// Local presentation data is not a persisted Sanity Page document.
+export interface HomePreview {
   eyebrow: string;
   heroImage: LocalPreviewImage;
   capabilities: HomeCapability[];
@@ -106,7 +107,8 @@ export interface HomePage extends Page {
 export interface ContentSnapshot {
   source: 'mock';
   siteSettings: SiteSettings;
-  home: HomePage;
+  home: Page;
+  homepagePreview: HomePreview;
   categories: Category[];
   articles: Article[];
 }

@@ -6,32 +6,32 @@ import FAQ from '../components/FAQ.astro';
 import Icon from '../components/Icon.astro';
 import { loadContent } from '../lib/content';
 import { readRuntime } from '../../../config/runtime';
-const { siteSettings, home } = await loadContent(readRuntime().contentMode);
+const { siteSettings, home, homepagePreview } = await loadContent(readRuntime().contentMode);
 ---
 <BaseLayout title={home.seo.seoTitle} description={home.seo.seoDescription} brandName={siteSettings.brandName} home>
   <section class="hero shell" aria-labelledby="hero-heading">
     <div class="hero-copy">
-      <p class="eyebrow">{home.eyebrow}</p>
+      <p class="eyebrow">{homepagePreview.eyebrow}</p>
       <h1 id="hero-heading">{home.title}</h1>
       <p class="intro">{home.intro}</p>
       <PendingContact id="hero-contact-note" />
       <a class="text-link" href="#capabilities">Explore the proposed approach <span aria-hidden="true">↓</span></a>
       <p class="hero-index">Ideas <span>/</span> Materials <span>/</span> Fit <span>/</span> Finish</p>
     </div>
-    <PreviewImage image={home.heroImage} label="Garments, considered." priority shape="square" sizes="(min-width: 1440px) 650px, (min-width: 768px) 48vw, calc(100vw - 40px)" />
+    <PreviewImage image={homepagePreview.heroImage} label="Garments, considered." priority shape="square" sizes="(min-width: 1440px) 650px, (min-width: 768px) 48vw, calc(100vw - 40px)" />
   </section>
 
   <section class="section-row shell section-grid capabilities" id="capabilities" tabindex="-1" aria-labelledby="capabilities-heading">
     <div class="section-heading"><p class="eyebrow">What we could make possible</p><h2 id="capabilities-heading">Capabilities</h2><p class="section-note">Proposed service areas.<br />Not yet factory-confirmed.</p></div>
     <div class="capability-grid">
-      {home.capabilities.map(item => <div class="capability"><Icon name={item.icon} /><h3>{item.title}</h3><p>{item.description}</p></div>)}
+      {homepagePreview.capabilities.map(item => <div class="capability"><Icon name={item.icon} /><h3>{item.title}</h3><p>{item.description}</p></div>)}
     </div>
   </section>
 
   <section class="section-row shell section-grid" id="categories" tabindex="-1" aria-labelledby="categories-heading">
     <div class="section-heading"><p class="eyebrow">Explore the possibilities</p><h2 id="categories-heading">Apparel<br />categories</h2><p class="section-note">Two directions to frame a brief. Demonstrations only.</p></div>
     <div class="category-grid">
-      {home.demonstrationCategories.map((category, index) => (
+      {homepagePreview.demonstrationCategories.map((category, index) => (
         <article class="category-card" id={category.anchor} tabindex="-1" aria-labelledby={`${category.anchor}-heading`}>
           <div class="category-media"><span class="card-number" aria-hidden="true">0{index + 1}</span><PreviewImage image={category.image} label={category.name} sizes="(min-width: 1440px) 450px, (min-width: 1024px) 33vw, (min-width: 768px) 45vw, calc(100vw - 40px)" /></div>
           <div class="category-copy"><p class="eyebrow">Demonstration category</p><h3 id={`${category.anchor}-heading`}>{category.name}</h3><p>{category.description}</p><a class="text-link" href="#enquiry-guide">What to prepare <span aria-hidden="true">↗</span></a><p class="unavailable small-copy">Category detail page not available yet.</p></div>
@@ -48,13 +48,13 @@ const { siteSettings, home } = await loadContent(readRuntime().contentMode);
   <section class="section-row shell section-grid" id="production" tabindex="-1" aria-labelledby="process-heading">
     <div class="section-heading"><p class="eyebrow">How a project could take shape</p><h2 id="process-heading">A straightforward<br />process</h2><p class="section-note">Illustrative workflow, not a confirmed factory procedure.</p></div>
     <ol class="process-grid">
-      {home.processSteps.map((step, index) => <li><span class="step-number">0{index + 1}</span><h3>{step.title}</h3><p>{step.description}</p>{index < home.processSteps.length - 1 && <span class="step-arrow" aria-hidden="true">→</span>}</li>)}
+      {homepagePreview.processSteps.map((step, index) => <li><span class="step-number">0{index + 1}</span><h3>{step.title}</h3><p>{step.description}</p>{index < homepagePreview.processSteps.length - 1 && <span class="step-arrow" aria-hidden="true">→</span>}</li>)}
     </ol>
   </section>
 
   <section class="section-row shell section-grid" id="journal" tabindex="-1" aria-labelledby="journal-heading">
     <div class="section-heading"><p class="eyebrow">Journal</p><h2 id="journal-heading">Ideas, process<br />and perspectives</h2></div>
-    <div class="journal-content"><p class="journal-intro serif">Good questions come before good garments.</p><p>The Journal is taking shape. No articles have been published in this preview.</p><ol class="journal-topics">{home.journalTopics.map(topic => <li><span>{topic}</span><small>Planned topic · Not published</small></li>)}</ol><p class="small-copy unavailable">Journal and article pages are not available yet.</p></div>
+    <div class="journal-content"><p class="journal-intro serif">Good questions come before good garments.</p><p>The Journal is taking shape. No articles have been published in this preview.</p><ol class="journal-topics">{homepagePreview.journalTopics.map(topic => <li><span>{topic}</span><small>Planned topic · Not published</small></li>)}</ol><p class="small-copy unavailable">Journal and article pages are not available yet.</p></div>
   </section>
 
   <section class="section-row shell section-grid enquiry-guide" id="enquiry-guide" tabindex="-1" aria-labelledby="faq-heading">

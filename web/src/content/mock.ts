@@ -19,14 +19,23 @@ export const mockContent: ContentSnapshot = {
     defaultMoq: example.factory.defaultMoq, factConfirmedAt: null,
   },
   home: {
-    _type: 'page', pageKey: 'home', factsStatus: 'unconfirmed',
-    eyebrow: 'Custom apparel / A manufacturing concept',
+    _type: 'page', pageKey: 'home',
     title: 'Custom apparel manufacturing for brands in motion.',
     intro: 'For independent labels shaping their next collection. Explore a small-MOQ manufacturing concept, with capabilities, quantities and commercial terms still to be confirmed.',
     seo: {
       seoTitle: `${example.brand.displayName} — Custom apparel manufacturing concept`,
       seoDescription: 'An apparel manufacturing concept for independent brands. Provisional branding; factory capabilities, independent imagery and contact details are awaiting confirmation.',
     },
+    faqItems: [
+      { question: 'What should I prepare for a clothing enquiry?', answer: 'Gather your sketches or reference images, intended fabrics, quantities by style and colour, size range, destination and target timing. This helps define the questions to confirm with the factory once contact channels are available.' },
+      { question: 'Are minimum quantities and sampling times confirmed?', answer: 'Not yet. Minimum quantities, sample charges, lead times, available materials and production capabilities all require factory confirmation. This preview does not promise a quantity, price or delivery date.' },
+      { question: 'Are these actual products or factory photographs?', answer: 'No. T-shirts and hoodies are demonstration categories. Independent concept garment imagery is still pending, and the factory image area is an explicit placeholder. Any future AI-generated garment image must be labelled as a concept, not evidence of production.' },
+    ],
+  },
+  // Separate local UI model: never serialized or tested as a Sanity document.
+  homepagePreview: {
+    factsStatus: 'unconfirmed',
+    eyebrow: 'Custom apparel / A manufacturing concept',
     heroImage: pendingImage('HERO-001', 'Garment image pending: the intended concept is a cream T-shirt with a charcoal hoodie. No product photograph is shown.'),
     capabilities: [
       { title: 'Design support', icon: 'design', description: 'Start with your sketches, fit references and finishing ideas. The scope of development support needs factory confirmation.' },
@@ -45,11 +54,6 @@ export const mockContent: ContentSnapshot = {
       { title: 'Dispatch', description: 'Agree the packing, shipping method and destination for the project.' },
     ],
     journalTopics: ['What to send for a clothing quote', 'Understanding MOQ per style and colour'],
-    faqItems: [
-      { question: 'What should I prepare for a clothing enquiry?', answer: 'Gather your sketches or reference images, intended fabrics, quantities by style and colour, size range, destination and target timing. This helps define the questions to confirm with the factory once contact channels are available.' },
-      { question: 'Are minimum quantities and sampling times confirmed?', answer: 'Not yet. Minimum quantities, sample charges, lead times, available materials and production capabilities all require factory confirmation. This preview does not promise a quantity, price or delivery date.' },
-      { question: 'Are these actual products or factory photographs?', answer: 'No. T-shirts and hoodies are demonstration categories. Independent concept garment imagery is still pending, and the factory image area is an explicit placeholder. Any future AI-generated garment image must be labelled as a concept, not evidence of production.' },
-    ],
   },
   // These remain empty: homepage demonstrations and planned topics are not published content.
   categories: [], articles: [],

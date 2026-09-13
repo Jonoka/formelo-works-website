@@ -14,21 +14,21 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 
 test('homepage concepts do not become confirmed categories or published articles', async () => {
   const content = await loadContent('mock');
-  assert.equal(content.home.factsStatus, 'unconfirmed');
+  assert.equal(content.homepagePreview.factsStatus, 'unconfirmed');
   assert.equal(content.home.title, 'Custom apparel manufacturing for brands in motion.');
-  assert.deepEqual(content.home.demonstrationCategories.map(item => item.anchor), ['t-shirts', 'hoodies']);
-  assert.ok(content.home.demonstrationCategories.every(item => item.status === 'demonstration_only'));
-  assert.equal(content.home.capabilities.length, 4);
-  assert.equal(content.home.processSteps.length, 4);
+  assert.deepEqual(content.homepagePreview.demonstrationCategories.map(item => item.anchor), ['t-shirts', 'hoodies']);
+  assert.ok(content.homepagePreview.demonstrationCategories.every(item => item.status === 'demonstration_only'));
+  assert.equal(content.homepagePreview.capabilities.length, 4);
+  assert.equal(content.homepagePreview.processSteps.length, 4);
   assert.equal(content.home.faqItems.length, 3);
-  assert.equal(content.home.journalTopics.length, 2);
+  assert.equal(content.homepagePreview.journalTopics.length, 2);
   assert.deepEqual(content.categories, []);
   assert.deepEqual(content.articles, []);
 });
 
 test('missing garment assets remain pending and UI media is explicitly local, not Sanity', async () => {
-  const { home } = await loadContent('mock');
-  const images = [home.heroImage, ...home.demonstrationCategories.map(item => item.image)];
+  const { homepagePreview } = await loadContent('mock');
+  const images = [homepagePreview.heroImage, ...homepagePreview.demonstrationCategories.map(item => item.image)];
   assert.deepEqual(images.map(image => image.requiredAssetId), ['HERO-001', 'CAT-TS-001', 'CAT-HD-001']);
   for (const image of images) {
     validateLocalImage(image);
@@ -50,19 +50,19 @@ test('missing garment assets remain pending and UI media is explicitly local, no
 });
 
 test('unknown media providers and unsafe local paths fail closed', async () => {
-  const { home } = await loadContent('mock');
+  const { homepagePreview } = await loadContent('mock');
   for (const change of [
     { source: 'sanity' }, { kind: 'unreviewed' }, { src: 'https://example.invalid/photo.webp' },
     { src: '/media/../secret.png' }, { width: 0 }, { height: -10 }, { alt: '' }, { productionAllowed: true },
   ]) {
-    const image = { ...home.heroImage, ...change } as unknown as LocalPreviewImage;
+    const image = { ...homepagePreview.heroImage, ...change } as unknown as LocalPreviewImage;
     assert.throws(() => validateLocalImage(image), /Invalid local preview image/);
   }
 });
 
 test('raster renditions are sorted by width and must match the source aspect ratio', async () => {
-  const { home } = await loadContent('mock');
-  const image: LocalPreviewImage = { ...home.heroImage, kind: 'concept', src: '/media/test-source.webp',
+  const { homepagePreview } = await loadContent('mock');
+  const image: LocalPreviewImage = { ...homepagePreview.heroImage, kind: 'concept', src: '/media/test-source.webp',
     renditions: [
       { src: '/media/test-960.webp', width: 960, height: 720, format: 'image/webp' },
       { src: '/media/test-480.webp', width: 480, height: 360, format: 'image/webp' },
@@ -99,4 +99,13 @@ test('normal-text and control token contrast meets the documented thresholds', (
     assert.ok(contrast(foreground, background) >= 4.5, `${foreground} on ${background}`);
   }
   assert.ok(contrast(c.controlBorder, c.background) >= 3);
+});
+
+test('loading content also isolates mutable local preview state', async () => {
+  const first = await loadContent('mock');
+  first.homepagePreview.capabilities[0]!.title = 'Changed only in this test';
+  first.homepagePreview.heroImage.src = '/media/changed-only-in-this-test.svg';
+  const next = await loadContent('mock');
+  assert.notEqual(next.homepagePreview.capabilities[0]!.title, first.homepagePreview.capabilities[0]!.title);
+  assert.notEqual(next.homepagePreview.heroImage.src, first.homepagePreview.heroImage.src);
 });
