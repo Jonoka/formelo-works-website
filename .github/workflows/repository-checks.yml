@@ -18,6 +18,15 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - name: Package the exact tracked review source (no .git or local secrets)
+        run: git archive --format=tar.gz --output=review-source.tar.gz HEAD
+      # Official upload-artifact v4 ref verified via GitHub API on 2026-09-13.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: private-review-source-${{ github.sha }}
+          path: review-source.tar.gz
+          if-no-files-found: error
+          retention-days: 1
       - name: Validate documentation and assets
         run: python3 scripts/check_repository.py
       - name: Validate shell syntax
@@ -58,4 +67,3 @@ jobs:
       - name: Reject high-severity dependency advisories
         if: always()
         run: npm audit --audit-level=high
-
