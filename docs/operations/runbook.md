@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-私有仓库 `Jonoka/formelo-works-website` 已建立。本次初始化在 `chore/project-bootstrap`，通过 PR 审阅；不要再次运行新建仓库脚本，不向 main 强制推送。
-`web/` 与 `studio/` 只有职责说明，尚无 Node 依赖或应用启动命令。
+私有仓库 `Jonoka/formelo-works-website` 的初始化 PR #1 已合并。DEV-01 在 `feat/project-foundation` 开发工程底座，不向 main 直接写入或强制推送。
+`web/` 为本地 mock 静态工程，`studio/` 为独立配置与模型骨架；没有账号接入或部署。启动和检查命令见根 README。
 
 ## 本地获取与检查
 
@@ -11,8 +11,11 @@
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
-# 初始化 PR 尚未合并时：
-git switch --track origin/chore/project-bootstrap
+# DEV-01 PR 尚未合并时：
+git switch --track origin/feat/project-foundation
+npm ci
+npm exec -- playwright install chromium
+npm run verify
 python3 scripts/check_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 bash -n scripts/publish-github.sh
@@ -31,10 +34,15 @@ GitHub API 写入时读取最新 base commit / tree，叠加本次变化，创�
 `scripts/publish-github.sh` 只为最初离线启动包保留：创建不存在的私有仓库、校验后上传、拒绝同名库 / 错账号 / 已有 remote。当前仓库已存在，所以正常协作不使用此脚本。
 其离线测试用 mock gh 和本地裸 Git 库，不会创建真实远端，也不能代表远端权限或 CI 成功。
 
-## DEV-01 后补齐的运行资料
+## DEV-01 运行与验证
 
-记录 Node / 包管理器 / 框架实测版本、lockfile、npm ci、mock 开发、构建、类型和链接检查命令。没有跑通的命令不得标成已验证。
-Sanity 授权后补充项目、数据集和只读构建权限，文档只写环境变量名，不写密钥值。
+运行时、依赖取舍、实际命令结果及环境限制记录在 [DEV-01 验证记录](dev-01-verification.md)。Node 24.21.0 / npm 11.19.1；不使用其他包管理器，不手写 lockfile。升级依赖必须重新执行 npm ci、审计及完整工程回归，不能仅修改版本号。
+
+先用版本管理器切换至 `.nvmrc` / `.node-version` 指定的精确版本，或使用经官方 SHA-256 校验的对应发行包。官方 Node 24.21.0 包随附 npm 11.19.0；先明确升级到 npm 11.19.1：`npm install --global npm@11.19.1`，便携版另加 `--prefix` 指向该便携目录，不覆盖系统 npm。`node --version`、`npm --version` 和 `npm run check:runtime` 必须一致。Windows 可使用项目外或 Git 忽略目录中的便携版，只调整当前终端 PATH，不覆盖系统安装；子进程的 Node/npm 也必须来自同一目录。保持 `engine-strict=true`。运行时更新只通过 npm 正常生成 lockfile 必要元数据，不删除或重解现有依赖图以掩盖问题。Node 二进制安全与 npm 包审计分别核查，旧记录不改写为新版本的通过证据。
+
+本地开发仅监听 127.0.0.1。浏览器测试需 4321 / 4322 空闲；先停止自己启动的本项目服务器，不强行杀死不明进程。遇到内存分配失败应记录环境和失败日志，不把未执行的后续步骤算作通过；Linux CI 结果单独记录。
+
+Sanity 授权后补充真实项目、数据集和只读构建权限，文档只写环境变量名，不写密钥值。未配置的 Studio 应明确失败，而不是填入演示账号以制造构建成功。
 
 ## 后续发布与恢复
 

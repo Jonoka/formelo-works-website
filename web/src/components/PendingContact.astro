@@ -1,0 +1,9 @@
+---
+interface Props { id: string }
+const { id } = Astro.props;
+---
+<div class="contact-actions" aria-describedby={id}>
+  <button class="button button-primary" type="button" disabled>Chat on WhatsApp</button>
+  <button class="button button-secondary" type="button" disabled>Email Our Factory</button>
+</div>
+<p class="contact-note" id={id}>Contact details pending. These buttons are unavailable until the factory confirms its channels.</p>

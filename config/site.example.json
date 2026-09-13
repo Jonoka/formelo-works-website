@@ -1,5 +1,5 @@
 {
-  "status": "mock_configuration_not_connected_to_application",
+  "status": "local_mock_configuration_not_for_production",
   "brand": {
     "displayName": "FORMELO WORKS",
     "shortName": "FORMELO",
@@ -26,5 +26,5 @@
     "capabilitiesConfirmed": false,
     "defaultMoq": null
   },
-  "conceptNotice": "Concept preview — AI-generated imagery and placeholder branding."
+  "conceptNotice": "Concept preview — placeholder branding and unconfirmed manufacturing details."
 }

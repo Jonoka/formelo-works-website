@@ -5,13 +5,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import struct
 import sys
 from pathlib import Path
 from typing import Any
 
-SKIP_DIRS = {'.git', '__pycache__', 'node_modules', '.astro', '.sanity', 'dist', '.local'}
+SKIP_DIRS = {'.git', '__pycache__', 'node_modules', '.astro', '.sanity', 'dist', '.local', 'coverage', 'playwright-report', 'test-results'}
 REQUIRED = [
     'README.md', 'AGENTS.md', 'CONTRIBUTING.md', '.gitignore', '.env.example',
     'docs/decisions/0001-approved-direction.md', 'docs/design/visual-baseline.md',
@@ -21,6 +22,14 @@ REQUIRED = [
     'assets/manifest.json', 'scripts/publish-github.sh',
     '.github/workflows/repository-checks.yml',
 ]
+
+
+def project_paths(root: Path):
+    """Prune generated directories before traversal, including installed workspaces."""
+    for directory, names, files in os.walk(root, followlinks=False):
+        names[:] = [name for name in names if name not in SKIP_DIRS]
+        for name in names + files:
+            yield Path(directory) / name
 
 
 def validate(root: Path) -> dict[str, Any]:
@@ -107,7 +116,7 @@ def validate(root: Path) -> dict[str, Any]:
             re.compile(r'sk-(?:proj-)?[A-Za-z0-9_-]{35,}'),
         ]
         forbidden_suffixes = {'.pem', '.key', '.p12', '.pfx', '.woff', '.woff2', '.ttf', '.otf'}
-        for path in root.rglob('*'):
+        for path in project_paths(root):
             relative = path.relative_to(root)
             if set(relative.parts) & SKIP_DIRS:
                 continue
@@ -119,11 +128,11 @@ def validate(root: Path) -> dict[str, Any]:
             if path.name.startswith('.env') and path.name != '.env.example':
                 continue  # Real local env files are gitignored, not release inputs.
             require(path.suffix.lower() not in forbidden_suffixes, 'Do not ship credentials or font files: ' + str(relative))
-            if path.suffix.lower() not in {'.md', '.json', '.py', '.sh', '.yml', '.yaml'} and path.name != '.env.example':
+            if path.suffix.lower() not in {'.md', '.json', '.py', '.sh', '.yml', '.yaml', '.ts', '.tsx', '.astro', '.mjs', '.css'} and path.name != '.env.example':
                 continue
             text = path.read_text(encoding='utf-8')
             require(not any(pattern.search(text) for pattern in token_patterns), 'Possible credential found (value not displayed): ' + str(relative))
-            if path.suffix != '.md' or str(relative) in imported_paths:
+            if path.suffix != '.md' or relative.as_posix() in imported_paths:
                 continue
             prose = re.sub(r'```.*?```', '', text, flags=re.S)
             for match in re.finditer(r'!?\[[^\]]*\]\(([^\s)]+)\)', prose):

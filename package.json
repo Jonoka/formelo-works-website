@@ -1,0 +1,32 @@
+{
+  "name": "formelo-works-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.19.1",
+  "engines": { "node": "24.21.0", "npm": "11.19.1" },
+  "workspaces": ["web", "studio"],
+  "scripts": {
+    "check:runtime": "node scripts/check-runtime.mjs",
+    "dev": "npm run dev --workspace @formelo/web",
+    "preview": "npm run preview --workspace @formelo/web",
+    "check": "npm run check --workspaces --if-present && tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test --test-concurrency=1 tests/foundation.test.ts tests/schema.test.ts",
+    "build": "npm run build --workspace @formelo/web && node scripts/check-built-site.mjs",
+    "test:browser": "playwright test",
+    "verify": "npm run check:runtime && npm run check && npm test && npm run build && npm run test:browser",
+    "studio:dev": "npm run dev --workspace @formelo/studio",
+    "studio:build": "npm run build --workspace @formelo/studio"
+  },
+  "overrides": {
+    "adm-zip": "0.6.1",
+    "js-yaml@3": "3.15.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@sanity/schema": "5.31.2",
+    "@types/node": "24.13.4",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3"
+  }
+}

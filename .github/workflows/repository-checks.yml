@@ -24,3 +24,38 @@ jobs:
         run: bash -n scripts/publish-github.sh
       - name: Run offline bootstrap safety tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEPLOY_ENV: local
+      CONTENT_MODE: mock
+      CONCEPT_MODE: 'true'
+      ANALYTICS_MODE: 'off'
+      ASTRO_TELEMETRY_DISABLED: '1'
+      DO_NOT_TRACK: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      # Official actions/setup-node v6 commit verified via GitHub API.
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Pin npm and show runtime versions
+        run: |
+          npm install --global npm@11.19.1
+          node --version
+          npm --version
+          npm run check:runtime
+      - name: Install the committed dependency graph
+        run: npm ci
+      - name: Install the pinned Chromium runtime
+        run: npm exec -- playwright install --with-deps chromium
+      - name: Typecheck, unit tests, static output and browser checks
+        run: npm run verify
+      - name: Reject high-severity dependency advisories
+        if: always()
+        run: npm audit --audit-level=high
+

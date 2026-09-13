@@ -8,7 +8,9 @@
 `bash -n scripts/publish-github.sh` 检查 Bash 语法。
 CI 配置随初始化 PR 交付；实际运行状态以 GitHub Actions 为准，不用本地报告代替远端结果。
 
-## 应用验收（全部待执行）
+## DEV-01 工程底座与完整应用验收
+
+工程检查命令为 `npm run verify` 和 `npm audit --audit-level=high`，实际执行环境、结果和限制见 [DEV-01 验证记录](../operations/dev-01-verification.md)。它只覆盖本地 mock 首页 / 404、内容模型骨架与工程安全边界；不能用于勾选完整十页、真实 CMS 或生产用例。
 
 沿用 [PRD 第 16 章](../product/prd-v1.0.md) 的 T-01～T-45 及 [UI 第 16 章](../reference/ui-ux-kickoff-v1.0.md) 的 UI-V01～UI-V16。
 已选画面方向明确，不意味着移动端、代码、生产素材或所有 UI-V 用例已通过。

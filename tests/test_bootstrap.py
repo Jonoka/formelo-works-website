@@ -62,7 +62,8 @@ class BootstrapSafetyTests(unittest.TestCase):
         self.base = Path(self.temp.name)
         self.project = self.base / 'project'
         shutil.copytree(ROOT, self.project, ignore=shutil.ignore_patterns(
-            '.git', '__pycache__', '*.pyc', '.local', 'node_modules', 'dist', '.env', '.env.local'
+            '.git', '__pycache__', '*.pyc', '.local', 'node_modules', 'dist', '.env', '.env.local',
+            '.astro', '.sanity', 'coverage', 'test-results', 'playwright-report'
         ))
         self.bin = self.base / 'bin'
         self.bin.mkdir()

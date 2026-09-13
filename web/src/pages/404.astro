@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadContent } from '../lib/content';
+import { readRuntime } from '../../../config/runtime';
+const { siteSettings } = await loadContent(readRuntime().contentMode);
+---
+<BaseLayout title={`Page not found — ${siteSettings.brandName}`} description="This page is not available in the local foundation preview." brandName={siteSettings.brandName}>
+  <section class="not-found shell">
+    <p class="eyebrow">404 / Page not found</p>
+    <h1>This page is not here.</h1>
+    <p>Only the foundation homepage is available in this local preview.</p>
+    <a class="button button-primary" href="/">Return to the homepage</a>
+  </section>
+</BaseLayout>
