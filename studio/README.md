@@ -12,7 +12,7 @@
 
 ## 不需要账号的检查
 
-从仓库根目录：
+统一使用 Node 24.21.0 / npm 11.19.1，从仓库根目录运行；版本与根 lockfile 的一致性由 `npm run check:runtime` 检查：
 
 ```bash
 npm ci

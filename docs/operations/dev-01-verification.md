@@ -65,3 +65,35 @@ npm 报告 4 个中危条目：`uuid@10.0.0` 及 `typeid-js`、`@sanity/cli`、`
 ## 明确未执行
 
 Sanity 项目创建、授权登录、CORS、云端 schema / 文档验证、内容发布 / 撤回 / 重建、Studio 公共托管、工厂事实审核、真实渠道收发、公共部署和 PR 合并均未执行。参考图不作为静态站资产，字体为系统回退栈。
+
+---
+
+## 2026-09-13 追加：PR #2 运行时安全基线修正
+
+本节不替换上面的 2026-09-12 记录；旧 Node 24.12.0 / npm 11.6.2 的结果不能当作本次通过证据。依据 [PR #2 验收意见](https://github.com/Jonoka/formelo-works-website/pull/2#issuecomment-5645870626)，从原功能分支 head `ff799298ec7a58c439eaec4871c5ee26dea6c520` 继续，重新 fetch 后远端与本机一致，main 仍为 `41a9e910ef42cd80f4d5540928bf6b307b8b0d2a`。断线前的修改保留，没有新建替代分支或 PR。
+
+### 精确版本与官方依据
+
+采用 **Node 24.21.0 / npm 11.19.1**，保持 `engine-strict=true`。2026-09-13 再次读取 [Node 官方发行索引](https://nodejs.org/dist/index.json)：最新 24.x 为 24.21.0，LTS 代号 Krypton；该条 `security=false`，最近单独标记安全发布的版本为 24.18.1。选择的是包含其后累积更新的当前 LTS，不把普通 LTS 错称为独立安全公告。发行索引日期为 2026-09-07，[24.21.0 公告](https://nodejs.org/en/blog/release/v24.21.0)标题日期为 2026-09-08；两者日期口径分别保留。
+
+[官方支持计划](https://raw.githubusercontent.com/nodejs/Release/main/schedule.json)列明 24.x 于 2026-10-20 进入维护期、2028-04-30 结束支持；本次核对时仍处于 Active LTS。24.21.0 公告记录 OpenSSL 3.5.8、Undici 7.29.1 更新。版本选择不是零漏洞保证，后续仍需跟进官方安全发布。
+
+官方 Node 包随附 npm 11.19.0；补充核对 [npm 11.19.1 官方发行说明](https://github.com/npm/cli/releases/tag/v11.19.1)后，将 npm 单独固定到补丁版 11.19.1，而不是照搬随附版本。说明列出 undici 6.28.0、ip-address 10.5.0、brace-expansion 5.0.9、tar 7.5.22 等依赖更新；本机安装后核对了这些随附版本。npm 11.19.1 声明 Node 范围 `^20.17.0 || >=22.9.0`，包含所选 Node。
+
+Windows 使用 `.local/runtime-review-20260913/` 中的官方便携包，仅对子进程设置 PATH，不覆盖系统 Node/npm。下载 [官方 Windows x64 ZIP](https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip)，与同目录 `SHASUMS256.txt` 核对 SHA-256：`158f7685b44de51f6c0df1d153526cbcd3e1bc739a8dfc607721cef75de9e541`，一致后才解压执行。实际输出为 `v24.21.0`；随后使用该 Node 执行 `npm install --global --prefix <portable-directory> npm@11.19.1`，实际 npm 输出为 `11.19.1`。
+
+### 单一锁文件与运行时校验
+
+使用新 npm 正常执行 `npm install --package-lock-only`，没有手写 lockfile、删除锁文件重解依赖、修改完整性值或运行强制修复。与原提交逐记录比较：根 engines 更新；npm 规范化 33 个 peer 标记，并移除 `vite-tsconfig-paths` 下重复的 TypeScript 5.9.3 锁记录。所有保留包的版本、依赖约束、resolved 和 integrity 均未变化，没有新增包或应用依赖升级。最初要求全部非根记录完全相同的诊断断言因此失败，随后检查并明确记录上述实际差异，未把它隐藏为纯两行修改。
+
+`.nvmrc`、`.node-version`、engines、packageManager、CI 与运行说明同步。新增 `npm run check:runtime` 核对真实 Node、npm user agent 和所有版本配置；它是 verify 的第一步，也在 CI 安装依赖前执行。实际新运行时校验通过；用系统旧 Node 24.12.0 执行该脚本则明确退出 1，错误指出必须切换版本，符合负向测试预期。
+
+安装保留了 npm 对 esbuild 0.28.2 的 allowScripts 未覆盖提示及原有弃用告警，未用 `--ignore-scripts`、关闭 engine-strict、关闭 TLS 校验或忽略退出码使其通过。此提示不是本项目已完成安装脚本审计的声明。
+
+### 新运行时 Windows 执行证据
+
+干净 `npm ci --maxsockets=4 --fetch-retries=2 --fetch-timeout=30000` 已退出 0：安装 1164 个包、审计 1167 个条目；安装前后 lockfile SHA-256 不变。日志在忽略目录 `npm-ci.log` 与 `npm-ci-result.json`，不把本地忽略文件称为已提交的 CI artifacts。
+
+本轮重新执行仓库检查退出 0；显式 Git Bash 的 `bash -n scripts/publish-github.sh` 退出 0。原有 Python 套件在 Windows 执行 14 项，整体退出 1（2 项失败）：夹具中的裸 `bash` 解析到不可用的 WSL，错误为 `execvpe(/bin/bash) failed`。其余负向用例的通过不能证明建仓脚本已经执行；Windows 套件不计通过，Linux CI 必须独立执行同一套测试。没有修改测试断言或系统 WSL 设置。
+
+独立 `npm audit --audit-level=high --json` 及一次重试均因注册表 TLS 连接中断退出 1，没有取得可用审计结果，不能把安装时的审计摘要替代独立审计成功。四个中危 UUID / Sanity CLI 链条仍保留原说明，是否有新告警以实际 CI 审计为准。完整 verify 与对应提交的 Linux CI 结果在下面继续追加。

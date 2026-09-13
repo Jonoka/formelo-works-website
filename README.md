@@ -45,7 +45,9 @@ npm run dev
 # 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
-PR 合并后直接使用 main。运行时固定为 Node **24.12.0**、npm **11.6.2**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+PR 合并后直接使用 main。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+
+使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志属于旧运行时；本次安全基线修正的依据和新结果追加在验证记录末尾。
 
 ## 检查与静态预览
 
@@ -62,7 +64,7 @@ npm run preview
 
 `verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际生产构建阻断、HTML 和内链检查，以及开发 / 静态服务器的 Chromium 回归。构建输出仅在 `web/dist/`，Studio 不自动参与构建。
 
-完整验证已在 Linux CI 通过；Windows 本机的成功检查与内存 / 服务器启动限制单独记录。当前审计为 **0 高危 / 严重、4 个中危条目**（Sanity CLI 的 UUID 依赖链），不是零漏洞；版本取舍和未完成项见 [验证记录](docs/operations/dev-01-verification.md)。
+检查结果按运行时版本和平台分别记录；旧运行时的绿色 CI 不代表新版本已通过。本轮 Node 24.21.0 / npm 11.19.1 的本机结果、Linux CI 对应 SHA / run ID 和剩余限制，见 [验证记录末尾的追加章节](docs/operations/dev-01-verification.md)。保留 Sanity CLI / UUID 链上的 **4 个中危依赖条目**说明，不宣称零漏洞；Node 二进制与 npm 依赖图的安全核查是两件事。
 
 原文档和建仓安全测试仍保留；Python 3.9+、Git、Bash 为其前提，Linux CI 执行全套：
 

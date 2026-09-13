@@ -2,7 +2,7 @@
 
 静态输出、严格 TypeScript、本地 mock。当前仅首页 `/`、工程 404 和 `robots.txt`；不是完整十页站点。首页用于验证工程与既定字体、配色、双栏及移动端布局，不代表 DEV-02 / DEV-03 已完成。
 
-从仓库根目录执行：
+使用 Node 24.21.0 / npm 11.19.1，从仓库根目录执行；先用 `node --version`、`npm --version` 和 `npm run check:runtime` 核对，不能关闭 engine-strict：
 
 ```bash
 npm ci

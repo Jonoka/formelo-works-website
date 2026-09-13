@@ -7,7 +7,7 @@ DEV-01 已建立根 npm workspaces、Astro 静态首页 / 404 和独立 Studio s
 ## DEV-01 工程结构
 
 采用根目录轻量 npm workspaces：`web/` 为 Astro + TypeScript 静态前端，`studio/` 为 Sanity Studio。
-固定 Node 24.12.0 / npm 11.6.2，使用一种包管理器、精确直接依赖及单一根 lockfile。本地和 CI 执行 `npm ci` / `npm run verify`。版本取舍与实际检查记录见 [DEV-01 验证记录](../operations/dev-01-verification.md)。
+固定 Node 24.21.0 / npm 11.19.1，使用一种包管理器、精确直接依赖及单一根 lockfile。本地和 CI 执行 `npm ci` / `npm run verify`。版本取舍与实际检查记录见 [DEV-01 验证记录](../operations/dev-01-verification.md)。
 
 Astro 的静态输出在构建期生成公开 HTML；Sanity 内容发布需要触发重建才能体现在静态站。[S4][S5] 不因为使用 CMS 就建设客户数据库或询盘 API。
 
