@@ -65,7 +65,7 @@ jobs:
               'headSha': os.environ['PR_HEAD'], 'baseSha': os.environ['PR_BASE'],
               'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
-              'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Real-device/browser UI zoom'],
+              'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real garment image quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
               'assetLimit': 'No accepted independent garment assets imported; attachment transfer blocked by OAuth MCP client trust validation. Local SVG UI placeholders remain.',
               'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'FACTORY-001']]
           }, indent=2))

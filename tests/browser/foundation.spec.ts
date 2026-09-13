@@ -20,6 +20,7 @@ for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: width < 768 ? 844 : 900 });
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+    expect((await page.locator('.site-header > .wordmark').boundingBox())?.height).toBeGreaterThanOrEqual(48);
     await noOverflow(page);
     for (const button of await page.locator('.contact-actions button:visible').all()) {
       const box = await button.boundingBox();

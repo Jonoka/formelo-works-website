@@ -27,8 +27,26 @@ base/main：`4f6690124e1e0e9831214be40b6414435348ad84`。
 
 本地首次仓库检查失败：Windows 自动 CRLF 把已有 SVG 从已登记的 319 字节变为 323 字节。核对 git HEAD 的原始 blob 后，固定 `.gitattributes` 的 SVG 为 LF，并仅恢复该文件的原始换行。原 SVG 内容和 `a6b4d3cc...` 台账哈希不变；没有弱化哈希检查。AVIF/JPEG 也明确按二进制管理。
 
-本文件首次提交时 CI 尚待执行；通过结果必须以本轮 PR #3 后续审阅评论和 artifact 中 `review/source.json`、`review/outcomes.json`、完整日志为准。source 记录 head/base/实际 checkout SHA，不能把旧 CI 结果当成本轮结果。
+本轮首个实现提交 `0c0b372f5d22bd834ec0c03e0319f36f0fa6ab31` 的 [CI 34767628851](https://github.com/Jonoka/formelo-works-website/actions/runs/34767628851) 已完成，bootstrap / foundation 均 success。已实际下载 artifact 并读取 source/outcomes、单测、构建、浏览器和审计日志；不是沿用 7d7cc14 的旧绿色状态。该次实际 checkout 为 `40eac45ae74ee27030c32ffaa191c554afe92019`（PR 合成 merge，不是合并到 main）。
+
+| 检查 | 该提交实际结果 |
+|---|---|
+| Node / npm | 24.21.0 / 11.19.1，固定版本核验通过 |
+| npm ci / Chromium 安装 | 通过；单一 lockfile 不变 |
+| 类型 / tokens | 通过；Astro 0 errors / warnings / hints |
+| 单元、schema、生产阻断、静态策略 | 41 通过、0 失败、0 跳过 |
+| Astro / 静态输出 | 通过；仅首页与 404，本地外置增强脚本 |
+| Chromium dev + static preview | 40 通过、0 失败、0 跳过、0 flaky |
+| npm run verify | 完整重跑通过（不把重复执行累加成测试数量） |
+| Python / 文档资产 / Bash 语法 | 20 项 Python 测试通过，另两项检查通过 |
+| npm audit --audit-level=high | 门禁通过；4 中危，0 高危，0 严重 |
+
+[该次私有截图和报告](https://github.com/Jonoka/formelo-works-website/actions/runs/34767628851/artifacts/10320968530) 的 artifact 名为 `homepage-review-0c0b372f5d22bd834ec0c03e0319f36f0fa6ab31`；GitHub 返回 ZIP digest `sha256:010ad3b696ae2a4a83273364fbda30d8495707fe2f9fe18090c19b79e024fd6f`，有效至 2026-09-27 16:10 UTC。已实际查看其 1440 / 390 首屏的等比例预览。
+
+后续补齐本记录，并将 Header 品牌链接触达高度接入现有 48px token、正文声明引用现有 body token，在六个视口测试中检查品牌链接高度；不改设计色彩、版式方向或工厂事实。最终 head 的 CI / artifact 由 PR #3 最新审阅摘要与 `review/source.json` 标识；本段历史结果只绑定上述 0c0b372，不能自动冒充后续提交的通过结果。
 私有 artifact `homepage-review-<head SHA>` 保留 14 天，包含主视口和回归截图、Playwright HTML/JSON、日志、审计、静态构建输出与设计参考。截图不得仅留在 runner 临时目录。
+
+审计的四个中危条目涉及现有 `sanity`、`@sanity/cli`、`typeid-js`、`uuid`；未用 force 修复或修改依赖图掩盖问题。CI 另报告既有 checkout/upload action 的 Node 20 元数据弃用警告（runner 强制以 Node 24 执行）；这是动作运行时提示，不等于项目使用了 Node 20，本轮未擅自升级动作版本。
 
 未执行 / 不得冒称：真实手机、Safari、Firefox、Edge、真实浏览器 UI 200% 缩放、真实服装图片加载/裁切、邮箱与 WhatsApp 收发、真实 CMS、生产部署。Chromium 手机视口只是模拟。
 
