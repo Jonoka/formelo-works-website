@@ -1,0 +1,17 @@
+---
+interface Props {
+  href?: string;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary';
+  describedBy?: string;
+}
+const { href, disabled = false, variant = 'primary', describedBy } = Astro.props;
+if (!disabled && !href) throw new Error('An enabled Button needs a real destination.');
+if (href && !/^(?:\/|\/?#[a-z][a-z0-9-]*)$/.test(href)) throw new Error('Homepage buttons must use a real local homepage destination.');
+const className = `button button-${variant}`;
+---
+{disabled ? (
+  <button class={className} type="button" disabled aria-describedby={describedBy}><slot /></button>
+) : (
+  <a class={className} href={href} aria-describedby={describedBy}><slot /></a>
+)}

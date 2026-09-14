@@ -1,0 +1,12 @@
+---
+interface Props { name: 'design' | 'sample' | 'production' | 'quality' | 'factory' }
+const { name } = Astro.props;
+const paths = {
+  design: 'M5 19l1-5L17 3l4 4L10 18l-5 1zm9-13 4 4M4 22h16',
+  sample: 'M3 8l9-5 9 5-9 5-9-5zm0 5 9 5 9-5M3 18l9 5 9-5',
+  production: 'M5 5h9a5 5 0 010 10H5a5 5 0 010-10zm0 0v10m9-10a5 5 0 000 10M3 20h18',
+  quality: 'M20 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 6 5 6M8 10l3 3 5-6',
+  factory: 'M2 22V12l7-4v5l7-5v14H2zm14 0V3h4l2 19M5 17h2m4 0h2m5 0h2',
+};
+---
+<svg class="line-icon" width="28" height="28" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]} /></svg>

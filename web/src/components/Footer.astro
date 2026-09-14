@@ -1,0 +1,20 @@
+---
+import PendingContact from './PendingContact.astro';
+import { footerNavigation } from '../content/navigation';
+interface Props { brandName: string; home?: boolean }
+const { brandName, home = false } = Astro.props;
+---
+<footer class="site-footer" id="contact" tabindex="-1" aria-labelledby="contact-heading">
+  <div class="shell">
+    <div class="footer-contact-row">
+      <div><p class="eyebrow">The next conversation</p><h2 id="contact-heading">Get in touch.</h2></div>
+      <div class="footer-contact-copy"><p>Bring your ideas, references and questions.<br />The right starting point is a clear brief.</p><p class="small-copy">Email and WhatsApp are awaiting configuration. Enquiries cannot be sent yet.</p></div>
+      <PendingContact id="footer-contact-note" />
+    </div>
+    <div class="footer-bottom">
+      <div><span class="wordmark">{brandName}</span><p class="footer-brand-note">Apparel manufacturing for brands in motion.<br />Provisional brand · Factory facts awaiting confirmation.</p></div>
+      <nav aria-label="Footer navigation">{footerNavigation.map(link => <a href={link.href}>{link.label}</a>)}<span class="unavailable">Privacy <small>Not available in this preview</small></span></nav>
+    </div>
+  </div>
+</footer>
+{home && <aside class="mobile-contact-bar" aria-label="Contact options — not configured"><PendingContact id="mobile-contact-note" compact /></aside>}

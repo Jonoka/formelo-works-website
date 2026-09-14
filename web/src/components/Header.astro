@@ -1,0 +1,26 @@
+---
+import { homepageNavigation, demonstrationNavigation } from '../content/navigation';
+interface Props { brandName: string }
+const { brandName } = Astro.props;
+---
+<header class="site-header shell">
+  <a class="wordmark" href="/" aria-label={`${brandName} home`}>{brandName}</a>
+  <nav class="desktop-nav" aria-label="Main navigation">
+    <details class="clothing-menu" data-nav-disclosure>
+      <summary>Clothing <span class="disclosure-mark" aria-hidden="true"></span></summary>
+      <ul class="clothing-menu-panel">
+        {demonstrationNavigation.map(link => <li><a href={link.href}>{link.label} <small>Demonstration category</small></a></li>)}
+      </ul>
+    </details>
+    {homepageNavigation.map(link => <a href={link.href}>{link.label}</a>)}
+  </nav>
+  <details class="mobile-nav" data-nav-disclosure>
+    <summary>Menu <span class="disclosure-mark" aria-hidden="true"></span></summary>
+    <nav aria-label="Mobile navigation">
+      <p class="eyebrow">Clothing / Demonstration categories</p>
+      {demonstrationNavigation.map(link => <a href={link.href}>{link.label}</a>)}
+      {homepageNavigation.map(link => <a href={link.href}>{link.label}</a>)}
+      <p class="navigation-note">Inner pages are not available yet. These links visit sections of the homepage.</p>
+    </nav>
+  </details>
+</header>

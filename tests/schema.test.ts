@@ -43,3 +43,19 @@ test('MOQ quantities cannot masquerade as project-based conditions', () => {
     assert.notEqual(validMoq(value), true);
   }
 });
+
+// Keep the original all-fields CMS assertion above; do not replace it with a whitelist.
+test('homepage presentation is separate from persisted CMS fields and images', () => {
+  const { home, homepagePreview } = mockContent;
+  assert.equal(home._type, 'page');
+  assert.equal('_type' in homepagePreview, false);
+  assert.equal('pageKey' in homepagePreview, false);
+  assert.equal(home.heroImage, undefined, 'No fabricated CMS image reference');
+  for (const key of Object.keys(homepagePreview)) {
+    assert.equal(Object.hasOwn(home, key), false, `Preview field leaked into Page: ${key}`);
+  }
+  assert.equal(homepagePreview.factsStatus, 'unconfirmed');
+  assert.equal(homepagePreview.heroImage.source, 'local');
+  assert.equal('asset' in homepagePreview.heroImage, false);
+  assert.equal('_ref' in homepagePreview.heroImage, false);
+});

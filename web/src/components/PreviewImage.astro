@@ -1,0 +1,28 @@
+---
+import type { LocalPreviewImage } from '../../../shared/content';
+import { imageSrcSet, validateLocalImage } from '../lib/images';
+interface Props {
+  image: LocalPreviewImage;
+  priority?: boolean;
+  shape?: 'square' | 'landscape';
+  label: string;
+  sizes: string;
+}
+const { image, priority = false, shape = 'landscape', label, sizes } = Astro.props;
+validateLocalImage(image);
+const avif = imageSrcSet(image, 'image/avif');
+const webp = imageSrcSet(image, 'image/webp');
+---
+<figure class:list={['preview-image', `media-${shape}`]} data-asset-id={image.requiredAssetId} data-media-kind={image.kind}>
+  <div class="media-frame">
+    <div class="media-fallback" aria-hidden="true"><span class="eyebrow">{image.kind === 'placeholder' ? 'Independent image pending' : 'Image unavailable'}</span><span class="serif">{label}</span></div>
+    <picture>
+      {avif && <source type="image/avif" srcset={avif} sizes={sizes} />}
+      {webp && <source type="image/webp" srcset={webp} sizes={sizes} />}
+      <img src={image.src} alt={image.alt} width={image.width} height={image.height}
+        loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : 'auto'} decoding="async"
+        data-preview-image />
+    </picture>
+  </div>
+  <figcaption>{image.kind === 'placeholder' ? 'Image pending — no garment photograph is shown.' : 'AI-generated garment concept — not a factory sample.'}<span data-image-error hidden> Image could not be loaded.</span></figcaption>
+</figure>

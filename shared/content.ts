@@ -45,6 +45,7 @@ export interface Page {
   intro: string;
   seo: Seo;
   faqItems: Faq[];
+  heroImage?: ApprovedImage;
 }
 /** These are starter contracts, not a declaration of production content completeness. */
 export interface Category {
@@ -68,10 +69,50 @@ export interface Article {
   referenceCode: string;
   seo: Seo;
 }
+export const homepageAssetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'] as const;
+export type HomepageAssetId = (typeof homepageAssetIds)[number];
+/** Local preview media never impersonates the Sanity reference contract above. */
+export interface LocalPreviewImage {
+  source: 'local';
+  kind: 'concept' | 'placeholder';
+  assetId: string;
+  requiredAssetId: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  renditions: { src: string; width: number; height: number; format: 'image/avif' | 'image/webp' }[];
+  productionAllowed: false;
+}
+export interface HomeCapability {
+  title: string;
+  description: string;
+  icon: 'design' | 'sample' | 'production' | 'quality';
+}
+export interface HomeDemoCategory {
+  anchor: 't-shirts' | 'hoodies';
+  name: string;
+  description: string;
+  status: 'demonstration_only';
+  image: LocalPreviewImage;
+}
+// Local presentation data is not a persisted Sanity Page document.
+export interface HomePreview {
+  heroTitleLines: string[];
+  heroFactNote: string;
+  eyebrow: string;
+  heroImage: LocalPreviewImage;
+  capabilities: HomeCapability[];
+  demonstrationCategories: HomeDemoCategory[];
+  processSteps: { title: string; description: string }[];
+  journalTopics: string[];
+  factsStatus: 'unconfirmed';
+}
 export interface ContentSnapshot {
   source: 'mock';
   siteSettings: SiteSettings;
   home: Page;
+  homepagePreview: HomePreview;
   categories: Category[];
   articles: Article[];
 }
