@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { categoryPreviews } from '../../web/src/content/category-previews';
+// Independent browser expectations: do not import build-time content/manifest loaders
+// into Playwright's runner (which uses a different ESM JSON-loading pipeline).
+const categoryPreviews = [{
+  slug: 't-shirts', name: 'T-shirts', title: 'Custom T-shirt manufacturing.',
+  seo: {
+    seoTitle: 'T-shirt manufacturing concept — FORMELO WORKS',
+    seoDescription: 'Explore a T-shirt manufacturing concept for independent brands: jersey, fit, neckline and artwork discussion points. Factory capability and terms are unconfirmed.',
+  },
+}];
 
 for (const category of categoryPreviews) {
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
