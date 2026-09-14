@@ -1,6 +1,4 @@
 import { test, expect } from '@playwright/test';
-// Independent browser expectations: do not import build-time content/manifest loaders
-// into Playwright's runner (which uses a different ESM JSON-loading pipeline).
 const categoryPreviews = [{
   slug: 't-shirts', name: 'T-shirts', title: 'Custom T-shirt manufacturing.',
   seo: {
@@ -16,8 +14,8 @@ for (const category of categoryPreviews) {
       const response = await page.goto(`/clothing/${category.slug}/`);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(category.title);
-      await expect(page.locator('title')).toHaveText(category.seo.seoTitle);
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', category.seo.seoDescription);
+      await expect(page).toHaveTitle(category.seo.seoTitle);
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'seoDescription' in category.seo ? category.seo.seoDescription : '');
       const crumb = page.getByRole('navigation', { name: 'Breadcrumb' });
       await expect(crumb.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('href', '/');
       await expect(crumb.locator('[aria-current="page"]')).toHaveText(category.name);
