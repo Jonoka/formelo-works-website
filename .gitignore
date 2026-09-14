@@ -34,3 +34,6 @@ reports/local/
 # Private CI review outputs are artifacts, not source inputs.
 review/
 review-source.tar.gz
+
+# Exact historical source checked out only inside private CI.
+.review-baseline/

@@ -73,3 +73,37 @@ test('the real Astro build command rejects a production attempt', { timeout: 300
   assert.notEqual(result.status, 0);
   assert.match(result.stdout + result.stderr, /PRODUCTION_BLOCKED/);
 });
+
+test('category previews stay distinct, registered and separate from formal CMS content', async () => {
+  const { validateCategoryPreviews } = await import('../web/src/lib/category-preview');
+  const content = await loadContent('mock');
+  assert.deepEqual(content.categoryPreviews.map(item => item.slug), ['t-shirts', 'hoodies']);
+  validateCategoryPreviews(content.categoryPreviews);
+  for (const key of ['intro', 'moqNotes', 'samplingNotes'] as const) {
+    assert.notEqual(content.categoryPreviews[0]![key], content.categoryPreviews[1]![key]);
+  }
+  assert.notDeepEqual(content.categoryPreviews[0]!.discussion, content.categoryPreviews[1]!.discussion);
+  assert.notDeepEqual(content.categoryPreviews[0]!.faqItems, content.categoryPreviews[1]!.faqItems);
+  assert.notEqual(content.categoryPreviews[0]!.image.src, content.categoryPreviews[1]!.image.src);
+  for (const item of content.categoryPreviews) {
+    assert.equal(item.productionAllowed, false); assert.equal(item.kind, 'category_preview');
+    for (const key of ['samples', 'factConfirmedAt', 'approvedAt', '_type']) assert.equal(key in item, false);
+    assert.equal('asset' in item.image, false);
+    assert.deepEqual(content.homepagePreview.demonstrationCategories.find(card => card.anchor === item.slug)?.image, item.image);
+  }
+  const changed = await loadContent('mock'); changed.categoryPreviews[0]!.title = 'Changed';
+  assert.notEqual((await loadContent('mock')).categoryPreviews[0]!.title, 'Changed');
+});
+test('category mapping rejects invalid routes, incomplete content, fake approvals and wrong assets', async () => {
+  const { validateCategoryPreviews } = await import('../web/src/lib/category-preview');
+  for (const change of [
+    { slug: '../unknown' }, { slug: 'hoodies' }, { referenceCode: 'WEB-HOME' }, { status: 'published' },
+    { productionAllowed: true }, { samples: [] }, { factConfirmedAt: '2026-09-14' }, { title: '' }, { discussion: [] }, { faqItems: [] },
+  ]) {
+    const items = (await loadContent('mock')).categoryPreviews;
+    Object.assign(items[0]!, change); assert.throws(() => validateCategoryPreviews(items));
+  }
+  const items = (await loadContent('mock')).categoryPreviews;
+  items[0]!.image = items[1]!.image; assert.throws(() => validateCategoryPreviews(items), /Unregistered/);
+  assert.throws(() => validateCategoryPreviews([]), /count mismatch/);
+});

@@ -66,7 +66,7 @@ jobs:
               'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
-              'assetLimit': 'Three local AI-generated garment concepts are included for homepage review only; they are not factory samples or production-approved imagery. Factory photography is still awaiting verified originals.',
+              'assetLimit': 'Three local AI-generated garment concepts are reused by the homepage and category previews; they are not factory samples or production-approved imagery. Factory photography is still awaiting verified originals.',
               'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'FACTORY-001']]
           }, indent=2))
           PYCODE
@@ -92,7 +92,7 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee review/unit.txt
-      - name: Build and inspect the static homepage
+      - name: Build and inspect the three static concept pages
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
         run: |
@@ -104,6 +104,22 @@ jobs:
         run: |
           set -o pipefail
           npm exec -- playwright install --with-deps chromium 2>&1 | tee review/browser-install.txt
+      - name: Check out the exact PR 3 source for the before comparison
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: bc78d30e7497e764d585e3510f9c2a296e93017c
+          path: .review-baseline
+          persist-credentials: false
+      - name: Render the historical homepage without deploying it
+        id: baseline
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          mkdir -p review/before
+          { git -C .review-baseline rev-parse HEAD; git -C .review-baseline rev-parse HEAD^{tree}; node --version; npm --version; } > review/before/source.txt
+          (cd .review-baseline && npm ci && npm run build) 2>&1 | tee review/before/build.txt
+          node scripts/capture-home-baseline.mjs 2>&1 | tee review/before/capture.txt
       - name: Run responsive and accessibility-oriented browser regressions
         id: browser
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
@@ -132,19 +148,20 @@ jobs:
           BROWSER: ${{ steps.browser.outcome }}
           VERIFY: ${{ steps.verify.outcome }}
           AUDIT: ${{ steps.audit.outcome }}
+          BASELINE: ${{ steps.baseline.outcome }}
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
-          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT']
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
       - name: Retain private screenshots, reports, traces and static output
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: homepage-review-${{ github.event.pull_request.head.sha || github.sha }}
+          name: category-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/
             playwright-report/
@@ -155,5 +172,7 @@ jobs:
             docs/design/homepage-handoff.md
             docs/design/homepage-asset-handoff.md
             docs/operations/pr-3-homepage-review.md
+            docs/design/category-handoff.md
+            docs/operations/pr-4-category-review.md
           if-no-files-found: error
           retention-days: 14

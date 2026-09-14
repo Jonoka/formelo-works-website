@@ -3,7 +3,18 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = fileURLToPath(new URL('../web/dist/', import.meta.url));
+const project = fileURLToPath(new URL('../', import.meta.url));
+const root = join(project, 'web', 'dist');
+const routes = JSON.parse(readFileSync(join(project, 'config', 'routes.json'), 'utf8'));
+const assets = JSON.parse(readFileSync(join(project, 'assets', 'manifest.json'), 'utf8')).assets;
+const previewPages = routes.previewPages;
+assert.ok(Array.isArray(previewPages) && previewPages.length > 0, 'Explicit implemented preview routes required.');
+assert.equal(new Set(previewPages.map(page => page.path)).size, previewPages.length, 'Duplicate preview paths.');
+for (const page of previewPages) {
+  assert.ok(routes.pages.some(plan => plan.path === page.path && ['Home', 'Category'].includes(plan.template)), 'Preview route outside this increment.');
+  assert.ok(Array.isArray(page.assetIds), 'Page asset policy required.');
+}
+const htmlName = path => path === '/' ? 'index.html' : `${path.slice(1)}index.html`;
 assert.ok(existsSync(root), 'Build web/ before checking the static output.');
 function filesIn(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
@@ -14,17 +25,23 @@ function filesIn(directory) {
 }
 const files = filesIn(root);
 const htmlFiles = files.filter(path => extname(path) === '.html');
-assert.deepEqual(htmlFiles.map(path => relative(root, path).replaceAll('\\', '/')).sort(), ['404.html', 'index.html'],
-  'This homepage increment implements one content URL and the existing 404, not the ten-page plan.');
+assert.deepEqual(htmlFiles.map(path => relative(root, path).replaceAll('\\', '/')).sort(), ['404.html', ...previewPages.map(page => htmlName(page.path))].sort(),
+  'Only explicitly implemented home/category routes and the existing 404 may be emitted.');
 const titles = new Set();
+const descriptions = new Set();
+const emittedModules = new Set();
 for (const path of htmlFiles) {
   const html = readFileSync(path, 'utf8');
-  const name = relative(root, path);
+  const name = relative(root, path).replaceAll('\\', '/');
+  const pagePolicy = previewPages.find(page => htmlName(page.path) === name);
   assert.match(html, /<html\b[^>]*lang="en"/i, `${name}: English language missing`);
   assert.equal((html.match(/<h1(?:\s|>)/gi) ?? []).length, 1, `${name}: require one H1`);
   const title = html.match(/<title>([^<]+)<\/title>/i)?.[1];
   assert.ok(title && !titles.has(title), `${name}: missing or duplicate title`);
   titles.add(title);
+  const description = html.match(/name="description"\s+content="([^"]+)"/i)?.[1];
+  assert.ok(description && !descriptions.has(description), `${name}: missing or duplicate description`);
+  descriptions.add(description);
   assert.match(html, /name="description"\s+content="[^"]+"/i, `${name}: missing description`);
   assert.match(html, /name="robots"\s+content="noindex, nofollow"/i, `${name}: preview must be noindex`);
   assert.doesNotMatch(html, /<(?:form|input|textarea|iframe)\b/i, `${name}: unexpected active markup`);
@@ -39,6 +56,7 @@ for (const path of htmlFiles) {
     assert.match(script[1], /(?:^|\s)type="module"(?:\s|$)/, `${name}: only the local enhancement module is allowed`);
     assert.match(script[1], /(?:^|\s)src="\/_astro\/[^"?#]+\.js"(?:\s|$)/, `${name}: enhancement must be a local compiled module`);
     assert.equal(script[2].trim(), '', `${name}: no inline scripts`);
+    emittedModules.add(script[1].match(/(?:^|\s)src="([^"]+)"/)?.[1]);
   }
   if (name === 'index.html') {
     for (const id of ['capabilities', 'categories', 't-shirts', 'hoodies', 'factory', 'production', 'journal', 'enquiry-guide', 'contact']) {
@@ -46,24 +64,42 @@ for (const path of htmlFiles) {
     }
     assert.match(html, /No articles have been published in this preview/, 'Journal must not masquerade as published content.');
     assert.equal((html.match(/class="faq-item"/g) ?? []).length, 3, 'Three native purchasing FAQs are required.');
-    assert.equal((html.match(/<img\b/g) ?? []).length, 3, 'Three honest local media slots are required.');
-    const figures = [...html.matchAll(/<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi)];
-    assert.equal(figures.length, 3, 'All three media slots need persistent provenance captions.');
-    for (const [index, figure] of figures.entries()) {
-      assert.ok(figure[1].includes(`data-asset-id="${['HERO-001', 'CAT-TS-001', 'CAT-HD-001'][index]}"`), 'Unexpected homepage asset ID.');
-      assert.match(figure[1], /data-media-kind="(?:concept|placeholder)"/, 'Media status must be explicit.');
-      const concept = figure[1].includes('data-media-kind="concept"');
-      assert.ok(figure[2].includes(concept ? 'AI-generated garment concept — not a factory sample.' : 'Image pending — no garment photograph is shown.'), 'Media provenance caption does not match its state.');
-      if (concept) assert.doesNotMatch(figure[2], /src="[^"]+\.svg"/, 'A concept cannot be the old SVG placeholder.');
-    }
-    for (const image of html.matchAll(/<img\b([^>]*)>/gi)) {
+  }
+  const expectedAssets = pagePolicy?.assetIds ?? [];
+  assert.equal((html.match(/<img\b/g) ?? []).length, expectedAssets.length, `${name}: Registered image slots only.`);
+  const figures = [...html.matchAll(/<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi)];
+  assert.equal(figures.length, expectedAssets.length, `${name}: All media slots need persistent provenance captions.`);
+  for (const [index, figure] of figures.entries()) {
+    const assetId = expectedAssets[index];
+    const asset = assets.find(item => item.id === assetId);
+    assert.ok(asset && asset.productionAllowed === false && asset.replacementRequiredBeforeLaunch === true, 'Registered non-production asset required.');
+    assert.ok(figure[1].includes(`data-asset-id="${assetId}"`), `${name}: Unexpected page asset ID.`);
+    assert.match(figure[1], /data-media-kind="(?:concept|placeholder)"/, 'Media status must be explicit.');
+    const concept = figure[1].includes('data-media-kind="concept"');
+    assert.equal(concept, asset.status === 'generated_concept', 'Media must match registered state.');
+    assert.ok(figure[2].includes(concept ? 'AI-generated garment concept — not a factory sample.' : 'Image pending — no garment photograph is shown.'), 'Media provenance caption does not match its state.');
+    if (concept) assert.doesNotMatch(figure[2], /src="[^"]+\.svg"/, 'A concept cannot be the old SVG placeholder.');
+    const allowed = new Set([asset.path, ...(asset.renditions ?? []).map(item => item.path)].filter(Boolean).map(path => path.replace(/^web\/public/, '')));
+    const images = [...figure[2].matchAll(/<img\b([^>]*)>/gi)];
+    assert.equal(images.length, 1, 'One image per registered slot.');
+    for (const image of images) {
       assert.match(image[1], /width="[1-9]\d*"/);
       assert.match(image[1], /height="[1-9]\d*"/);
       assert.match(image[1], /alt="[^"]+"/);
       assert.match(image[1], /loading="(?:eager|lazy)"/);
     }
+    for (const item of figure[2].matchAll(/(?:^|\s)(src|srcset)="([^"]+)"/g)) {
+      const paths = item[1] === 'srcset' ? item[2].split(',').map(part => part.trim().split(/\s+/)[0]) : [item[2]];
+      for (const imagePath of paths) assert.ok(allowed.has(imagePath), `${name}: Image source not registered for this page slot.`);
+    }
   }
-  const sourcePath = name === 'index.html' ? '/' : '/404.html';
+  if (pagePolicy?.path.startsWith('/clothing/')) {
+    assert.match(html, /aria-label="Breadcrumb"/, 'Category breadcrumb required.');
+    assert.match(html, /aria-current="page"/, 'Current breadcrumb must be identified.');
+    assert.doesNotMatch(html, /href="\/clothing\/"/, 'No empty Clothing hub.');
+    assert.ok((html.match(/class="faq-item"/g) ?? []).length >= 3, 'Category-specific native FAQs required.');
+  }
+  const sourcePath = pagePolicy?.path ?? '/404.html';
   const destinations = [...html.matchAll(/\b(?:href|src)="([^"]+)"/g)].map(match => match[1]);
   for (const set of html.matchAll(/\bsrcset="([^"]+)"/g)) {
     destinations.push(...set[1].split(',').map(item => item.trim().split(/\s+/)[0]));
@@ -81,6 +117,7 @@ for (const path of htmlFiles) {
     }
   }
 }
+assert.equal(emittedModules.size, 1, 'All pages must reuse the single shared enhancement module.');
 for (const path of files) {
   assert.doesNotMatch(path, /\.(?:woff2?|ttf|otf|pem|key|env)$/i, 'Unexpected font or credential file.');
   if (!['.html', '.css', '.js', '.json', '.txt', '.svg'].includes(extname(path))) continue;
@@ -91,4 +128,4 @@ for (const path of files) {
 }
 assert.equal(readFileSync(join(root, 'robots.txt'), 'utf8').trim(), 'User-agent: *\nDisallow: /');
 assert.ok(!files.some(path => /sitemap/i.test(path)), 'No sitemap is emitted for the local concept.');
-console.log(`Static homepage checks passed: ${htmlFiles.length} HTML files, all internal links and fragments resolved, no active contact links or reference image.`);
+console.log(`Static concept checks passed: ${htmlFiles.length} HTML files, all internal links and fragments resolved, no active contact links or reference image.`);

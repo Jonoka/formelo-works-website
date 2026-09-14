@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import routes from '../config/routes.json';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -22,15 +23,25 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
     if (!missingModule) writeFileSync(join(dist, '_astro', 'navigation.fixture.js'), moduleCode);
     writeFileSync(join(dist, 'media', 'pending.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
     writeFileSync(join(dist, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
-    for (const name of ['index.html', '404.html']) {
+    mkdirSync(join(root, 'config'), { recursive: true });
+    mkdirSync(join(root, 'assets'), { recursive: true });
+    writeFileSync(join(root, 'config', 'routes.json'), JSON.stringify(routes));
+    const assetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'];
+    writeFileSync(join(root, 'assets', 'manifest.json'), JSON.stringify({ assets: assetIds.map(id => ({ id, status: 'pending_generation', path: 'web/public/media/pending.svg', productionAllowed: false, replacementRequiredBeforeLaunch: true })) }));
+    const pageNames = ['404.html', ...routes.previewPages.map(page => page.path === '/' ? 'index.html' : `${page.path.slice(1)}index.html`)];
+    for (const name of pageNames) {
+      mkdirSync(join(dist, name, '..'), { recursive: true });
       const sections = name === 'index.html'
         ? ['capabilities', 'categories', 't-shirts', 'hoodies', 'factory', 'production', 'journal', 'enquiry-guide', 'contact']
             .map(id => `<section id="${id}"></section>`).join('') +
           '<p>No articles have been published in this preview</p>' +
           '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
           ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'].map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="lazy"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('')
-        : '';
-      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${bodySuffix}${script}</body></html>`);
+        : name === '404.html' ? '' :
+          '<nav aria-label="Breadcrumb"><a href="/">Home</a><span aria-current="page">Fixture category</span></nav>' +
+          '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
+          (routes.previewPages.find(page => name === `${page.path.slice(1)}index.html`)?.assetIds ?? []).map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="eager"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('');
+      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture ${name}"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${bodySuffix}${script}</body></html>`);
     }
     const result = spawnSync(process.execPath, [checker], { cwd: root, encoding: 'utf8', timeout: 5000 });
     assert.equal(result.error, undefined);
@@ -83,5 +94,5 @@ test('external modules still cannot make API requests', () => {
 test('static checker rejects adding an unlabelled fourth image slot', () => {
   const result = runFixture(validScript, '<img src="/media/pending.svg" width="1200" height="900" alt="Unlabelled extra">');
   assert.notEqual(result.status, 0);
-  assert.match(result.output, /Three honest local media slots/);
+  assert.match(result.output, /Registered image slots only/);
 });

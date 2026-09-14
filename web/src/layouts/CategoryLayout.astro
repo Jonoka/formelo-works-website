@@ -1,0 +1,45 @@
+---
+import type { CategoryPreview } from '../../../shared/content';
+import BaseLayout from './BaseLayout.astro';
+import '../styles/category.css';
+import PreviewImage from '../components/PreviewImage.astro';
+import PendingContact from '../components/PendingContact.astro';
+import FAQ from '../components/FAQ.astro';
+import { categoryPath } from '../lib/category-preview';
+interface Props { category: CategoryPreview; related: CategoryPreview[]; brandName: string }
+const { category, related, brandName } = Astro.props;
+---
+<BaseLayout title={category.seo.seoTitle} description={category.seo.seoDescription} brandName={brandName} showMobileContact referenceCode={category.referenceCode}>
+  <nav class="breadcrumb shell" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">{category.name}</li></ol></nav>
+  <section class="category-hero shell" aria-labelledby="category-title" data-category={category.slug} data-reference-code={category.referenceCode}>
+    <div class="category-hero-copy">
+      <p class="eyebrow">Concept category / Manufacturing enquiry</p>
+      <h1 id="category-title">{category.title}</h1>
+      <p class="intro">{category.intro}</p>
+      <p class="fact-note">Proposed category. Production availability is unconfirmed.</p>
+      <PendingContact id="category-contact-note" referenceCode={category.referenceCode} />
+      <a class="text-link" href="#discussion">Shape your brief <span aria-hidden="true">↗</span></a>
+    </div>
+    <PreviewImage image={category.image} label={`${category.name} concept`} priority sizes="(min-width: 1440px) 650px, (min-width: 1024px) 50vw, (min-width: 768px) 48vw, calc(100vw - 40px)" />
+  </section>
+  <section class="section-row shell category-concept" aria-labelledby="concept-heading">
+    <div class="section-grid">
+      <div><p class="eyebrow">Concept study / One image</p><h2 id="concept-heading">{category.concept.title}</h2><p class="section-note">{category.concept.description}</p></div>
+      <div class="concept-observations">{category.concept.observations.map((observation, index) => <article><p class="eyebrow">0{index + 1} / Discussion cue</p><h3>{observation.title}</h3><p>{observation.description}</p></article>)}</div>
+    </div>
+  </section>
+  <section class="section-row shell" id="discussion" tabindex="-1" aria-labelledby="discussion-heading">
+    <div class="section-grid">
+      <div><p class="eyebrow">To discuss with the factory</p><h2 id="discussion-heading">Start with the details.</h2><p class="section-note">Questions for a manufacturing conversation, not a list of confirmed services.</p></div>
+      <dl class="discussion-list">{category.discussion.map(row => <div><dt>{row.title}</dt><dd>{row.description}</dd></div>)}</dl>
+    </div>
+  </section>
+  <section class="section-row shell category-terms" aria-labelledby="terms-heading">
+    <div><p class="eyebrow">Terms awaiting confirmation</p><h2 id="terms-heading">MOQ &amp; sampling.</h2></div>
+    <div class="terms-grid"><article><h3>Minimum quantities</h3><p>{category.moqNotes}</p></article><article><h3>Developing a sample</h3><p>{category.samplingNotes}</p></article></div>
+  </section>
+  <section class="section-row shell" aria-labelledby="category-faq-heading">
+    <div class="section-grid"><div><p class="eyebrow">Before the conversation</p><h2 id="category-faq-heading">{category.name}, considered.</h2></div><FAQ items={category.faqItems} /></div>
+  </section>
+  {related.length > 0 && <section class="section-row shell related-category" aria-labelledby="related-heading"><div><p class="eyebrow">Another direction</p><h2 id="related-heading">Explore the other concept.</h2></div>{related.map(item => <a class="related-category-link" href={categoryPath(item.slug)}><span><strong>{item.name}</strong><span>{item.cardSummary}</span></span><span aria-hidden="true">↗</span></a>)}</section>}
+</BaseLayout>

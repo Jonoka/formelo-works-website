@@ -108,11 +108,31 @@ export interface HomePreview {
   journalTopics: string[];
   factsStatus: 'unconfirmed';
 }
+/** Concept UI data only: deliberately not a Sanity Category or Sample document. */
+export interface CategoryPreview {
+  kind: 'category_preview';
+  status: 'concept_only';
+  productionAllowed: false;
+  slug: 't-shirts' | 'hoodies';
+  name: string;
+  referenceCode: 'WEB-TSHIRTS' | 'WEB-HOODIES';
+  title: string;
+  intro: string;
+  cardSummary: string;
+  image: LocalPreviewImage;
+  concept: { title: string; description: string; observations: { title: string; description: string }[] };
+  discussion: { title: string; description: string }[];
+  moqNotes: string;
+  samplingNotes: string;
+  faqItems: Faq[];
+  seo: Seo;
+}
 export interface ContentSnapshot {
   source: 'mock';
   siteSettings: SiteSettings;
   home: Page;
   homepagePreview: HomePreview;
+  categoryPreviews: CategoryPreview[];
   categories: Category[];
   articles: Article[];
 }

@@ -5,13 +5,14 @@ import PreviewImage from '../components/PreviewImage.astro';
 import FAQ from '../components/FAQ.astro';
 import Icon from '../components/Icon.astro';
 import SectionHeading from '../components/SectionHeading.astro';
+import { categoryPath } from '../lib/category-preview';
 import { loadContent } from '../lib/content';
 import { readRuntime } from '../../../config/runtime';
 const { siteSettings, home, homepagePreview } = await loadContent(readRuntime().contentMode);
 // Presentation hints must never replace an updated, authoritative page title.
 const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ? homepagePreview.heroTitleLines : [home.title];
 ---
-<BaseLayout title={home.seo.seoTitle} description={home.seo.seoDescription} brandName={siteSettings.brandName} home>
+<BaseLayout title={home.seo.seoTitle} description={home.seo.seoDescription} brandName={siteSettings.brandName} showMobileContact>
   <section class="hero shell" aria-labelledby="hero-heading">
     <div class="hero-copy">
       <p class="eyebrow">{homepagePreview.eyebrow}</p>
@@ -20,7 +21,6 @@ const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ?
       <p class="fact-note">{homepagePreview.heroFactNote}</p>
       <PendingContact id="hero-contact-note" />
       <a class="text-link" href="#capabilities">Explore the proposed approach <span aria-hidden="true">↓</span></a>
-      <p class="hero-index">Ideas <span>/</span> Materials <span>/</span> Fit <span>/</span> Finish</p>
     </div>
     <PreviewImage image={homepagePreview.heroImage} label="Garments, considered." priority shape="square" sizes="(min-width: 1440px) 650px, (min-width: 768px) 48vw, calc(100vw - 40px)" />
   </section>
@@ -38,7 +38,7 @@ const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ?
       {homepagePreview.demonstrationCategories.map((category, index) => (
         <article class="category-card" id={category.anchor} tabindex="-1" aria-labelledby={`${category.anchor}-heading`}>
           <div class="category-media"><span class="card-number" aria-hidden="true">0{index + 1}</span><PreviewImage image={category.image} label={category.name} sizes="(min-width: 1440px) 450px, (min-width: 1024px) 33vw, (min-width: 768px) 45vw, calc(100vw - 40px)" /></div>
-          <div class="category-copy"><p class="eyebrow">Demonstration category</p><h3 id={`${category.anchor}-heading`}>{category.name}</h3><p>{category.description}</p><a class="text-link" href="#enquiry-guide">What to prepare <span aria-hidden="true">↗</span></a><p class="unavailable small-copy">Category detail page not available yet.</p></div>
+          <div class="category-copy"><p class="eyebrow">Demonstration category</p><h3 id={`${category.anchor}-heading`}><a href={categoryPath(category.anchor)}>{category.name} <span aria-hidden="true">↗</span></a></h3><p>{category.description}</p></div>
         </article>
       ))}
     </div>
