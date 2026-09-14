@@ -4,7 +4,20 @@ const categories = [
   { slug: 'hoodies', name: 'Hoodies', title: 'Custom hoodie manufacturing.', asset: 'CAT-HD-001', reference: 'WEB-HOODIES', seoTitle: 'Hoodie manufacturing concept — FORMELO WORKS' },
 ];
 async function noOverflow(page: Page) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const layout = await page.evaluate(() => ({
+    viewport: innerWidth, width: document.documentElement.scrollWidth,
+    overflow: [...document.querySelectorAll('body *')].map(node => {
+      const box = node.getBoundingClientRect();
+      return { tag: node.tagName, className: node.className, right: box.right, left: box.left, width: box.width, text: node.textContent?.slice(0, 80) };
+    }).filter(node => node.right > innerWidth + 1 || node.left < -1),
+  }));
+  if (layout.width > layout.viewport) {
+    await test.info().attach('reflow-diagnostics', { body: JSON.stringify(layout, null, 2), contentType: 'application/json' });
+    const path = test.info().outputPath('overflow.png');
+    await page.screenshot({ path, fullPage: true, animations: 'disabled' });
+    await test.info().attach('reflow-overflow', { path, contentType: 'image/png' });
+  }
+  expect(layout.width, JSON.stringify(layout)).toBeLessThanOrEqual(layout.viewport);
 }
 async function capture(page: Page, info: TestInfo, name: string) {
   if (info.project.name !== 'preview') return;
@@ -135,7 +148,12 @@ for (const category of categories) {
     const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 }, baseURL: baseURL! });
     try {
       const page = await context.newPage(); await page.goto(route);
-      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+      // Synchronous test-harness DOM insertion: no page callback is required while JS is disabled.
+      await page.evaluate(() => {
+        const style = document.createElement('style');
+        style.textContent = 'html { font-size: 200% !important; }';
+        document.head.append(style);
+      });
       await noOverflow(page); await footerClear(page);
       await capture(page, info, `${category.slug}-text-200-no-js`);
     } finally { await context.close(); }
