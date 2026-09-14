@@ -1,5 +1,5 @@
 {
-  "status": "home_and_first_category_concept_in_progress",
+  "status": "ten_routes_planned_home_and_two_category_previews_implemented",
   "defaultPreviewIndexable": false,
   "pages": [
     {
@@ -122,6 +122,12 @@
       "path": "/clothing/t-shirts/",
       "assetIds": [
         "CAT-TS-001"
+      ]
+    },
+    {
+      "path": "/clothing/hoodies/",
+      "assetIds": [
+        "CAT-HD-001"
       ]
     }
   ]

@@ -1,0 +1,17 @@
+/* Shared contact controls and the three bounded homepage refinements. */
+.button-label { min-width: 0; overflow-wrap: anywhere; }
+.button-arrow { flex: 0 0 auto; }
+.category-copy h3 a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; text-decoration: none; }
+.category-copy h3 a:hover { color: var(--color-accent); }
+@media (max-width: 767px) {
+  :root { scroll-padding-block-end: var(--contact-bar-reserve, calc(10rem + 32px)); }
+  .has-mobile-contact { padding-bottom: var(--contact-bar-reserve, calc(10rem + 32px + env(safe-area-inset-bottom))); }
+  .preview-notice { font-size: .75rem; padding: 8px 20px; }
+  .hero { gap: 24px; padding-top: 12px; }
+  .hero h1 { margin: 12px 0 16px; }
+  .hero .intro, .hero .fact-note { margin-bottom: 12px; }
+  .hero .pending-contact { margin-top: 16px; }
+  .contact-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .button, .mobile-contact-bar .button { min-width: 0; font-size: 1rem; gap: 8px; padding: 12px; }
+  .contact-note, .footer-contact-row .contact-note, .mobile-contact-bar .contact-note { margin: 8px 0 0; font-size: .875rem; }
+}

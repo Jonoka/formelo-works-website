@@ -39,3 +39,14 @@ for (const image of document.querySelectorAll<HTMLImageElement>('img[data-previe
   image.addEventListener('error', fail);
   if (image.complete && image.naturalWidth === 0) fail();
 }
+
+// Measure only this page's bar; the rem-based CSS reserve is the no-JS fallback.
+// Text resizing and safe-area changes must not cover the end of the document.
+const contactBar = document.querySelector<HTMLElement>('.mobile-contact-bar');
+if (contactBar && 'ResizeObserver' in window) {
+  const observer = new ResizeObserver(() => {
+    const height = contactBar.getBoundingClientRect().height;
+    if (height > 0) document.documentElement.style.setProperty('--contact-bar-reserve', `${Math.ceil(height) + 16}px`);
+  });
+  observer.observe(contactBar);
+}

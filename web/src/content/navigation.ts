@@ -1,4 +1,4 @@
-/** Current homepage destinations only. The final ten-route plan remains in config/routes.json. */
+/** Only implemented categories; other planned pages resolve to real homepage sections. */
 export const homepageNavigation = [
   { label: 'Manufacturing', href: '/#capabilities' },
   { label: 'Our Factory', href: '/#factory' },
@@ -6,8 +6,8 @@ export const homepageNavigation = [
   { label: 'Contact', href: '/#contact' },
 ] as const;
 export const demonstrationNavigation = [
-  { label: 'T-shirts', href: '/#t-shirts' },
-  { label: 'Hoodies', href: '/#hoodies' },
+  { label: 'T-shirts', href: '/clothing/t-shirts/' },
+  { label: 'Hoodies', href: '/clothing/hoodies/' },
 ] as const;
 export const footerNavigation = [
   homepageNavigation[0], { label: 'Proposed process', href: '/#production' }, homepageNavigation[2],

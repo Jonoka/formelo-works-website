@@ -6,10 +6,10 @@
 |---|---|---|---|---|
 | INIT-01 | 初始化资料入库并通过 PR 审阅 | 私有仓库及写入连接已验证 | PR #1；main 41a9e910ef42cd80f4d5540928bf6b307b8b0d2a | 已由用户合并 |
 | DEV-01 | Astro + TypeScript / Sanity Studio 基础工程 | INIT-01；选择实际兼容版本 | 根 lockfile、运行说明、测试和 CI；见 [验证记录](../operations/dev-01-verification.md) | 已由用户合并 PR #2；main 4f6690124e1e0e9831214be40b6414435348ad84 |
-| DESIGN-01 | 已选方向的手机与品类演绎 | 已选首页、PRD | 390px 手机 / 品类布局、状态、微调记录；不重新生成三方向 | 首页衔接、断点与三张概念图视觉回归在 PR #3 审阅；品类演绎未做 |
+| DESIGN-01 | 已选方向的手机与品类演绎 | 已选首页、PRD | 390px 手机 / 品类布局、状态、微调记录；不重新生成三方向 | PR #3 已合并；首页三个有界调整和两个品类演绎在 PR #4 待审阅，不整项关闭 |
 | ASSET-01 | 独立无字服装概念图与网页优化版本 | 已选图、manifest | Hero、两类、两文封面；来源 / 比例 / 审核状态 | Hero / T-shirt / Hoodie 三张独立首页概念图及 WebP/AVIF 已接入 PR #3；两文封面未做，不标完成 |
-| DEV-02 | 字体、设计变量、Header / Footer / CTA / 无 JS 导航 | DEV-01、DESIGN-01 | 1440 / 390 对照截图、空联系方式不外跳 | 首页共享标题/导航、图片错误状态和素材接口继续完善；本轮 CI 见下方记录；跨页/真实渠道未做 |
-| DEV-03 | Home 与 Category 模板 | DEV-02、ASSET-01 | 保留所选视觉与 PRD 信息，两类差异，手机可用 | 首页概念实现和三图接入在 PR #3 审阅；Category 模板仍未做，不标完成 |
+| DEV-02 | 字体、设计变量、Header / Footer / CTA / 无 JS 导航 | DEV-01、DESIGN-01 | 1440 / 390 对照截图、空联系方式不外跳 | PR #4 补共享移动 CTA、跨页导航与图片回归；真实渠道未做，不整项关闭 |
+| DEV-03 | Home 与 Category 模板 | DEV-02、ASSET-01 | 保留所选视觉与 PRD 信息，两类差异，手机可用 | 首页与三图已随 PR #3 合并；PR #4 实现单一 Category 模板与两概念品类，正式样品/事实仍待补，不整项关闭 |
 | DEV-04 | 制造、工厂、Journal、Article、Contact、Privacy、404 | DEV-03 | 十内容路由 + 404，不新增 Process 页 | 待开始 |
 | DEV-05 | Sanity schema、查询、published 内容与重建 | DEV-01；Sanity 授权 | 一条内容发布 / 撤回链路；schema 与 mock 对齐 | 待账号和实现 |
 | DEV-06 | SEO、联系逻辑、可访问性与完整检查 | DEV-04、DEV-05 | 对应 T / UI-V 测试日志；统计关闭 | 待开始 |
@@ -19,6 +19,10 @@
 第一开发任务只做工程底座和最小本地页面，不一次铺满十页。
 DEV-01 已补充 `web/`、`studio/` 的命令与 CI 配置。最小 Header / Footer、静态首页及 404 只用于底座验证，不意味着 DEV-02 / DEV-03 / DEV-04 的完整视觉与业务模板完成。
 
-PR #3 的 CI 修复、实际结果、首页微调和未执行范围见 [修复记录](../operations/pr-3-ci-repair.md)。PR 保持草稿；不自动合并或发布，十页路线和其余任务不变。
+PR #3 的 CI 修复、实际结果、首页微调和未执行范围见 [修复记录](../operations/pr-3-ci-repair.md)。该记录保留历史草稿状态；PR #3 实际已合并到 main@ef92f55955c2ab761d282c3c86fa8e663856424f。当前工作为 PR #4，不自动合并或发布。
 
 本轮客户文案、组件与素材接口工作见 [首页继续开发记录](../operations/pr-3-homepage-review.md) 和 [素材阻塞/交接](../design/homepage-asset-handoff.md)。所有上述大任务仍是局部进展，不以接口测试代替真实图片接入或完整页面验收。
+
+## 当前品类迭代 / PR #4
+
+实际范围为首页三个体验调整、T-shirts/Hoodies 共用 Category 模板及相关导航/回归；实现三个内容 URL 和既有 404，最终十 URL 规划不变。第一品类截图与 CI 检查点通过后才复用到 Hoodie。见 [品类衔接](../design/category-handoff.md) 与 [本轮验证](../operations/pr-4-category-review.md)。ASSET-01 的两篇文章封面、正式产品与工厂素材仍待补；DEV-04 其余内页、DEV-05 CMS 和全站验收没有完成。旧日志不改写为本轮通过。

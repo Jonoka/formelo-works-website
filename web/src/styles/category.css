@@ -36,3 +36,5 @@
   .discussion-list > div { grid-template-columns: 1fr; gap: 12px; padding-block: 20px; }
   .terms-grid { grid-template-columns: 1fr; gap: 16px; }
 }
+.category-hero > *, .concept-observations > *, .terms-grid > * { min-width: 0; }
+.discussion-list dt, .discussion-list dd { overflow-wrap: anywhere; }

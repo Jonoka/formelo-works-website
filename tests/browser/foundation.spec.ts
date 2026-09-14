@@ -72,7 +72,7 @@ test('page metadata, disabled contact actions and local-only requests', async ({
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
   for (const button of await page.locator('.contact-actions button').all()) await expect(button).toBeDisabled();
-  await expect(page.locator('#hero-contact-note')).toContainText('Contact details pending.');
+  await expect(page.locator('#hero-contact-note')).toContainText('Contact details pending');
   await expect(page.locator('a[href^="mailto:"], a[href*="wa.me"], form, input, textarea, iframe')).toHaveCount(0);
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'Explore the proposed approach' }).click();
@@ -83,15 +83,17 @@ test('page metadata, disabled contact actions and local-only requests', async ({
   expect(errors).toEqual([]);
 });
 
-test('all rendered link destinations are real homepage sections or the homepage', async ({ page }) => {
+test('all homepage links resolve to implemented pages and actual fragments', async ({ page, request }) => {
   await page.goto('/');
   const links = await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')!));
   for (const href of links) {
     expect(href).not.toBe('#');
     expect(href).not.toBe('/#');
     const target = new URL(href, 'http://127.0.0.1/');
-    expect(target.pathname).toBe('/');
-    if (target.hash) await expect(page.locator(`[id="${target.hash.slice(1)}"]`)).toHaveCount(1);
+    expect(['/', '/clothing/t-shirts/', '/clothing/hoodies/']).toContain(target.pathname);
+    const response = await request.get(target.pathname);
+    expect(response.status()).toBe(200);
+    if (target.hash) expect(await response.text()).toContain(`id="${target.hash.slice(1)}"`);
   }
 });
 
@@ -134,7 +136,7 @@ test('desktop clothing disclosure opens by keyboard and returns focus on Escape'
   await expect(trigger).toBeFocused();
   await page.keyboard.press('Enter');
   await page.locator('.clothing-menu a').last().click();
-  await expect(page).toHaveURL(/#hoodies$/);
+  await expect(page).toHaveURL(/\/clothing\/hoodies\/$/);
   await expect(page.locator('.clothing-menu')).not.toHaveAttribute('open', '');
 });
 

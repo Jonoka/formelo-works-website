@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
+import '../styles/contact.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-interface Props { title: string; description: string; brandName: string; home?: boolean }
-const { title, description, brandName, home = false } = Astro.props;
+interface Props { title: string; description: string; brandName: string; showMobileContact?: boolean; referenceCode?: 'WEB-HOME' | 'WEB-TSHIRTS' | 'WEB-HOODIES' }
+const { title, description, brandName, showMobileContact = false, referenceCode = 'WEB-HOME' } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -14,12 +15,12 @@ const { title, description, brandName, home = false } = Astro.props;
     <meta name="robots" content="noindex, nofollow" />
     <title>{title}</title>
   </head>
-  <body class:list={{ 'has-mobile-contact': home }}>
+  <body class:list={{ 'has-mobile-contact': showMobileContact }}>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="preview-notice">Concept preview — provisional branding and unconfirmed factory capabilities. Not a production catalogue.</div>
+    <div class="preview-notice">Concept preview · Provisional brand &amp; unconfirmed capabilities.</div>
     <Header brandName={brandName} />
     <main id="main" tabindex="-1"><slot /></main>
-    <Footer brandName={brandName} home={home} />
+    <Footer brandName={brandName} showMobileContact={showMobileContact} referenceCode={referenceCode} />
     <script>import '../scripts/navigation';</script>
   </body>
 </html>
