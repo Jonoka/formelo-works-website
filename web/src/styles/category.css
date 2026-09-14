@@ -38,3 +38,5 @@
 }
 .category-hero > *, .concept-observations > *, .terms-grid > * { min-width: 0; }
 .discussion-list dt, .discussion-list dd { overflow-wrap: anywhere; }
+/* Keep the decorative glyph in its own flex slot when text is enlarged. */
+.related-category-link > span[aria-hidden="true"] { flex: 0 0 auto; }
