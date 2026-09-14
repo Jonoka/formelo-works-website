@@ -37,3 +37,28 @@ Windows 最后可读到的默认版本为 Node 24.12.0/npm 11.6.2；本次隔离
 上述两次失败 artifact（`10338254160`、`10338293654`）保留，后续当前-head 完整重跑才可证明修复通过。隔离容器尝试用系统 Chromium 查看 CI 静态产物时受到管理员的回环访问限制，没有修改或绕过该策略；实际定位依据是已授权私有 CI 的 trace、JSON 和截图，不把该容器浏览器算作通过。
 
 首页 390x844 的实际截图已看到业务定位、双入口和可辨识的卫衣轮廓：该实现的图片顶部约 583.55px，底条上方可见图像约 162.67px；PR #3 对照由原始精确代码重新渲染。最终头提交的对应数字与截图以其 artifact 为准，而非自动沿用本段。
+
+## 2026-09-14 追加：完整实现的通过证据
+
+新增首页 320/390px 的 200% 文字回归提交 `cf68e5543bd964bab1328b60b5ec65a37bb6d895` 的 CI `34823275348` 随后因新提交被取消，不计为通过。已核对并保留其后的箭头修复提交 `dca6acbd0d0ff4afa300b8c82a00f8cbc1061898`，没有覆盖新出现的远端工作。
+
+[实现验证 CI 34823532596](https://github.com/Jonoka/formelo-works-website/actions/runs/34823532596) 的完整检查已通过。PR head 为 `dca6acbd0d0ff4afa300b8c82a00f8cbc1061898`；实际 checkout 为 `1bb4d46fc94ac38f16261e62b25e003bcdfe6d6e`（PR 合成 merge，不是合并 main）；源 tree 为 `52ca2405aa75309d1d008af597cf9ea080811327`。下载的 source ZIP 已核对 SHA-256，并在隔离工作区重新计算 Git tree 一致。
+
+| 检查 | 该实现提交的实际结果 |
+|---|---|
+| Node / npm | 24.21.0 / 11.19.1；运行时门禁通过 |
+| npm ci | 成功；运行时、依赖版本和单一 lockfile 未升级 |
+| 类型 / tokens | 通过；Astro 0 errors / 0 warnings / 0 hints |
+| 单元 / schema / production 阻断 / 静态策略 | 43 passed，0 failed / skipped |
+| 静态输出与内链 | 4 HTML：首页、两个品类、404；链接和片段全部解析 |
+| Chromium dev + preview | 124 passed，0 failed / skipped / flaky；不是重复运行数量相加 |
+| npm run verify | 完整重跑通过，包含上述浏览器回归 |
+| npm audit --audit-level=high | 通过；4 moderate / 0 high / 0 critical，风险未消除 |
+| Linux CI 仓库 / Bash / Python | bootstrap 通过；隔离 Linux 工作区另行重跑仓库、Bash 及 20 项 Python 测试也通过 |
+| PR #3 同环境对照 | 精确旧代码本地构建、1440/390 截图成功，无部署 |
+
+已下载并检查 [私有审阅 artifact 10339640067](https://github.com/Jonoka/formelo-works-website/actions/runs/34823532596/artifacts/10339640067)：`category-pages-review-dca6acbd0d0ff4afa300b8c82a00f8cbc1061898`，ZIP SHA-256 `b487069ae5477f8eb3a902493d9277e252e4bee48e400e2b5725b96a0e79fd4a`，保留至 2026-09-28 08:41 UTC。source/outcomes、runtime、unit、verify、audit 与 Playwright JSON 的提交和结果一致。浏览器安装日志为 Chrome/Headless Shell 153.0.8010.12、Playwright Chromium build 1243；不冒称真机或其他浏览器已测。
+
+390x844 下，原 PR #3 主图顶部为 851.80px，本轮为 583.55px，提前约 268.25px；主 CTA 底部为 481.16px，底条顶部为 746.22px，其上可见服装图约 162.67px。是自然内容与间距调整，不是固定首屏高度或裁切正文。完整截图、其余宽度、失败状态和文字放大证据均随该 artifact 保存。
+
+本段只绑定上述实现提交。保存验证记录的后续文档提交仍需自己的 CI；最终 PR head、对应运行和 artifact 在 PR #4 最终审阅摘要中核对，不把此处旧 head 的结果自动改写成后续通过。未执行范围及上线前资料要求不变。
