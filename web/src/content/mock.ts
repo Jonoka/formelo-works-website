@@ -1,6 +1,7 @@
 import example from '../../../config/site.example.json';
 import type { ContentSnapshot } from '../../../shared/content';
 import { localPreviewFromManifest } from './local-media';
+import { categoryPreviews } from './category-previews';
 
 /** Proposed customer-facing copy is labelled as a concept; commercial facts remain null. */
 export const mockContent: ContentSnapshot = {
@@ -52,5 +53,6 @@ export const mockContent: ContentSnapshot = {
     journalTopics: ['What to send for a clothing quote', 'Understanding MOQ per style and colour'],
   },
   // These remain empty: homepage demonstrations and planned topics are not published content.
+  categoryPreviews,
   categories: [], articles: [],
 };

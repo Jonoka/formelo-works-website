@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from 'astro';
+import CategoryLayout from '../../layouts/CategoryLayout.astro';
+import { loadContent } from '../../lib/content';
+import { readRuntime } from '../../../../config/runtime';
+export const getStaticPaths = (async () => {
+  const { categoryPreviews, siteSettings } = await loadContent(readRuntime().contentMode);
+  return categoryPreviews.map(category => ({
+    params: { slug: category.slug },
+    props: { category, related: categoryPreviews.filter(item => item.slug !== category.slug), brandName: siteSettings.brandName },
+  }));
+}) satisfies GetStaticPaths;
+const { category, related, brandName } = Astro.props;
+---
+<CategoryLayout category={category} related={related} brandName={brandName} />

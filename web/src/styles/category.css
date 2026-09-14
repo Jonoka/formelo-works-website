@@ -1,0 +1,38 @@
+/* Category concept template: the homepage's editorial tokens, not a second theme. */
+.breadcrumb { padding-block: 12px 24px; font-size: .875rem; }
+.breadcrumb ol { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; margin: 0; }
+.breadcrumb li { display: flex; align-items: center; gap: 12px; }
+.breadcrumb li + li::before { content: '/'; color: var(--color-muted); }
+.breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; text-underline-offset: .2em; }
+.category-hero { display: grid; grid-template-columns: .96fr 1.04fr; gap: 40px; align-items: center; padding-bottom: 56px; }
+.category-hero h1 { font-size: clamp(3.5rem, 4.6vw, 4.6875rem); margin: 20px 0 24px; text-wrap: balance; }
+.category-hero .intro { max-width: 34rem; }
+.concept-observations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.concept-observations article { border-top: 1px solid var(--color-divider); padding-top: 20px; }
+.concept-observations h3, .terms-grid h3 { font-size: 1.75rem; margin-block: 16px; }
+.concept-observations p:not(.eyebrow), .terms-grid p, .discussion-list dd { font-size: 1rem; }
+.discussion-list { margin: 0; }
+.discussion-list > div { display: grid; grid-template-columns: minmax(150px, .55fr) 1fr; gap: 28px; padding: 24px 0; border-top: 1px solid var(--color-divider); }
+.discussion-list dt { font-family: var(--font-heading); font-size: 1.5rem; line-height: 1.2; }
+.discussion-list dd { margin: 0; color: var(--color-muted); }
+.terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 24px; }
+.terms-grid article { border-top: 1px solid var(--color-divider); padding-top: 12px; }
+.related-category-link { display: flex; align-items: center; justify-content: space-between; gap: 28px; min-height: 48px; padding: 24px 0; border-top: 1px solid var(--color-divider); margin-top: 24px; text-decoration: none; }
+.related-category-link strong { display: block; font-family: var(--font-heading); font-size: 2rem; font-weight: normal; margin-bottom: 8px; }
+.related-category-link > span { min-width: 0; }
+.related-category-link > span > span { display: block; max-width: 42rem; color: var(--color-muted); }
+@media (max-width: 1023px) {
+  .category-hero { gap: 24px; }
+  .category-hero h1 { font-size: 3.5rem; }
+  .concept-observations { gap: 20px; }
+}
+@media (max-width: 767px) {
+  .breadcrumb { padding-block: 4px 16px; }
+  .category-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 40px; }
+  .category-hero h1 { font-size: var(--typography-h1-mobile); margin: 16px 0; }
+  .category-hero .eyebrow { margin-bottom: 16px; }
+  .concept-observations { grid-template-columns: 1fr; gap: 12px; }
+  .concept-observations article { padding-top: 16px; }
+  .discussion-list > div { grid-template-columns: 1fr; gap: 12px; padding-block: 20px; }
+  .terms-grid { grid-template-columns: 1fr; gap: 16px; }
+}
