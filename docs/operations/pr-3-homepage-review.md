@@ -51,6 +51,24 @@ base/main：`4f6690124e1e0e9831214be40b6414435348ad84`。
 
 未执行 / 不得冒称：真实手机、Safari、Firefox、Edge、真实浏览器 UI 200% 缩放、真实服装图片加载/裁切、邮箱与 WhatsApp 收发、真实 CMS、生产部署。Chromium 手机视口只是模拟。
 
+## 三图接入后的最终 CI
+
+图片接入提交 `955f9bfcda38e161bc58c7a627083a4494fd582b` 的 [CI 34801520569](https://github.com/Jonoka/formelo-works-website/actions/runs/34801520569) 已完成，bootstrap / foundation 均 success。测试 checkout 为 `9ae860ff389026c3eb9c413fa789356abd387813`（PR 合成 merge，不是合并到 main）。
+
+| 检查 | 最终结果 |
+|---|---|
+| Node / npm | 24.21.0 / 11.19.1，固定版本核验通过 |
+| 类型 / tokens | 通过；Astro 0 errors / warnings / hints |
+| 单元、schema、生产阻断、静态策略 | 41 通过、0 失败、0 跳过 |
+| Astro / 静态输出 | 通过；仍只有首页与既有 404 |
+| Chromium dev + static preview | 42 通过、0 失败；新增真实三图解码与概念图失败回归 |
+| npm run verify | 完整重跑通过 |
+| npm audit --audit-level=high | 门禁通过；4 中危、0 高危、0 严重 |
+
+最终私有 artifact：`homepage-review-955f9bfcda38e161bc58c7a627083a4494fd582b`，ID `10331578050`，约 30.7 MB，ZIP digest `sha256:725d66faea6aede7ac5fe4d01aaf81d16bbe8529d6161b0bd7b9e5d2cef35b3a`，有效至 2026-09-28 03:10 UTC。包含源码/结果日志、Playwright 报告、静态输出、manifest、设计文档及所有回归截图。
+
+1440×900 首屏截图为 `c4bb41b8668d98e5fd20d25b8a1246f7193fffd78c3b32af1037126af619360f`；1440 全页为 `7e56dcb0...`。390×844 首屏哈希仍为 `46c90208...`，因为该固定首屏高度没有滚到 Hero 图片区域；390 全页已变为 `2cbc7c97...`，证明移动页面中概念图已进入渲染结果。真实手机、Safari、Firefox、Edge、浏览器 UI 真缩放、真实替换服装摄影、真实联系方式、CMS 和生产部署仍未执行。
+
 ## 剩余范围
 
 DESIGN-01 首页待图片接入后的视觉审阅，品类演绎未做；ASSET-01 三张独立首页图与两文封面未完成；DEV-02 仅首页公共组件，跨页和真实渠道未做；DEV-03 Category 模板未做。最终十内容路由规划不变，本轮仍只有首页和既有工程 404。
