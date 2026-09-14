@@ -4,12 +4,13 @@
   "homepageGenerationAttempt": {
     "date": "2026-09-14",
     "provider": "ChatGPT image generation",
-    "actualOutput": "One new text-free garment triptych, not three independent source images.",
-    "acceptedIndependentAssets": 0,
-    "importResult": "Blocked: import_conversation_files_to_project requires an explicitly trusted OAuth MCP client.",
-    "repositoryFilesImported": 0,
-    "disposition": "Not cropped, not served, not committed; do not count the triptych as HERO-001/CAT-TS-001/CAT-HD-001.",
-    "nextRequirement": "Three separate text-free source files and an authorized host-to-project attachment transfer; see docs/design/homepage-asset-handoff.md."
+    "actualOutput": "Three independent text-free garment concept images were generated after the earlier rejected triptych attempt: one Hero, one T-shirt and one Hoodie.",
+    "acceptedIndependentAssets": 3,
+    "importResult": "Standard ChatGPT-to-WebCodex attachment import remained blocked by OAuth MCP client trust validation. The user placed the generated ZIP in the project root; its archive SHA-256 and every contained file were validated before extraction.",
+    "transferArchiveSha256": "a7bc678f02ee0552ff765352e0746b7c4ce30a88ae84f8f690160709068bd8c1",
+    "repositoryFilesImported": 21,
+    "disposition": "Three source PNGs and eighteen responsive WebP/AVIF renditions are local generated concepts only; they are not Sanity assets, factory evidence or production-approved imagery.",
+    "nextRequirement": "Review the three concepts in-browser; replace them with approved real garment photography before production launch."
   },
   "assets": [
     {
@@ -27,69 +28,237 @@
     },
     {
       "id": "HERO-001",
-      "status": "pending_generation",
-      "path": null,
+      "status": "generated_concept",
+      "path": "web/public/media/concepts/hero-1200.webp",
+      "sha256": "456b034950418035a86acebd991a64b846462801b1a01d0a690f785246ad7a2e",
+      "dimensions": {
+        "width": 1200,
+        "height": 1200
+      },
+      "sizeBytes": 85198,
+      "format": "image/webp",
+      "source": "AI-generated concept",
+      "conceptStatus": "concept_only",
+      "generationOutput": "independent_image",
       "productionAllowed": false,
       "role": "Unbranded cream T-shirt and charcoal hoodie still life, concrete setting",
-      "suggestedRatio": "approximately 1:1 desktop; mobile crop evaluated separately",
-      "approval": "not yet reviewed",
+      "approval": "pending_user_review",
       "replacementRequiredBeforeLaunch": true,
-      "generationStatus": "blocked_no_acceptable_independent_output",
-      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
-      "plannedWebWidths": [
-        480,
-        800,
-        1200
-      ],
-      "plannedWebFormats": [
-        "image/avif",
-        "image/webp"
-      ],
-      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
+      "replacement": "Replace with reviewed real garment photography before production launch.",
+      "sourceImage": {
+        "path": "assets/concepts/source/hero.png",
+        "width": 1254,
+        "height": 1254,
+        "format": "image/png",
+        "sizeBytes": 2273892,
+        "sha256": "3e8e6e021d2b530680a7c8c31ea1f40958ba9f17780e418da0f07a45b392a17a"
+      },
+      "renditions": [
+        {
+          "path": "web/public/media/concepts/hero-480.webp",
+          "width": 480,
+          "height": 480,
+          "format": "image/webp",
+          "sizeBytes": 12832,
+          "sha256": "63e2dbc6f410e8276354a7b8bcf54afff264f69639f23f419af0bc6e8986fea2"
+        },
+        {
+          "path": "web/public/media/concepts/hero-480.avif",
+          "width": 480,
+          "height": 480,
+          "format": "image/avif",
+          "sizeBytes": 15500,
+          "sha256": "b23bc67b7181241f445dc399d30548423c0514d8d07b5bfdf6320a335f7faf07"
+        },
+        {
+          "path": "web/public/media/concepts/hero-800.webp",
+          "width": 800,
+          "height": 800,
+          "format": "image/webp",
+          "sizeBytes": 37766,
+          "sha256": "6be7f54c861caf82eab817fefed282ada9e6e821e3f78d76c0f3ab0b3c6371ca"
+        },
+        {
+          "path": "web/public/media/concepts/hero-800.avif",
+          "width": 800,
+          "height": 800,
+          "format": "image/avif",
+          "sizeBytes": 44165,
+          "sha256": "a946bfd03511fcea8b3869227982ffbf5511a1b8bc86512e39601b1385d6265a"
+        },
+        {
+          "path": "web/public/media/concepts/hero-1200.webp",
+          "width": 1200,
+          "height": 1200,
+          "format": "image/webp",
+          "sizeBytes": 85198,
+          "sha256": "456b034950418035a86acebd991a64b846462801b1a01d0a690f785246ad7a2e"
+        },
+        {
+          "path": "web/public/media/concepts/hero-1200.avif",
+          "width": 1200,
+          "height": 1200,
+          "format": "image/avif",
+          "sizeBytes": 96882,
+          "sha256": "c3e9a53172e21dfd7a2d38d7cea6a4b6b63bb24a1a52b658b32022541129efd3"
+        }
+      ]
     },
     {
       "id": "CAT-TS-001",
-      "status": "pending_generation",
-      "path": null,
+      "status": "generated_concept",
+      "path": "web/public/media/concepts/t-shirt-960.webp",
+      "sha256": "5f790c9958ccc6df2238158286b5b1258f3ec7defc8f5f3998472c800171e124",
+      "dimensions": {
+        "width": 960,
+        "height": 720
+      },
+      "sizeBytes": 64484,
+      "format": "image/webp",
+      "source": "AI-generated concept",
+      "conceptStatus": "concept_only",
+      "generationOutput": "independent_image",
       "productionAllowed": false,
       "role": "Cream unbranded T-shirt / neckline detail",
-      "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
-      "approval": "not yet reviewed",
+      "approval": "pending_user_review",
       "replacementRequiredBeforeLaunch": true,
-      "generationStatus": "blocked_no_acceptable_independent_output",
-      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
-      "plannedWebWidths": [
-        360,
-        640,
-        960
-      ],
-      "plannedWebFormats": [
-        "image/avif",
-        "image/webp"
-      ],
-      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
+      "replacement": "Replace with reviewed real garment photography before production launch.",
+      "sourceImage": {
+        "path": "assets/concepts/source/t-shirt.png",
+        "width": 1448,
+        "height": 1086,
+        "format": "image/png",
+        "sizeBytes": 2387505,
+        "sha256": "a17c72b00d07d4880466022fbad0327f72306702f4f8fb586a13c7ff5c8c3742"
+      },
+      "renditions": [
+        {
+          "path": "web/public/media/concepts/t-shirt-360.webp",
+          "width": 360,
+          "height": 270,
+          "format": "image/webp",
+          "sizeBytes": 8294,
+          "sha256": "8e5340f4c7afdec22a0345221946f20c1799e3d6a6591a4d2f76a26a828fb44a"
+        },
+        {
+          "path": "web/public/media/concepts/t-shirt-360.avif",
+          "width": 360,
+          "height": 270,
+          "format": "image/avif",
+          "sizeBytes": 8703,
+          "sha256": "d2e6c53d58da88fb9d03e5ec9f86947e06e9adab5282c6bf7bf192ca18fdaaef"
+        },
+        {
+          "path": "web/public/media/concepts/t-shirt-640.webp",
+          "width": 640,
+          "height": 480,
+          "format": "image/webp",
+          "sizeBytes": 27372,
+          "sha256": "42dd03401ebc23a5759483d351a9f085c8ba5650a6f99dd29ef28ea5bdf9462d"
+        },
+        {
+          "path": "web/public/media/concepts/t-shirt-640.avif",
+          "width": 640,
+          "height": 480,
+          "format": "image/avif",
+          "sizeBytes": 27073,
+          "sha256": "7303ac7b0c910b1ef470e516c9da4a9f32ae794a9db17514188b21486c7ad4ef"
+        },
+        {
+          "path": "web/public/media/concepts/t-shirt-960.webp",
+          "width": 960,
+          "height": 720,
+          "format": "image/webp",
+          "sizeBytes": 64484,
+          "sha256": "5f790c9958ccc6df2238158286b5b1258f3ec7defc8f5f3998472c800171e124"
+        },
+        {
+          "path": "web/public/media/concepts/t-shirt-960.avif",
+          "width": 960,
+          "height": 720,
+          "format": "image/avif",
+          "sizeBytes": 61228,
+          "sha256": "530ffa750ca1235c0343399ab3b87943141884c6d499e1f96010ee7fb879a3f0"
+        }
+      ]
     },
     {
       "id": "CAT-HD-001",
-      "status": "pending_generation",
-      "path": null,
+      "status": "generated_concept",
+      "path": "web/public/media/concepts/hoodie-960.webp",
+      "sha256": "3b33bc3d58c87721dd27dc5a4259f940748b0fa004296735686eb40f3f4495ac",
+      "dimensions": {
+        "width": 960,
+        "height": 720
+      },
+      "sizeBytes": 59458,
+      "format": "image/webp",
+      "source": "AI-generated concept",
+      "conceptStatus": "concept_only",
+      "generationOutput": "independent_image",
       "productionAllowed": false,
       "role": "Charcoal unbranded hoodie / hood and seam detail",
-      "suggestedRatio": "4:3 entry card; 4:5 detail use separately evaluated",
-      "approval": "not yet reviewed",
+      "approval": "pending_user_review",
       "replacementRequiredBeforeLaunch": true,
-      "generationStatus": "blocked_no_acceptable_independent_output",
-      "generationNote": "Image-generation calls returned website/composite imagery instead of independent text-free garment files. Outputs were rejected, never cropped, never served, and are not browser evidence.",
-      "plannedWebWidths": [
-        360,
-        640,
-        960
-      ],
-      "plannedWebFormats": [
-        "image/avif",
-        "image/webp"
-      ],
-      "plannedFormatsStatus": "Not generated or performance-verified; specification only."
+      "replacement": "Replace with reviewed real garment photography before production launch.",
+      "sourceImage": {
+        "path": "assets/concepts/source/hoodie.png",
+        "width": 1448,
+        "height": 1086,
+        "format": "image/png",
+        "sizeBytes": 2335584,
+        "sha256": "449c21937c5cab9ff8ea662ffb87301ecad2ebd5ccf8e93586b46ab2ab3e6d0e"
+      },
+      "renditions": [
+        {
+          "path": "web/public/media/concepts/hoodie-360.webp",
+          "width": 360,
+          "height": 270,
+          "format": "image/webp",
+          "sizeBytes": 7158,
+          "sha256": "c75fc77cbd539617e35e0e702f42831a54d84d3a60540c1d24980f449e2ccf40"
+        },
+        {
+          "path": "web/public/media/concepts/hoodie-360.avif",
+          "width": 360,
+          "height": 270,
+          "format": "image/avif",
+          "sizeBytes": 7954,
+          "sha256": "be8d0f62a40a3106c2ebf92f72c5563ef2f8895136aeb053bc6e5a5c22bd26c7"
+        },
+        {
+          "path": "web/public/media/concepts/hoodie-640.webp",
+          "width": 640,
+          "height": 480,
+          "format": "image/webp",
+          "sizeBytes": 24584,
+          "sha256": "2bc661b4afa3d0d2e65e193edb9ba507fb368f6264739f07d5420a1ce2ef9b8c"
+        },
+        {
+          "path": "web/public/media/concepts/hoodie-640.avif",
+          "width": 640,
+          "height": 480,
+          "format": "image/avif",
+          "sizeBytes": 26234,
+          "sha256": "ca50738912e9854d58baa9b64473529e98307285009c498b9686b5cf5199ffb5"
+        },
+        {
+          "path": "web/public/media/concepts/hoodie-960.webp",
+          "width": 960,
+          "height": 720,
+          "format": "image/webp",
+          "sizeBytes": 59458,
+          "sha256": "3b33bc3d58c87721dd27dc5a4259f940748b0fa004296735686eb40f3f4495ac"
+        },
+        {
+          "path": "web/public/media/concepts/hoodie-960.avif",
+          "width": 960,
+          "height": 720,
+          "format": "image/avif",
+          "sizeBytes": 60647,
+          "sha256": "d2129c6fae5dfc4771cccb2c532f2a38249f87a1c777c20706075adb2932921f"
+        }
+      ]
     },
     {
       "id": "JOURNAL-QUOTE-001",

@@ -31,22 +31,25 @@ test('homepage concepts do not become confirmed categories or published articles
   assert.deepEqual(content.articles, []);
 });
 
-test('missing garment assets remain pending and UI media is explicitly local, not Sanity', async () => {
+test('generated garment concepts are local, non-production and never Sanity assets', async () => {
   const { homepagePreview } = await loadContent('mock');
   const images = [homepagePreview.heroImage, ...homepagePreview.demonstrationCategories.map(item => item.image)];
   assert.deepEqual(images.map(image => image.requiredAssetId), ['HERO-001', 'CAT-TS-001', 'CAT-HD-001']);
   for (const image of images) {
     validateLocalImage(image);
     assert.equal(image.source, 'local');
-    assert.equal(image.kind, 'placeholder');
+    assert.equal(image.kind, 'concept');
     assert.equal(image.productionAllowed, false);
     assert.equal('asset' in image, false);
     assert.equal('_ref' in image, false);
-    assert.equal(imageSrcSet(image, 'image/webp'), undefined);
+    assert.ok(imageSrcSet(image, 'image/webp'));
+    assert.ok(imageSrcSet(image, 'image/avif'));
     const asset = manifest.assets.find(item => item.id === image.requiredAssetId);
-    assert.equal(asset?.status, 'pending_generation');
-    assert.equal(asset?.path, null);
-    assert.match(image.alt, /pending/i);
+    assert.equal(asset?.status, 'generated_concept');
+    assert.ok(asset?.path);
+    assert.equal(asset?.productionAllowed, false);
+    assert.equal(asset?.replacementRequiredBeforeLaunch, true);
+    assert.match(image.alt, /^AI-generated concept:/);
   }
   const placeholder = manifest.assets.find(item => item.id === 'UI-MEDIA-PENDING-001');
   assert.ok(placeholder?.path && 'sha256' in placeholder);
@@ -68,6 +71,7 @@ test('unknown media providers and unsafe local paths fail closed', async () => {
 test('raster renditions are sorted by width and must match the source aspect ratio', async () => {
   const { homepagePreview } = await loadContent('mock');
   const image: LocalPreviewImage = { ...homepagePreview.heroImage, kind: 'concept', assetId: 'HERO-001', src: '/media/test-source.webp',
+    width: 960, height: 720,
     renditions: [
       { src: '/media/test-960.webp', width: 960, height: 720, format: 'image/webp' },
       { src: '/media/test-480.webp', width: 480, height: 360, format: 'image/webp' },
@@ -163,7 +167,9 @@ test('missing, duplicate or contradictory pending manifest entries are rejected'
   data.assets.push({ ...asset });
   assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', data), /Duplicate/);
   const pending = structuredClone(manifest) as { assets: Record<string, unknown>[] };
-  pending.assets.find(item => item['id'] === 'HERO-001')!['path'] = 'web/public/media/not-generated.webp';
+  const pendingHero = pending.assets.find(item => item['id'] === 'HERO-001')!;
+  pendingHero['status'] = 'pending_generation';
+  pendingHero['path'] = 'web/public/media/not-generated.webp';
   assert.throws(() => localPreviewFromManifest('HERO-001', 'Fixture.', pending), /Pending asset/);
 });
 test('rendition format cannot disagree with extension or impersonate a placeholder', () => {

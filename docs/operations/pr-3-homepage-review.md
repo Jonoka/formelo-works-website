@@ -16,10 +16,11 @@ base/main：`4f6690124e1e0e9831214be40b6414435348ad84`。
 首页英文客户文案和独立未确认说明；共享区块标题与导航；正文可读性；manifest 驱动本地图片状态与 fail-closed 接口；可见图片加载失败说明；素材 provenance / 文件哈希 / MIME 回归；新无 JS 图片失败浏览器用例和私有报告。
 设计说明见 [首页衔接](../design/homepage-handoff.md)，素材状态与准确接口见 [素材交接](../design/homepage-asset-handoff.md)。
 
-## 图片阻塞
+## 图片生成与接入
 
-生图实际返回一张新的无字三联画，不是三张独立源图。标准附件导入被 WebCodex 拒绝：`requires an explicitly trusted OAuth MCP client`。没有绕过信任限制；没有裁切该图或旧网页截图冒充三张正式资产；没有把图片写成假的 Sanity 引用。
-独立图片接受数 0，仓库图片导入数 0。三个首页槽位继续明确 pending，工厂区域仍等待真实授权实拍。因此这不是完整首页视觉验收。
+首次生图返回的无字三联画继续保持拒绝状态，没有裁切或冒充三张独立资产。随后分别生成 Hero、T-shirt、Hoodie 三张独立、无文字、无品牌概念图，用户选择厚实哑光的材质方向。
+标准 ChatGPT → WebCodex 附件导入仍被 `requires an explicitly trusted OAuth MCP client` 拒绝；没有绕过该信任校验。改由用户把本会话生成的 `formelo-homepage-concept-assets.zip` 放入项目根目录。接入前验证 ZIP SHA-256 `a7bc678f02ee0552ff765352e0746b7c4ce30a88ae84f8f690160709068bd8c1`，并逐个核对 21 个图片文件的哈希、字节数、格式、尺寸和路径安全后，只提取约定资产，临时 ZIP 随后删除。
+当前三个首页槽位均由本地 `generated_concept` 资产驱动，不是 Sanity 引用；`productionAllowed` 保持 false、`approval` 保持 `pending_user_review`、上线前必须替换。Hero 源图 1254×1254，最大 WebP/AVIF 1200×1200；T-shirt / Hoodie 源图 1448×1086，最大网页版本 960×720。工厂区域仍只等待真实授权实拍，不生成 AI 工厂图。
 
 ## 验证执行记录
 

@@ -178,7 +178,26 @@ test('reduced-motion preference removes nonessential transitions', async ({ page
   if (info.project.name === 'preview') await screenshot(page, info, 'homepage-reduced-motion');
 });
 
-test('local placeholder image failures preserve captions, dimensions and usable content', async ({ page }, info) => {
+test('three local garment concepts load as explicit non-production imagery', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const figures = page.locator('.preview-image');
+  await expect(figures).toHaveCount(3);
+  const expectedAssets = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'];
+  for (let index = 0; index < expectedAssets.length; index += 1) {
+    const figure = figures.nth(index);
+    await expect(figure).toHaveAttribute('data-asset-id', expectedAssets[index]!);
+    await expect(figure).toHaveAttribute('data-media-kind', 'concept');
+    await expect(figure.locator('figcaption')).toContainText('AI-generated garment concept — not a factory sample.');
+    const imageState = await figure.locator('img').evaluate((node: HTMLImageElement) => ({ complete: node.complete, naturalWidth: node.naturalWidth, naturalHeight: node.naturalHeight, alt: node.alt }));
+    expect(imageState.complete).toBe(true);
+    expect(imageState.naturalWidth).toBeGreaterThan(0);
+    expect(imageState.naturalHeight).toBeGreaterThan(0);
+    expect(imageState.alt).toMatch(/^AI-generated concept:/);
+  }
+});
+
+test('local concept image failures preserve captions, dimensions and usable content', async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route('**/media/**', route => route.abort());
   await page.goto('/');
@@ -237,8 +256,8 @@ test('broken images without JavaScript retain labelled space and native FAQ', as
     await page.goto('/');
     for (const figure of await page.locator('.preview-image').all()) {
       await figure.scrollIntoViewIfNeeded();
-      await expect(figure.locator('figcaption')).toContainText('Image pending');
-      await expect(figure.locator('img')).toHaveAttribute('alt', /Image pending/);
+      await expect(figure.locator('figcaption')).toContainText('AI-generated garment concept');
+      await expect(figure.locator('img')).toHaveAttribute('alt', /^AI-generated concept:/);
       expect((await figure.locator('.media-frame').boundingBox())?.height).toBeGreaterThan(200);
     }
     await page.locator('.faq-item > summary').first().click();
