@@ -25,7 +25,7 @@ jobs:
           name: private-review-source-${{ github.sha }}
           path: ${{ runner.temp }}/review-source.tar.gz
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 14
       - name: Validate documentation and assets
         run: python3 scripts/check_repository.py
       - name: Validate shell syntax
@@ -59,11 +59,14 @@ jobs:
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
-          import json, os
+          import json, os, subprocess
           from pathlib import Path
           Path('review/source.json').write_text(json.dumps({
               'headSha': os.environ['PR_HEAD'], 'baseSha': os.environ['PR_BASE'],
               'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
+              'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'comparisonSha': '4116c2c2d40c16abfb078fe4805089556595f569',
+              'scope': 'Six content previews plus the existing 404. Manufacturing, Factory and Contact are local unconfirmed presentations, not production/CMS acceptance.',
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
               'assetLimit': 'Three local AI-generated garment concepts are reused by the homepage and category previews; they are not factory samples or production-approved imagery. Factory photography is still awaiting verified originals.',
@@ -92,7 +95,7 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee review/unit.txt
-      - name: Build and inspect the three static concept pages
+      - name: Build and inspect the six static concept pages plus 404
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
         run: |
@@ -104,14 +107,14 @@ jobs:
         run: |
           set -o pipefail
           npm exec -- playwright install --with-deps chromium 2>&1 | tee review/browser-install.txt
-      - name: Check out the exact PR 3 source for the before comparison
+      - name: Check out the accepted PR 4 head for the before comparison
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: bc78d30e7497e764d585e3510f9c2a296e93017c
+          ref: 4116c2c2d40c16abfb078fe4805089556595f569
           path: .review-baseline
           persist-credentials: false
-      - name: Render the historical homepage without deploying it
+      - name: Render the accepted homepage and categories without deploying them
         id: baseline
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: |
@@ -161,7 +164,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: category-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
+          name: core-information-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/
             playwright-report/
@@ -174,5 +177,9 @@ jobs:
             docs/operations/pr-3-homepage-review.md
             docs/design/category-handoff.md
             docs/operations/pr-4-category-review.md
+            docs/design/core-information-handoff.md
+            docs/operations/core-information-verification.md
+            docs/content/factory-materials-checklist.md
+            config/routes.json
           if-no-files-found: error
           retention-days: 14

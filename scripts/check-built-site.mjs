@@ -8,11 +8,23 @@ const root = join(project, 'web', 'dist');
 const routes = JSON.parse(readFileSync(join(project, 'config', 'routes.json'), 'utf8'));
 const assets = JSON.parse(readFileSync(join(project, 'assets', 'manifest.json'), 'utf8')).assets;
 const previewPages = routes.previewPages;
+// This increment admits exactly six content routes. Updating the plan alone cannot publish more.
+const implementedPolicies = {
+  '/': { assetIds: ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'], imagePolicy: 'registered_concepts', factoryPlaceholder: true },
+  '/clothing/t-shirts/': { assetIds: ['CAT-TS-001'], imagePolicy: 'registered_concepts', factoryPlaceholder: false },
+  '/clothing/hoodies/': { assetIds: ['CAT-HD-001'], imagePolicy: 'registered_concepts', factoryPlaceholder: false },
+  '/manufacturing/': { assetIds: [], imagePolicy: 'no_images', factoryPlaceholder: false },
+  '/our-factory/': { assetIds: [], imagePolicy: 'factory_placeholder', factoryPlaceholder: true },
+  '/contact/': { assetIds: [], imagePolicy: 'no_images', factoryPlaceholder: false },
+};
 assert.ok(Array.isArray(previewPages) && previewPages.length > 0, 'Explicit implemented preview routes required.');
 assert.equal(new Set(previewPages.map(page => page.path)).size, previewPages.length, 'Duplicate preview paths.');
+assert.deepEqual(previewPages.map(page => page.path).sort(), Object.keys(implementedPolicies).sort(), 'Exactly six implemented content routes required.');
 for (const page of previewPages) {
-  assert.ok(routes.pages.some(plan => plan.path === page.path && ['Home', 'Category'].includes(plan.template)), 'Preview route outside this increment.');
+  assert.ok(routes.pages.some(plan => plan.path === page.path && ['Home', 'Category', 'Manufacturing', 'Factory', 'Contact'].includes(plan.template)), 'Preview route outside this increment.');
   assert.ok(Array.isArray(page.assetIds), 'Page asset policy required.');
+  const { path, ...policy } = page;
+  assert.deepEqual(policy, implementedPolicies[path], 'Explicit route/image policy mismatch.');
 }
 const htmlName = path => path === '/' ? 'index.html' : `${path.slice(1)}index.html`;
 assert.ok(existsSync(root), 'Build web/ before checking the static output.');
@@ -26,7 +38,7 @@ function filesIn(directory) {
 const files = filesIn(root);
 const htmlFiles = files.filter(path => extname(path) === '.html');
 assert.deepEqual(htmlFiles.map(path => relative(root, path).replaceAll('\\', '/')).sort(), ['404.html', ...previewPages.map(page => htmlName(page.path))].sort(),
-  'Only explicitly implemented home/category routes and the existing 404 may be emitted.');
+  'Only six explicitly implemented content routes and the existing 404 may be emitted.');
 const titles = new Set();
 const descriptions = new Set();
 const emittedModules = new Set();
@@ -42,12 +54,25 @@ for (const path of htmlFiles) {
   const description = html.match(/name="description"\s+content="([^"]+)"/i)?.[1];
   assert.ok(description && !descriptions.has(description), `${name}: missing or duplicate description`);
   descriptions.add(description);
+  const plan = pagePolicy && routes.pages.find(page => page.path === pagePolicy.path);
+  const references = [...html.matchAll(/data-reference-code="([^"]+)"/g)].map(match => match[1]);
+  const contactGroups = (html.match(/class="pending-contact"/g) ?? []).length;
+  assert.equal(contactGroups, pagePolicy ? 3 : 0, `${name}: explicit hero, footer and mobile contact groups required; none on 404.`);
+  assert.ok(references.every(code => code === plan?.referenceCode), `${name}: wrong page referenceCode`);
+  for (const group of html.matchAll(/<div\b(?=[^>]*class="pending-contact")([^>]*)>/g)) {
+    assert.ok(group[1].includes(`data-reference-code="${plan?.referenceCode}"`), `${name}: missing or wrong contact-group referenceCode`);
+  }
+  assert.doesNotMatch(html, /\son[a-z]+\s*=/i, `${name}: inline event handlers are not allowed`);
+  for (const button of html.matchAll(/<button\b([^>]*)>/gi)) {
+    assert.match(button[1], /(?:^|\s)disabled(?:\s|=|$)/, `${name}: no executable buttons with null contacts`);
+  }
+  assert.doesNotMatch(html, /(?:Email copied|Message sent|Enquiry submitted|data-copy-email)/i, `${name}: no fake copy or delivery success`);
   assert.match(html, /name="description"\s+content="[^"]+"/i, `${name}: missing description`);
   assert.match(html, /name="robots"\s+content="noindex, nofollow"/i, `${name}: preview must be noindex`);
   assert.doesNotMatch(html, /<(?:form|input|textarea|iframe)\b/i, `${name}: unexpected active markup`);
+  assert.doesNotMatch(html, /href="\/clothing\/"/, 'No empty Clothing hub.');
   assert.doesNotMatch(html, /(?:mailto:|wa\.me\/|rel="canonical"|homepage-selected-v1|assets\/reference)/i,
     `${name}: contact, canonical or reference asset must not be published in this preview`);
-  assert.doesNotMatch(html, /\son[a-z]+\s*=/i, `${name}: inline event handlers are not allowed`);
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(ids).size, ids.length, `${name}: duplicate element IDs`);
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
@@ -66,6 +91,33 @@ for (const path of htmlFiles) {
     assert.equal((html.match(/class="faq-item"/g) ?? []).length, 3, 'Three native purchasing FAQs are required.');
   }
   const expectedAssets = pagePolicy?.assetIds ?? [];
+  const factorySlots = (html.match(/data-factory-media-status="awaiting_factory"/g) ?? []).length;
+  assert.equal(factorySlots, pagePolicy?.factoryPlaceholder ? 1 : 0, `${name}: factory photography policy mismatch`);
+  if (factorySlots) {
+    const factoryAsset = assets.find(asset => asset.id === 'FACTORY-001');
+    assert.ok(factoryAsset?.status === 'awaiting_factory' && factoryAsset.path === null && factoryAsset.productionAllowed === false,
+      'Factory photography must remain awaiting verified originals.');
+    assert.match(html, /Factory photography/);
+  }
+  if (['/manufacturing/', '/our-factory/', '/contact/'].includes(pagePolicy?.path)) {
+    assert.match(html, /data-preview-status="concept_only"/);
+    assert.match(html, /data-facts-status="unconfirmed"/);
+    assert.match(html, /data-production-allowed="false"/);
+  }
+  if (pagePolicy?.path === '/manufacturing/') {
+    for (const id of ['options', 'moq', 'prepare', 'sampling', 'production', 'faq']) assert.ok(ids.includes(id), `Manufacturing anchor missing: ${id}`);
+    assert.ok((html.match(/class="faq-item"/g) ?? []).length >= 3, 'Manufacturing native FAQs required.');
+  }
+  if (pagePolicy?.path === '/contact/') {
+    for (const field of ['email', 'whatsapp', 'person', 'hours', 'timezone', 'address']) {
+      assert.ok(new RegExp(`data-contact-field="${field}"[^>]*data-contact-state="unconfigured"`).test(html), `Contact field must remain unconfigured: ${field}`);
+    }
+    assert.doesNotMatch(html, /href="\/contact\/"/, 'Contact page must not link to itself.');
+  }
+  if (pagePolicy && pagePolicy.path !== '/') {
+    assert.match(html, /aria-label="Breadcrumb"/, 'Inner-page breadcrumb required.');
+    assert.match(html, /aria-current="page"/, 'Current page must be identified.');
+  }
   assert.equal((html.match(/<img\b/g) ?? []).length, expectedAssets.length, `${name}: Registered image slots only.`);
   const figures = [...html.matchAll(/<figure\b([^>]*)>([\s\S]*?)<\/figure>/gi)];
   assert.equal(figures.length, expectedAssets.length, `${name}: All media slots need persistent provenance captions.`);
@@ -122,10 +174,14 @@ for (const path of files) {
   assert.doesNotMatch(path, /\.(?:woff2?|ttf|otf|pem|key|env)$/i, 'Unexpected font or credential file.');
   if (!['.html', '.css', '.js', '.json', '.txt', '.svg'].includes(extname(path))) continue;
   const text = readFileSync(path, 'utf8');
-  if (extname(path) === '.js') assert.doesNotMatch(text, /\b(?:fetch|XMLHttpRequest|WebSocket|sendBeacon)\s*\(/, 'Static enhancement must not make network/API requests.');
+  if (extname(path) === '.js') {
+    assert.doesNotMatch(text, /\b(?:fetch|XMLHttpRequest|WebSocket|sendBeacon)\s*\(/, 'Static enhancement must not make network/API requests.');
+    assert.doesNotMatch(text, /(?:clipboard|writeText)/, 'Null-contact previews must not implement email copying.');
+  }
   assert.doesNotMatch(text, /(?:github_pat_[A-Za-z0-9_]{30,}|gh[pousr]_[A-Za-z0-9]{30,}|SANITY_READ_TOKEN|BEGIN PRIVATE KEY)/,
     `Potential secret in ${relative(root, path)} (value withheld)`);
 }
-assert.equal(readFileSync(join(root, 'robots.txt'), 'utf8').trim(), 'User-agent: *\nDisallow: /');
+// Git may use CRLF in a Windows checkout; preserve the exact deny-all directives.
+assert.equal(readFileSync(join(root, 'robots.txt'), 'utf8').replace(/\r\n/g, '\n').trim(), 'User-agent: *\nDisallow: /');
 assert.ok(!files.some(path => /sitemap/i.test(path)), 'No sitemap is emitted for the local concept.');
 console.log(`Static concept checks passed: ${htmlFiles.length} HTML files, all internal links and fragments resolved, no active contact links or reference image.`);

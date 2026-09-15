@@ -1,0 +1,13 @@
+---
+interface Props { label: string }
+const { label } = Astro.props;
+---
+<nav class="breadcrumb shell" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">{label}</li></ol></nav>
+<style>
+  .breadcrumb { padding-block: 12px 24px; font-size: .875rem; }
+  ol { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; margin: 0; }
+  li { display: flex; align-items: center; gap: 12px; min-width: 0; overflow-wrap: anywhere; }
+  li + li::before { content: '/'; color: var(--color-muted); flex: 0 0 auto; }
+  a { display: inline-flex; align-items: center; min-height: 44px; text-underline-offset: .2em; }
+  @media (max-width: 767px) { .breadcrumb { padding-block: 4px 16px; } }
+</style>

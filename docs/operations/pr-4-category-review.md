@@ -62,3 +62,9 @@ Windows 最后可读到的默认版本为 Node 24.12.0/npm 11.6.2；本次隔离
 390x844 下，原 PR #3 主图顶部为 851.80px，本轮为 583.55px，提前约 268.25px；主 CTA 底部为 481.16px，底条顶部为 746.22px，其上可见服装图约 162.67px。是自然内容与间距调整，不是固定首屏高度或裁切正文。完整截图、其余宽度、失败状态和文字放大证据均随该 artifact 保存。
 
 本段只绑定上述实现提交。保存验证记录的后续文档提交仍需自己的 CI；最终 PR head、对应运行和 artifact 在 PR #4 最终审阅摘要中核对，不把此处旧 head 的结果自动改写成后续通过。未执行范围及上线前资料要求不变。
+
+## 2026-09-15 追加：合并与下一增量
+
+GitHub 实际 state=MERGED，mergedAt=2026-09-14T17:37:38Z；head=4116c2c2d40c16abfb078fe4805089556595f569，merge/main=59ba085c25dc8ab412803b8b5afea7604d450756。最新验收 review 已读取；不是根据旧 PR 正文判断。上述日志保留其当时的运行时、平台与未执行项。
+
+本轮实际核对 Windows：原 feat/category-pages@4116c2c 工作树干净，main 可快进；仅执行 fast-forward 后从最新 main 建立 feat/core-information-pages。后续三核心内页的实现、结果与本地状态单独记录在 [核心内页验证](core-information-verification.md)，不把旧 PR #4 的通过结果自动算作新 head 的通过。

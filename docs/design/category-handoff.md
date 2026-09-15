@@ -27,3 +27,7 @@ loadContent 是单一入口；CategoryPreview 与正式 Sanity Category/Sample �
 ## 后续项，不在本輪无限打磨
 
 正式字体授权及细小字形/图标/装饰统一留后续。正式工厂能力、每品类至少三组获准真实样品及编号、真实工厂摄影、MOQ/打样规则、渠道收发和其他内页仍是上线前待办。现有三张概念图的视觉认可不等于生产授权。Safari/Firefox/真机、真实浏览器 UI 缩放和真实渠道未测试，不标通过。
+
+## 后续核心内页衔接
+
+PR #4 已合并，以上导航锚点是当时三页范围的历史。新的 Manufacturing / Factory / Contact 实现后导航改为对应内页，Process 进入 /manufacturing/#production；Journal 仍 /#journal，旧首页 ID 保留。仅 T-shirt 短词使用不拆行单元，整个 H1 仍自然换行；品类 MOQ/打样区补准确制造页内链。见 [核心内页衔接](core-information-handoff.md)。

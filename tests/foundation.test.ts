@@ -5,6 +5,10 @@ import test from 'node:test';
 import { readRuntime } from '../config/runtime';
 import routes from '../config/routes.json';
 import { loadContent } from '../web/src/lib/content';
+import { pageContexts } from '../config/page-context';
+import { titleWithBrand } from '../web/src/lib/seo';
+import { validateManufacturingPreview, validateFactoryPreview, validateContactPreview } from '../web/src/lib/fixed-preview';
+import { mockContent } from '../web/src/content/mock';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -106,4 +110,65 @@ test('category mapping rejects invalid routes, incomplete content, fake approval
   const items = (await loadContent('mock')).categoryPreviews;
   items[0]!.image = items[1]!.image; assert.throws(() => validateCategoryPreviews(items), /Unregistered/);
   assert.throws(() => validateCategoryPreviews([]), /count mismatch/);
+});
+
+test('six stable page contexts match the ten-route plan without widening the preview', () => {
+  assert.equal(routes.previewPages.length, 6);
+  assert.deepEqual(Object.values(pageContexts).map(item => item.referenceCode), ['WEB-HOME', 'WEB-TSHIRTS', 'WEB-HOODIES', 'WEB-MANUFACTURING', 'WEB-FACTORY', 'WEB-CONTACT']);
+  for (const context of Object.values(pageContexts)) {
+    assert.equal(routes.pages.find(page => page.path === context.path)?.referenceCode, context.referenceCode);
+    assert.ok(routes.previewPages.some(page => page.path === context.path));
+  }
+  assert.equal(routes.pages.length, 10);
+});
+test('fixed previews remain separate from CMS documents, approvals and real assets', async () => {
+  const content = await loadContent('mock');
+  validateManufacturingPreview(content.manufacturingPreview);
+  validateFactoryPreview(content.factoryPreview);
+  validateContactPreview(content.contactPreview);
+  for (const preview of [content.manufacturingPreview, content.factoryPreview, content.contactPreview]) {
+    assert.equal(preview.kind, 'fixed_page_preview'); assert.equal(preview.status, 'concept_only');
+    assert.equal(preview.factsStatus, 'unconfirmed'); assert.equal(preview.productionAllowed, false);
+    for (const key of ['_type', 'asset', 'heroImage', 'factConfirmedAt', 'approvedAt', 'contentUpdatedAt']) assert.equal(key in preview, false);
+  }
+  assert.deepEqual(content.factoryPreview.photography, { assetId: 'FACTORY-001', status: 'awaiting_factory' });
+  assert.deepEqual(content.categories, []); assert.deepEqual(content.articles, []);
+  content.manufacturingPreview.options[0]!.title = 'Local mutation only';
+  assert.notEqual((await loadContent('mock')).manufacturingPreview.options[0]!.title, 'Local mutation only');
+});
+test('fixed mappings reject wrong contexts, fake approvals and incomplete buyer guidance', async () => {
+  for (const change of [{ referenceCode: 'WEB-HOME' }, { pageKey: 'factory' }, { factsStatus: 'confirmed' }, { status: 'published' }, { productionAllowed: true }, { factConfirmedAt: '2026-09-15' }, { asset: { _ref: 'fake' } }, { title: '' }, { options: [] }, { preparation: [] }, { sampling: [] }, { faqItems: [] }]) {
+    const preview = (await loadContent('mock')).manufacturingPreview;
+    Object.assign(preview, change); assert.throws(() => validateManufacturingPreview(preview));
+  }
+  for (const change of [{ certifications: [] }, { capacity: 'unconfirmed numeric fixture' }, { photography: { assetId: 'HERO-001', status: 'awaiting_factory' } }, { qualityDiscussion: [] }]) {
+    const preview = (await loadContent('mock')).factoryPreview;
+    Object.assign(preview, change); assert.throws(() => validateFactoryPreview(preview));
+  }
+  const contact = (await loadContent('mock')).contactPreview;
+  Object.assign(contact, { email: null }); assert.throws(() => validateContactPreview(contact), /global contact settings/);
+});
+test('all contact identity and schedule fields remain null and cannot silently activate', async () => {
+  const fields = ['email', 'whatsappDigits', 'contactPersonOrTeam', 'businessHours', 'timezone', 'publicAddress'] as const;
+  for (const field of fields) {
+    assert.equal((await loadContent('mock')).siteSettings[field], null);
+    try {
+      // In-memory invalid fixture, never an address/phone saved or rendered on the website.
+      mockContent.siteSettings[field] = 'invalid-unit-fixture';
+      await assert.rejects(loadContent('mock'));
+    } finally { mockContent.siteSettings[field] = null; }
+  }
+});
+test('page-specific SEO titles receive their brand suffix only from configuration', async () => {
+  const content = await loadContent('mock');
+  const pages = [content.home, ...content.categoryPreviews, content.manufacturingPreview, content.factoryPreview, content.contactPreview];
+  const titles = pages.map(page => page.seo.seoTitle);
+  assert.equal(new Set(titles).size, 6);
+  assert.equal(new Set(pages.map(page => page.seo.seoDescription)).size, 6);
+  for (const title of titles) {
+    assert.ok(!title.includes(content.siteSettings.brandName));
+    assert.equal(titleWithBrand(title, 'Renamed Factory'), `${title} — Renamed Factory`);
+  }
+  assert.throws(() => titleWithBrand('', content.siteSettings.brandName));
+  assert.throws(() => titleWithBrand('A title', ''));
 });

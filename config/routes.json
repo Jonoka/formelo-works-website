@@ -1,5 +1,5 @@
 {
-  "status": "ten_routes_planned_home_and_two_category_previews_implemented",
+  "status": "ten_routes_planned_six_content_previews_implemented",
   "defaultPreviewIndexable": false,
   "pages": [
     {
@@ -110,25 +110,11 @@
   ],
   "processLink": "/manufacturing/#production",
   "previewPages": [
-    {
-      "path": "/",
-      "assetIds": [
-        "HERO-001",
-        "CAT-TS-001",
-        "CAT-HD-001"
-      ]
-    },
-    {
-      "path": "/clothing/t-shirts/",
-      "assetIds": [
-        "CAT-TS-001"
-      ]
-    },
-    {
-      "path": "/clothing/hoodies/",
-      "assetIds": [
-        "CAT-HD-001"
-      ]
-    }
+    { "path": "/", "assetIds": ["HERO-001", "CAT-TS-001", "CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": true },
+    { "path": "/clothing/t-shirts/", "assetIds": ["CAT-TS-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
+    { "path": "/clothing/hoodies/", "assetIds": ["CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
+    { "path": "/manufacturing/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false },
+    { "path": "/our-factory/", "assetIds": [], "imagePolicy": "factory_placeholder", "factoryPlaceholder": true },
+    { "path": "/contact/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false }
   ]
 }

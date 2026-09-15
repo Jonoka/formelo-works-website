@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-DEV-01 已建立根 npm workspaces、Astro 静态首页 / 404 和独立 Studio schema/config 骨架。默认本地 mock；没有真实 Sanity 项目、正式网站内容或部署配置。
+DEV-01 已建立根 npm workspaces、Astro 静态首页 / 404 和独立 Studio schema/config 骨架。默认本地 mock；没有真实 Sanity 项目、正式网站内容或部署配置。PR #4 已合并；当前增量在首页/两品类基础上实现 Manufacturing、Factory、Contact，共六个内容页与 404，仍为本地概念。
 
 ## DEV-01 工程结构
 
@@ -24,11 +24,15 @@ scripts/                检查与本机初始化
 
 ## 内容来源与模式
 
-原型用本地 mock 内容；正式使用 Sanity。两者映射到同一个 TypeScript 内容结构，不在每个页面写一套不同数据源。
+预览用本地 mock，正式 Sanity provider 尚未实现。各路由只调用 loadContent；本地预览类型与正式 CMS 文档契约分开，避免把概念资料当成工厂审核记录。不在页面内部新建第二个数据源。
 四类 CMS：siteSettings、page、category、article。samples、FAQ、MOQ、SEO 和 image 是嵌套对象，按 PRD 定义。
 概念模式与是否 private 是不同概念：mock 可以有占位，但预览仍必须是受控的。任何公网地址都要得到用户明确授权。
 
 `site.example.json` 的临时品牌、空联系与空工厂字段由 mock 读取，不含真实联系账号或密钥。`web/src/lib/content.ts` 是统一内容入口，返回独立快照；Sanity provider 尚未实现，显式拒绝而非回退。类型和字段名称为后续映射提供边界，不宣称已完成 CMS 类型生成或生产运行时校验。
+
+固定页采用带 pageKey / concept_only / unconfirmed / productionAllowed:false 的最小类型，Manufacturing/Factory/Contact 各自保留必要结构，不引入页面构建器。FactoryPhotographyPending 只验证 manifest 的 awaiting_factory 状态并渲染非照片图位；可选证书和案例无资料时没有模型数据或展示入口。Contact 只引用全局 null 账号、接待人、工作时间/时区及公开地址，不复制渠道资料到固定页数据。
+
+config/page-context.ts 集中六个稳定 referenceCode。BaseLayout 统一拼接品牌尾缀，Header/Footer 共享导航组件，当前页面用 aria-current 的不可点击文本避免自跳。详见 [路由说明](routes-and-navigation.md)。
 
 `DEPLOY_ENV`、`CONCEPT_MODE`、`CONTENT_MODE`、`ANALYTICS_MODE` 在构建阶段校验。DEV-01 禁止任何 production 构建，所有本地 / preview HTML noindex，不带 canonical 或 sitemap。`preview` 只是一项构建模式，不授予公网访问或部署权限。
 

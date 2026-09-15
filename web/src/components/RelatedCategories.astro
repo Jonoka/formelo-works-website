@@ -1,0 +1,7 @@
+---
+import type { CategoryPreview } from '../../../shared/content';
+import { categoryPath } from '../lib/category-preview';
+interface Props { categories: CategoryPreview[] }
+const { categories } = Astro.props;
+---
+<div class="information-category-links">{categories.map(category => <a href={categoryPath(category.slug)}><span><strong>{category.name}</strong><span>{category.cardSummary}</span></span><span aria-hidden="true">↗</span></a>)}</div>

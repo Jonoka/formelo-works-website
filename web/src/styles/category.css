@@ -1,9 +1,6 @@
 /* Category concept template: the homepage's editorial tokens, not a second theme. */
-.breadcrumb { padding-block: 12px 24px; font-size: .875rem; }
-.breadcrumb ol { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; margin: 0; }
-.breadcrumb li { display: flex; align-items: center; gap: 12px; }
-.breadcrumb li + li::before { content: '/'; color: var(--color-muted); }
-.breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; text-underline-offset: .2em; }
+/* Keep only this short compound together, never the complete editorial title. */
+.short-word-unit { white-space: nowrap; }
 .category-hero { display: grid; grid-template-columns: .96fr 1.04fr; gap: 40px; align-items: center; padding-bottom: 56px; }
 .category-hero h1 { font-size: clamp(3.5rem, 4.6vw, 4.6875rem); margin: 20px 0 24px; text-wrap: balance; }
 .category-hero .intro { max-width: 34rem; }
@@ -27,7 +24,6 @@
   .concept-observations { gap: 20px; }
 }
 @media (max-width: 767px) {
-  .breadcrumb { padding-block: 4px 16px; }
   .category-hero { grid-template-columns: 1fr; gap: 24px; padding-bottom: 40px; }
   .category-hero h1 { font-size: var(--typography-h1-mobile); margin: 16px 0; }
   .category-hero .eyebrow { margin-bottom: 16px; }
@@ -40,3 +36,6 @@
 .discussion-list dt, .discussion-list dd { overflow-wrap: anywhere; }
 /* Keep the decorative glyph in its own flex slot when text is enlarged. */
 .related-category-link > span[aria-hidden="true"] { flex: 0 0 auto; }
+.category-terms .text-link > span[aria-hidden], .category-next .text-link > span[aria-hidden] { flex: 0 0 auto; }
+.category-next > div { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+.category-next .text-link { max-width: 100%; min-width: 0; }

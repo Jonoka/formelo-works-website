@@ -1,0 +1,6 @@
+---
+interface Props { href: string; label: string; description?: string }
+const { href, label, description } = Astro.props;
+const current = Astro.url.pathname === href;
+---
+{current ? <span class="nav-current" aria-current="page">{label}{description && <small>{description}</small>}</span> : <a href={href}>{label}{description && <small>{description}</small>}</a>}

@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前为 **首页与两个品类的概念实现**。PR #3 已合并；三张独立 AI 服装概念图已接入。`feat/category-pages` / PR #4 在此基础上增加 T-shirts / Hoodies 共用模板和三个有界首页调整，等待审阅，不自动合并或部署。真实资料与完整十页尚未验收。
+> 当前为 **六个内容页与 404 的本地概念实现**。PR #4 已合并至 `main@59ba085c25dc8ab412803b8b5afea7604d450756`；本轮 `feat/core-information-pages` 增加 Manufacturing、Our Factory、Contact，并更新跨页导航与检查。未自动合并或部署；博客、Privacy 正文、CMS、真实工厂资料和完整十页仍未验收。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 
@@ -27,7 +27,7 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 
 `web/` 为可运行的 Astro + TypeScript 静态工程；`studio/` 为独立 Sanity 配置及四类内容模型骨架，尚未连接账号。共享内容类型、构建模式校验、单元 / schema / 静态产物 / 浏览器检查和 CI 位于仓库中。
 
-当前实现 `/`、`/clothing/t-shirts/`、`/clothing/hoodies/` 与工程 404。三张 AI 服装图均有性质标记；工厂摄影仍为待补占位。没有外部字体、分析或假联系方式。正式图片、全站十页、CMS、真实渠道与部署仍待完成。本轮见 [品类验证](docs/operations/pr-4-category-review.md)，旧 [DEV-01 记录](docs/operations/dev-01-verification.md) 保留为历史。
+当前实现 `/`、`/clothing/t-shirts/`、`/clothing/hoodies/`、`/manufacturing/`、`/our-factory/`、`/contact/` 与工程 404，共 7 个 HTML 产物。三张 AI 服装图均保留性质标记；制造/联系页不加装饰图片，工厂摄影仍是明确的待补图位。Contact 不含表单、上传或复制假邮箱按钮。没有外部字体、分析或假联系方式。本轮见 [核心内页验证](docs/operations/core-information-verification.md)、[路由说明](docs/development/routes-and-navigation.md) 与 [工厂资料清单](docs/content/factory-materials-checklist.md)；[PR #4 记录](docs/operations/pr-4-category-review.md) 和 [DEV-01 记录](docs/operations/dev-01-verification.md) 保留为历史。
 
 ## 本地获取
 
@@ -36,16 +36,16 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 ```bash
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
-# PR #4 合并前，在新克隆中审阅现有品类分支：
+# 在新克隆中审阅本轮核心内页分支；先确认远端分支存在：
 git fetch origin
-git switch --track origin/feat/category-pages
+git switch --track origin/feat/core-information-pages
 npm ci
 npm run dev
 # 打开终端打印的本机地址，默认 http://127.0.0.1:4321
 # 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
-PR #4 合并后直接使用 main；已有工作区切换前先检查 git status，目标分支存在时保留并继续。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+main 已包含 PR #4 的验收基线；本轮 PR 合并前在 feat/core-information-pages 审阅。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
 
 使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；本轮没有升级该运行时或依赖图。
 
@@ -64,7 +64,11 @@ npm run preview
 
 `verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际生产构建阻断、HTML 和内链检查，以及开发 / 静态服务器的 Chromium 回归。构建输出仅在 `web/dist/`，Studio 不自动参与构建。
 
-检查结果按运行时版本和平台分别记录；旧运行时的绿色 CI 不代表新版本已通过。本轮平台差异、Node 24.21.0 / npm 11.19.1 的 Linux CI 对应 SHA / run ID 和剩余限制，见 [品类验证记录](docs/operations/pr-4-category-review.md) 与 PR #4 最终审阅评论。保留 Sanity CLI / UUID 链上的 **4 个中危依赖条目**说明，不宣称零漏洞；Node 二进制与 npm 依赖图的安全核查是两件事。
+`loadContent` 统一返回本地 Home/Category/固定页预览；它们不构成已审核 Sanity 文档。`config/page-context.ts` 集中六个来源码，SEO 品牌尾缀由 BaseLayout 统一拼接。`routes.previewPages` 明确六页及逐页图片策略，Journal 仍指向 `/#journal`，Privacy 显示不可用。Manufacturing 的六个固定锚点及旧首页区块 ID 均保留。
+
+Windows 可使用现有 `.local/runtime-review-20260913/node-v24.21.0-win-x64` 便携运行时，并把该目录置于当前命令 PATH 前部；它不改变全局 Node。生成的 tokens.css 固定 LF，避免 Windows 换行转换造成字节一致性检查误报。真实浏览器 UI 缩放、真机和真实收发仍需另行授权验证。
+
+检查结果按运行时版本和平台分别记录；旧运行时的绿色 CI 不代表新版本已通过。本轮平台差异、Node 24.21.0 / npm 11.19.1 的 Linux CI 对应 SHA / run ID 和剩余限制，见 [核心内页验证记录](docs/operations/core-information-verification.md) 与本轮 PR 当前 head 的检查和审阅记录。保留 Sanity CLI / UUID 链上的 **4 个中危依赖条目**说明，不宣称零漏洞；Node 二进制与 npm 依赖图的安全核查是两件事。
 
 原文档和建仓安全测试仍保留；Python 3.9+、Git、Bash 为其前提，Linux CI 执行全套：
 

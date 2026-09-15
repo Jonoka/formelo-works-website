@@ -2,6 +2,9 @@ import example from '../../../config/site.example.json';
 import type { ContentSnapshot } from '../../../shared/content';
 import { localPreviewFromManifest } from './local-media';
 import { categoryPreviews } from './category-previews';
+import { manufacturingPreview } from './manufacturing-preview';
+import { factoryPreview } from './factory-preview';
+import { contactPreview } from './contact-preview';
 
 /** Proposed customer-facing copy is labelled as a concept; commercial facts remain null. */
 export const mockContent: ContentSnapshot = {
@@ -10,6 +13,9 @@ export const mockContent: ContentSnapshot = {
     _type: 'siteSettings', brandName: example.brand.displayName,
     factoryName: example.factory.legalName,
     email: example.contact.email, whatsappDigits: example.contact.whatsappDigits,
+    contactPersonOrTeam: example.contact.contactPersonOrTeam,
+    businessHours: example.contact.businessHours, timezone: example.contact.timezone,
+    publicAddress: example.factory.publicAddress,
     channelStatus: { emailEnabled: example.contact.emailEnabled, whatsappEnabled: example.contact.whatsappEnabled },
     defaultMoq: example.factory.defaultMoq, factConfirmedAt: null,
   },
@@ -18,7 +24,7 @@ export const mockContent: ContentSnapshot = {
     title: 'Custom apparel manufacturing for brands in motion.',
     intro: 'Explore fabric, fit and finish for your next collection.',
     seo: {
-      seoTitle: `${example.brand.displayName} — Custom apparel manufacturing concept`,
+      seoTitle: 'Custom apparel manufacturing concept',
       seoDescription: 'An apparel manufacturing concept for independent brands. Provisional branding; factory capabilities and contact details are unconfirmed. Images are AI-generated concepts.',
     },
     faqItems: [
@@ -54,5 +60,7 @@ export const mockContent: ContentSnapshot = {
   },
   // These remain empty: homepage demonstrations and planned topics are not published content.
   categoryPreviews,
+  manufacturingPreview,
+  factoryPreview, contactPreview,
   categories: [], articles: [],
 };

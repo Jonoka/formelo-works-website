@@ -1,0 +1,17 @@
+---
+import PendingContact from './PendingContact.astro';
+import type { CorePageKey } from '../../../config/page-context';
+import type { FixedPagePreview } from '../../../shared/content';
+interface Props { preview: FixedPagePreview<CorePageKey>; eyebrow: string }
+const { preview, eyebrow } = Astro.props;
+---
+<section class="information-hero shell" aria-labelledby="information-title">
+  <div class="information-hero-copy">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 id="information-title">{preview.title}</h1>
+    <p class="intro">{preview.intro}</p>
+    <p class="fact-note">{preview.factNote}</p>
+    <PendingContact id={`${preview.pageKey}-contact-note`} referenceCode={preview.referenceCode} />
+  </div>
+  <div class="information-hero-aside"><slot /></div>
+</section>

@@ -1,20 +1,22 @@
 ---
 import PendingContact from './PendingContact.astro';
 import { footerNavigation } from '../content/navigation';
-interface Props { brandName: string; showMobileContact?: boolean; referenceCode?: 'WEB-HOME' | 'WEB-TSHIRTS' | 'WEB-HOODIES' }
-const { brandName, showMobileContact = false, referenceCode = 'WEB-HOME' } = Astro.props;
+import NavigationItem from './NavigationItem.astro';
+import type { ReferenceCode } from '../../../config/page-context';
+interface Props { brandName: string; showMobileContact?: boolean; referenceCode: ReferenceCode | null }
+const { brandName, showMobileContact = false, referenceCode } = Astro.props;
 ---
 <footer class="site-footer" id="contact" tabindex="-1" aria-labelledby="contact-heading">
   <div class="shell">
     <div class="footer-contact-row">
       <div><p class="eyebrow">The next conversation</p><h2 id="contact-heading">Get in touch.</h2></div>
       <div class="footer-contact-copy"><p>Bring your ideas, references and questions.<br />The right starting point is a clear brief.</p></div>
-      <PendingContact id="footer-contact-note" referenceCode={referenceCode} />
+      {referenceCode && <PendingContact id="footer-contact-note" referenceCode={referenceCode} />}
     </div>
     <div class="footer-bottom">
       <div><span class="wordmark">{brandName}</span><p class="footer-brand-note">Apparel manufacturing for brands in motion.<br />Provisional brand · Factory facts awaiting confirmation.</p></div>
-      <nav aria-label="Footer navigation">{footerNavigation.map(link => <a href={link.href}>{link.label}</a>)}<span class="unavailable">Privacy <small>Not available in this preview</small></span></nav>
+      <nav aria-label="Footer navigation">{footerNavigation.map(link => <NavigationItem {...link} />)}<span class="unavailable">Privacy <small>Not available in this preview</small></span></nav>
     </div>
   </div>
 </footer>
-{showMobileContact && <aside class="mobile-contact-bar" aria-label="Contact options — not configured"><PendingContact id="mobile-contact-note" referenceCode={referenceCode} /></aside>}
+{showMobileContact && referenceCode && <aside class="mobile-contact-bar" aria-label="Contact options — not configured"><PendingContact id="mobile-contact-note" referenceCode={referenceCode} /></aside>}

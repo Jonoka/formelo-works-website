@@ -1,7 +1,9 @@
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
+import routes from '../../config/routes.json' with { type: 'json' };
+import settings from '../../config/site.example.json' with { type: 'json' };
 const categories = [
-  { slug: 't-shirts', name: 'T-shirts', title: 'Custom T-shirt manufacturing.', asset: 'CAT-TS-001', reference: 'WEB-TSHIRTS', seoTitle: 'T-shirt manufacturing concept — FORMELO WORKS' },
-  { slug: 'hoodies', name: 'Hoodies', title: 'Custom hoodie manufacturing.', asset: 'CAT-HD-001', reference: 'WEB-HOODIES', seoTitle: 'Hoodie manufacturing concept — FORMELO WORKS' },
+  { slug: 't-shirts', name: 'T-shirts', title: 'Custom T-shirt manufacturing.', asset: 'CAT-TS-001', reference: 'WEB-TSHIRTS', seoTitle: `T-shirt manufacturing concept — ${settings.brand.displayName}` },
+  { slug: 'hoodies', name: 'Hoodies', title: 'Custom hoodie manufacturing.', asset: 'CAT-HD-001', reference: 'WEB-HOODIES', seoTitle: `Hoodie manufacturing concept — ${settings.brand.displayName}` },
 ];
 async function noOverflow(page: Page) {
   const layout = await page.evaluate(() => ({
@@ -87,12 +89,12 @@ for (const category of categories) {
     await page.goto(route);
     for (const href of await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')!))) {
       const target = new URL(href, `http://127.0.0.1${route}`);
-      expect(['/', '/clothing/t-shirts/', '/clothing/hoodies/']).toContain(target.pathname);
+      expect(routes.previewPages.map(page => page.path)).toContain(target.pathname);
       const response = await request.get(target.pathname);
       expect(response.status()).toBe(200);
       if (target.hash) expect(await response.text()).toContain(`id="${target.hash.slice(1)}"`);
     }
-    for (const [label, href] of [['Manufacturing', '/#capabilities'], ['Our Factory', '/#factory'], ['Journal', '/#journal'], ['Contact', '/#contact']]) {
+    for (const [label, href] of [['Manufacturing', '/manufacturing/'], ['Our Factory', '/our-factory/'], ['Journal', '/#journal'], ['Contact', '/contact/']]) {
       await expect(page.locator('.desktop-nav').getByRole('link', { name: label!, exact: true })).toHaveAttribute('href', href!);
     }
     expect(external).toEqual([]); expect(errors).toEqual([]);
@@ -181,8 +183,8 @@ for (const javaScriptEnabled of [true, false]) for (const width of [390, 1440]) 
       await page.locator(`${disclosure} > summary`).focus(); await page.keyboard.press('Enter');
       await capture(page, info, `hoodies-menu-${width}-js-${javaScriptEnabled}`);
       await page.locator(width < 1024 ? '.mobile-nav' : '.desktop-nav').getByRole('link', { name: 'Manufacturing', exact: true }).click();
-      await expect(page).toHaveURL(/\/#capabilities$/);
-      await page.locator('#hoodies-heading a').focus(); await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/\/manufacturing\/$/);
+      await page.locator('.information-category-links a[href="/clothing/hoodies/"]').focus(); await page.keyboard.press('Enter');
       await expect(page).toHaveURL(/\/clothing\/hoodies\/$/);
       await page.locator('.related-category-link').click(); await expect(page).toHaveURL(/\/clothing\/t-shirts\/$/);
       await page.locator('.site-header > .wordmark').click(); await expect(page).toHaveURL(/\/$/);
@@ -199,9 +201,9 @@ test('unknown category slugs and absent Clothing hub return actual 404s', async 
     await expect(page.locator('.mobile-contact-bar')).toHaveCount(0);
   }
 });
-test('mobile contact labels, arrows and layout follow one rule on all three pages', async ({ page }) => {
+test('mobile contact labels, arrows and layout follow one rule on all six pages', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ['/', '/clothing/t-shirts/', '/clothing/hoodies/']) {
+  for (const { path } of routes.previewPages) {
     await page.goto(path);
     for (const group of await page.locator('.pending-contact').all()) {
       await expect(group.locator('.button-label')).toHaveText(['WhatsApp', 'Email']);
@@ -228,4 +230,12 @@ test('home 390 first fold shows positioning, contact and the start of the garmen
   expect(metrics.contactBottom).toBeLessThan(metrics.barTop);
   expect(metrics.visibleImageHeight).toBeGreaterThanOrEqual(100);
   await info.attach('home-first-fold-metrics', { body: JSON.stringify(metrics, null, 2), contentType: 'application/json' });
+});
+test('T-shirt is a single short word unit at 390px without locking the complete title', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 }); await page.goto('/clothing/t-shirts/');
+  const word = page.locator('h1 .short-word-unit');
+  await expect(word).toHaveText('T-shirt');
+  expect(await word.evaluate(node => node.getClientRects().length)).toBe(1);
+  expect(await page.locator('h1').evaluate(node => getComputedStyle(node).whiteSpace)).toBe('normal');
+  await noOverflow(page);
 });
