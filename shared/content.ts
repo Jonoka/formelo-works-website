@@ -1,3 +1,5 @@
+import type { CorePageKey, PageReference } from '../config/page-context';
+
 export const pageKeys = ['home', 'manufacturing', 'factory', 'contact', 'blogIndex', 'privacy'] as const;
 export type PageKey = (typeof pageKeys)[number];
 
@@ -34,6 +36,10 @@ export interface SiteSettings {
   factoryName: string | null;
   email: string | null;
   whatsappDigits: string | null;
+  contactPersonOrTeam: string | null;
+  businessHours: string | null;
+  timezone: string | null;
+  publicAddress: string | null;
   channelStatus: { emailEnabled: boolean; whatsappEnabled: boolean };
   defaultMoq: MoqPolicy | null;
   factConfirmedAt: string | null;
@@ -115,7 +121,7 @@ export interface CategoryPreview {
   productionAllowed: false;
   slug: 't-shirts' | 'hoodies';
   name: string;
-  referenceCode: 'WEB-TSHIRTS' | 'WEB-HOODIES';
+  referenceCode: PageReference<'tshirts' | 'hoodies'>;
   title: string;
   intro: string;
   cardSummary: string;
@@ -127,12 +133,47 @@ export interface CategoryPreview {
   faqItems: Faq[];
   seo: Seo;
 }
+/** Local fixed-page presentation, not a Sanity Page, asset or factory approval. */
+export interface FixedPagePreview<K extends CorePageKey> {
+  kind: 'fixed_page_preview';
+  pageKey: K;
+  status: 'concept_only';
+  factsStatus: 'unconfirmed';
+  productionAllowed: false;
+  referenceCode: PageReference<K>;
+  title: string;
+  intro: string;
+  factNote: string;
+  seo: Seo;
+}
+export interface InformationRow { title: string; description: string }
+export interface ManufacturingPreview extends FixedPagePreview<'manufacturing'> {
+  options: InformationRow[];
+  moqFactors: InformationRow[];
+  preparation: InformationRow[];
+  sampling: InformationRow[];
+  productionSteps: InformationRow[];
+  faqItems: Faq[];
+}
+export interface FactoryPreview extends FixedPagePreview<'factory'> {
+  overview: string;
+  arrangements: InformationRow[];
+  qualityDiscussion: InformationRow[];
+  photography: { assetId: 'FACTORY-001'; status: 'awaiting_factory' };
+}
+export interface ContactPreview extends FixedPagePreview<'contact'> {
+  preparation: InformationRow[];
+  preparationNote: string;
+}
 export interface ContentSnapshot {
   source: 'mock';
   siteSettings: SiteSettings;
   home: Page;
   homepagePreview: HomePreview;
   categoryPreviews: CategoryPreview[];
+  manufacturingPreview: ManufacturingPreview;
+  factoryPreview: FactoryPreview;
+  contactPreview: ContactPreview;
   categories: Category[];
   articles: Article[];
 }

@@ -1,0 +1,6 @@
+---
+import type { InformationRow } from '../../../shared/content';
+interface Props { rows: InformationRow[] }
+const { rows } = Astro.props;
+---
+<dl class="information-rows">{rows.map(row => <div><dt>{row.title}</dt><dd>{row.description}</dd></div>)}</dl>

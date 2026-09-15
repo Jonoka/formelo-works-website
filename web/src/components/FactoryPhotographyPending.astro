@@ -1,0 +1,9 @@
+---
+import Icon from './Icon.astro';
+import manifest from '../../../assets/manifest.json';
+const asset = manifest.assets.find(item => item.id === 'FACTORY-001');
+if (asset?.status !== 'awaiting_factory' || asset.path !== null || asset.productionAllowed !== false) {
+  throw new Error('Factory photography requires an explicitly reviewed integration; do not invent evidence.');
+}
+---
+<div class="factory-placeholder" data-factory-media-status="awaiting_factory" role="img" aria-label="Factory photography to be replaced. No factory photograph or evidence is shown."><Icon name="factory" /><p class="serif">Factory photography<br />to be replaced</p><p>Awaiting original, approved factory photographs.<br />No generated production imagery.</p></div>

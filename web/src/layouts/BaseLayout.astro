@@ -3,8 +3,11 @@ import '../styles/global.css';
 import '../styles/contact.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-interface Props { title: string; description: string; brandName: string; showMobileContact?: boolean; referenceCode?: 'WEB-HOME' | 'WEB-TSHIRTS' | 'WEB-HOODIES' }
-const { title, description, brandName, showMobileContact = false, referenceCode = 'WEB-HOME' } = Astro.props;
+import type { ReferenceCode } from '../../../config/page-context';
+import { titleWithBrand } from '../lib/seo';
+interface Props { title: string; description: string; brandName: string; showMobileContact?: boolean; referenceCode: ReferenceCode | null }
+const { title, description, brandName, showMobileContact = false, referenceCode } = Astro.props;
+if (showMobileContact && referenceCode === null) throw new Error('Content pages need an explicit contact reference.');
 ---
 <!doctype html>
 <html lang="en">
@@ -13,7 +16,7 @@ const { title, description, brandName, showMobileContact = false, referenceCode 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="robots" content="noindex, nofollow" />
-    <title>{title}</title>
+    <title>{titleWithBrand(title, brandName)}</title>
   </head>
   <body class:list={{ 'has-mobile-contact': showMobileContact }}>
     <a class="skip-link" href="#main">Skip to content</a>

@@ -1,11 +1,12 @@
 import type { CategoryPreview } from '../../../shared/content';
 import { localPreviewFromManifest } from './local-media';
+import { pageContexts } from '../../../config/page-context';
 
 /** A bounded local concept collection; not CMS documents or physical sample records. */
 export const categoryPreviews: CategoryPreview[] = [
   {
     kind: 'category_preview', status: 'concept_only', productionAllowed: false,
-    slug: 't-shirts', name: 'T-shirts', referenceCode: 'WEB-TSHIRTS',
+    slug: 't-shirts', name: 'T-shirts', referenceCode: pageContexts.tshirts.referenceCode,
     title: 'Custom T-shirt manufacturing.',
     intro: 'For independent brands considering their everyday jersey. Begin with the silhouette, neckline and feel you want to explore.',
     cardSummary: 'Everyday jersey, thoughtfully considered. Start with silhouette, neckline and the feel of the fabric.',
@@ -34,13 +35,13 @@ export const categoryPreviews: CategoryPreview[] = [
       { question: 'What are the T-shirt MOQ and sampling terms?', answer: 'They remain unconfirmed. Minimum quantities, sample costs, revisions and timing must be agreed with the factory once the contact channels are configured.' },
     ],
     seo: {
-      seoTitle: 'T-shirt manufacturing concept — FORMELO WORKS',
+      seoTitle: 'T-shirt manufacturing concept',
       seoDescription: 'Explore a T-shirt manufacturing concept for independent brands: jersey, fit, neckline and artwork discussion points. Factory capability and terms are unconfirmed.',
     },
   },
   {
     kind: 'category_preview', status: 'concept_only', productionAllowed: false,
-    slug: 'hoodies', name: 'Hoodies', referenceCode: 'WEB-HOODIES',
+    slug: 'hoodies', name: 'Hoodies', referenceCode: pageContexts.hoodies.referenceCode,
     title: 'Custom hoodie manufacturing.',
     intro: 'For independent brands exploring volume and structure. Consider the hood, layered fabric and finishing details that shape a hoodie brief.',
     cardSummary: 'Volume, structure and comfort. Explore hood shape, rib proportions and the feel of a layered garment.',
@@ -69,7 +70,7 @@ export const categoryPreviews: CategoryPreview[] = [
       { question: 'What should be reviewed in a hoodie development sample?', answer: 'Proposed review points include layering room, hood shape, cuff and hem proportions, pocket placement and trims. The actual review scope, sample charges, revisions and timing are not yet agreed with the factory.' },
     ],
     seo: {
-      seoTitle: 'Hoodie manufacturing concept — FORMELO WORKS',
+      seoTitle: 'Hoodie manufacturing concept',
       seoDescription: 'Explore a hoodie manufacturing concept for independent brands: hood shape, layering, inside finish and trims. Factory capability, MOQ and sampling are unconfirmed.',
     },
   },

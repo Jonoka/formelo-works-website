@@ -16,6 +16,9 @@
   "contact": {
     "email": null,
     "whatsappDigits": null,
+    "contactPersonOrTeam": null,
+    "businessHours": null,
+    "timezone": null,
     "emailEnabled": false,
     "whatsappEnabled": false,
     "verifiedAt": null
