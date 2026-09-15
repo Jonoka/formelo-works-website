@@ -1,4 +1,5 @@
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
+import routes from '../../config/routes.json' with { type: 'json' };
 
 const title = 'Custom apparel manufacturing for brands in motion.';
 async function noOverflow(page: Page): Promise<void> {
@@ -90,7 +91,7 @@ test('all homepage links resolve to implemented pages and actual fragments', asy
     expect(href).not.toBe('#');
     expect(href).not.toBe('/#');
     const target = new URL(href, 'http://127.0.0.1/');
-    expect(['/', '/clothing/t-shirts/', '/clothing/hoodies/']).toContain(target.pathname);
+    expect(routes.previewPages.map(page => page.path)).toContain(target.pathname);
     const response = await request.get(target.pathname);
     expect(response.status()).toBe(200);
     if (target.hash) expect(await response.text()).toContain(`id="${target.hash.slice(1)}"`);
@@ -116,10 +117,10 @@ test('mobile disclosure supports keyboard, Escape, anchor navigation and an unob
   await expect(trigger).toBeFocused();
   await page.keyboard.press('Enter');
   if (info.project.name === 'preview') await screenshot(page, info, 'homepage-mobile-menu');
-  await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Manufacturing', exact: true }).click();
-  await expect(page).toHaveURL(/#capabilities$/);
+  await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Journal', exact: true }).click();
+  await expect(page).toHaveURL(/#journal$/);
   await expect(page.locator('.mobile-nav')).not.toHaveAttribute('open', '');
-  await expect(page.locator('#capabilities')).toBeFocused();
+  await expect(page.locator('#journal')).toBeFocused();
 });
 
 test('desktop clothing disclosure opens by keyboard and returns focus on Escape', async ({ page }) => {

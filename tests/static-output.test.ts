@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import routes from '../config/routes.json';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +11,7 @@ const validScript = '<script type="module" src="/_astro/navigation.fixture.js"><
 
 // Isolated synthetic HTML exercises the ACTUAL checker CLI before the Astro build runs.
 // These fixtures are never published and are not website/browser acceptance evidence.
-function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Local test fixture', missingModule = false) {
+function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Local test fixture', missingModule = false, mutate?: (root: string) => void) {
   const root = mkdtempSync(join(tmpdir(), 'formelo-static-policy-'));
   try {
     const dist = join(root, 'web', 'dist');
@@ -27,7 +27,7 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
     mkdirSync(join(root, 'assets'), { recursive: true });
     writeFileSync(join(root, 'config', 'routes.json'), JSON.stringify(routes));
     const assetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'];
-    writeFileSync(join(root, 'assets', 'manifest.json'), JSON.stringify({ assets: assetIds.map(id => ({ id, status: 'pending_generation', path: 'web/public/media/pending.svg', productionAllowed: false, replacementRequiredBeforeLaunch: true })) }));
+    writeFileSync(join(root, 'assets', 'manifest.json'), JSON.stringify({ assets: [...assetIds.map(id => ({ id, status: 'pending_generation', path: 'web/public/media/pending.svg', productionAllowed: false, replacementRequiredBeforeLaunch: true })), { id: 'FACTORY-001', status: 'awaiting_factory', path: null, productionAllowed: false }] }));
     const pageNames = ['404.html', ...routes.previewPages.map(page => page.path === '/' ? 'index.html' : `${page.path.slice(1)}index.html`)];
     for (const name of pageNames) {
       mkdirSync(join(dist, name, '..'), { recursive: true });
@@ -41,8 +41,17 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
           '<nav aria-label="Breadcrumb"><a href="/">Home</a><span aria-current="page">Fixture category</span></nav>' +
           '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
           (routes.previewPages.find(page => name === `${page.path.slice(1)}index.html`)?.assetIds ?? []).map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="eager"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('');
-      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture ${name}"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${bodySuffix}${script}</body></html>`);
+      const policy = routes.previewPages.find(page => name === (page.path === '/' ? 'index.html' : `${page.path.slice(1)}index.html`));
+      const plan = routes.pages.find(page => page.path === policy?.path);
+      const core = policy && ['/manufacturing/', '/our-factory/', '/contact/'].includes(policy.path);
+      const safety = (policy ? `<div class="pending-contact" data-reference-code="${plan?.referenceCode}"><button disabled>Fixture channel</button></div>`.repeat(3) : '') +
+        (policy?.factoryPlaceholder ? '<div data-factory-media-status="awaiting_factory">Factory photography pending</div>' : '') +
+        (core ? '<div data-preview-status="concept_only" data-facts-status="unconfirmed" data-production-allowed="false"></div>' : '') +
+        (policy?.path === '/manufacturing/' ? ['options', 'moq', 'prepare', 'sampling', 'production', 'faq'].map(id => `<section id="${id}"></section>`).join('') : '') +
+        (policy?.path === '/contact/' ? ['email', 'whatsapp', 'person', 'hours', 'timezone', 'address'].map(field => `<div data-contact-field="${field}" data-contact-state="unconfigured"></div>`).join('') : '');
+      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture ${name}"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${safety}${bodySuffix}${script}</body></html>`);
     }
+    mutate?.(root);
     const result = spawnSync(process.execPath, [checker], { cwd: root, encoding: 'utf8', timeout: 5000 });
     assert.equal(result.error, undefined);
     assert.notEqual(result.status, null, 'Checker must exit, not time out');
@@ -95,4 +104,42 @@ test('static checker rejects adding an unlabelled fourth image slot', () => {
   const result = runFixture(validScript, '<img src="/media/pending.svg" width="1200" height="900" alt="Unlabelled extra">');
   assert.notEqual(result.status, 0);
   assert.match(result.output, /Registered image slots only/);
+});
+
+for (const [name, path, from, to, message] of [
+  ['wrong new-page reference', 'web/dist/manufacturing/index.html', 'WEB-MANUFACTURING', 'WEB-HOME', /wrong page referenceCode/],
+  ['missing contact-group reference', 'web/dist/contact/index.html', 'data-reference-code="WEB-CONTACT"', '', /contact-group referenceCode/],
+  ['false fact status', 'web/dist/our-factory/index.html', 'data-facts-status="unconfirmed"', 'data-facts-status="confirmed"', /unconfirmed/],
+  ['missing manufacturing anchor', 'web/dist/manufacturing/index.html', 'id="sampling"', 'id="removed-sampling"', /anchor missing/],
+  ['configured null contact', 'web/dist/contact/index.html', 'data-contact-state="unconfigured"', 'data-contact-state="configured"', /must remain unconfigured/],
+  ['executable contact button', 'web/dist/contact/index.html', '<button disabled>', '<button>', /no executable buttons/],
+] as const) {
+  test(`static checker rejects ${name}`, () => {
+    const result = runFixture(validScript, '', '// Fixture', false, root => {
+      const file = join(root, path);
+      writeFileSync(file, readFileSync(file, 'utf8').replace(from, to));
+    });
+    assert.notEqual(result.status, 0); assert.match(result.output, message);
+  });
+}
+test('route expansion and image-policy changes require explicit checker review', () => {
+  for (const extra of [true, false]) {
+    const result = runFixture(validScript, '', '// Fixture', false, root => {
+      const changed = structuredClone(routes);
+      if (extra) changed.previewPages.push({ path: '/blog/', assetIds: [], imagePolicy: 'no_images', factoryPlaceholder: false });
+      else changed.previewPages.find(page => page.path === '/contact/')!.assetIds.push('HERO-001');
+      writeFileSync(join(root, 'config/routes.json'), JSON.stringify(changed));
+    });
+    assert.notEqual(result.status, 0); assert.match(result.output, /six implemented|policy mismatch/);
+  }
+});
+test('null channels cannot acquire a copy or sent success state', () => {
+  assert.notEqual(runFixture(validScript, '<p>Email copied</p>').status, 0);
+  assert.notEqual(runFixture(validScript, '', 'navigator.clipboard.writeText("fixture")').status, 0);
+});
+test('robots accepts only the same deny-all directives with Windows or Unix line endings', () => {
+  const run = (text: string) => runFixture(validScript, '', '// Fixture', false, root => writeFileSync(join(root, 'web/dist/robots.txt'), text));
+  assert.equal(run('User-agent: *\r\nDisallow: /\r\n').status, 0);
+  assert.notEqual(run('User-agent: *\r\nAllow: /\r\n').status, 0);
+  assert.notEqual(run('User-agent: *\nDisallow: /\nAllow: /contact/').status, 0);
 });

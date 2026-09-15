@@ -1,4 +1,4 @@
-// CI-only, loopback-only review of the exact PR #3 static build. No website deployment.
+// CI-only, loopback-only review of the accepted PR #4 static build. No website deployment.
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -21,26 +21,27 @@ let browser;
 try {
   browser = await chromium.launch();
   const metrics = [];
-  for (const width of [1440, 390]) {
+  const targets = [{ path: '/', name: 'homepage' }, { path: '/clothing/t-shirts/', name: 't-shirts' }, { path: '/clothing/hoodies/', name: 'hoodies' }];
+  for (const target of targets) for (const width of [1440, 390]) {
     const page = await browser.newPage({ viewport: { width, height: width === 390 ? 844 : 900 } });
     const address = server.address();
-    const response = await page.goto(`http://127.0.0.1:${address.port}/`);
-    if (response.status() !== 200) throw new Error('Baseline homepage not served.');
+    const response = await page.goto(`http://127.0.0.1:${address.port}${target.path}`);
+    if (response.status() !== 200) throw new Error(`Baseline page not served: ${target.path}`);
     for (const img of await page.locator('img').all()) {
       await img.scrollIntoViewIfNeeded();
       await img.evaluate(async node => { await node.decode(); });
     }
     await page.evaluate(() => scrollTo(0, 0));
-    metrics.push({ width, ...(await page.evaluate(() => ({
-      imageTop: document.querySelector('.hero .media-frame').getBoundingClientRect().top,
+    metrics.push({ width, path: target.path, ...(await page.evaluate(() => ({
+      imageTop: document.querySelector('.hero .media-frame')?.getBoundingClientRect().top ?? null,
       title: document.title,
     }))) });
-    await page.screenshot({ path: `${output}/homepage-${width}.png`, fullPage: true, animations: 'disabled' });
-    await page.screenshot({ path: `${output}/homepage-${width}-viewport.png`, animations: 'disabled' });
+    await page.screenshot({ path: `${output}/${target.name}-${width}.png`, fullPage: true, animations: 'disabled' });
+    await page.screenshot({ path: `${output}/${target.name}-${width}-viewport.png`, animations: 'disabled' });
     await page.close();
   }
   await writeFile(`${output}/metrics.json`, JSON.stringify(metrics, null, 2));
-  console.log('Captured PR #3 before screenshots at 1440x900 and 390x844.');
+  console.log('Captured accepted PR #4 homepage and categories at 1440x900 and 390x844.');
 } finally {
   if (browser) await browser.close();
   await new Promise(done => server.close(done));

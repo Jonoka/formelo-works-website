@@ -5,11 +5,12 @@ import { loadContent } from '../lib/content';
 import { readRuntime } from '../../../config/runtime';
 const { siteSettings } = await loadContent(readRuntime().contentMode);
 ---
-<BaseLayout title={`Page not found — ${siteSettings.brandName}`} description="This page is not available in the local concept preview." brandName={siteSettings.brandName}>
+<BaseLayout title="Page not found" description="This page is not available in the local concept preview." brandName={siteSettings.brandName} referenceCode={null}>
   <section class="not-found shell">
     <p class="eyebrow">404 / Page not found</p>
     <h1>This page is not here.</h1>
-    <p>Only the homepage is available in this local preview.</p>
+    <p>The address may be incomplete, or the page may not be part of this preview.</p>
+    <p><a href="/manufacturing/">Explore the manufacturing guide</a> or <a href="/contact/">view contact options</a>.</p>
     <Button href="/">Return to the homepage</Button>
   </section>
 </BaseLayout>

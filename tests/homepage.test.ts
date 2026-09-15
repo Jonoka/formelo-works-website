@@ -179,11 +179,11 @@ test('rendition format cannot disagree with extension or impersonate a placehold
   const valid = localPreviewFromManifest('HERO-001', 'Fixture.', conceptManifest().data);
   assert.throws(() => validateLocalImage({ ...valid, assetId: 'UI-MEDIA-PENDING-001' }), /impersonate/);
 });
-test('navigation maps only implemented categories and real homepage sections', () => {
-  const anchors = new Set(['capabilities', 'factory', 'journal', 'contact', 'production']);
-  for (const link of [...homepageNavigation, ...footerNavigation]) {
-    assert.ok(link.href.startsWith('/#'));
-    assert.ok(anchors.has(link.href.slice(2)));
-  }
+test('navigation maps the implemented information pages and preserves the real Journal section', () => {
+  assert.deepEqual(homepageNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/#journal', '/contact/']);
+  assert.deepEqual(footerNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/manufacturing/#production', '/#journal', '/contact/']);
   assert.deepEqual(demonstrationNavigation.map(link => link.href), ['/clothing/t-shirts/', '/clothing/hoodies/']);
+  for (const link of [...homepageNavigation, ...footerNavigation, ...demonstrationNavigation]) {
+    assert.ok(!['/clothing/', '/blog/', '/privacy/'].includes(link.href));
+  }
 });
