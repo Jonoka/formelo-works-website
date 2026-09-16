@@ -158,7 +158,13 @@ jobs:
         id: audit
         if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
         run: npm audit --json --audit-level=high > review/audit.json
-      - name: Record outcomes, including skipped checks
+      - name: Collect exact-head CMS editorial review evidence
+        id: evidence
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          node scripts/collect-cms-review.mjs 2>&1 | tee review/cms-evidence.txt
+      - name: Record outcomes, including skipped checks and evidence collection
         if: always()
         env:
           RUNTIME: ${{ steps.runtime.outcome }}
@@ -172,17 +178,26 @@ jobs:
           AUDIT: ${{ steps.audit.outcome }}
           BASELINE: ${{ steps.baseline.outcome }}
           MOQ_BASELINE: ${{ steps.moq_baseline.outcome }}
+          EVIDENCE: ${{ steps.evidence.outcome }}
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
-          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE']
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE', 'EVIDENCE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
-      - name: Collect exact-head CMS editorial review evidence
-        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
-        run: node scripts/collect-cms-review.mjs
+      - name: Retain the focused private 1440-390 editorial screenshot pack
+        if: ${{ !cancelled() && steps.evidence.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cms-editorial-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            review/cms-editorial/
+            review/source.json
+            review/outcomes.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Retain private screenshots, reports, traces and static output
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -205,6 +220,7 @@ jobs:
             docs/design/journal-article-legal-handoff.md
             docs/operations/journal-privacy-verification.md
             docs/operations/cms-editorial-verification.md
+            docs/operations/pr-7-ci-repair.md
             docs/development/cms-editorial-mapping.md
             config/editorial-sources.json
             docs/content/factory-materials-checklist.md
