@@ -79,3 +79,7 @@ private-review-source-* 保存当前源，journal-privacy-pages-review-* 保存 
 Windows 原始过程在 `.local/pr6-moq-table-fix/`；最终完整检查须绑定提交 HEAD/tree 并记录各命令退出码。Linux CI 新增独立的 `c02116e...` 表格基线 checkout/build/capture，产物 `review/moq-table-before/` 明确是修复前；保留原 PR #5 六页比较，不混淆二者。新 head 的截图在 quantity-table 测试目录，source/outcomes 与原始日志保存在私有 CI artifact，包含 `moqTableBeforeSha` 和 `moq_baseline` 结果。
 
 最终 SHA、Windows 完整 verify/仓库/Bash/Python/audit 的实际结果、新 CI run 及修复前后图片入口追加到原 PR #6 的本修复交付评论，并按该精确 head 核查。这样不在提交尚未产生时预填 SHA/CI，也不把旧绿色结果当成本修复通过。Windows Python 的 WSL/Bash 限制仍须如实记录；Linux 成功不等于 Windows 已修好。PR 保持 Draft，等待用户复核；十页概念状态、真实内容/CMS/渠道/生产 SEO 与发布限制均不变。
+
+## 后续已观察状态 / 2026-09-16
+
+以上 Draft 和等待验收为当时历史，不能用于判断当前 PR 状态。DEV-05A 开工前通过 GitHub 和 Windows gh 实时确认：PR #6 已由 Jonoka 于 2026-09-16T09:35:51Z 合并；最终修复 head cfc1675b2ef364c361b03d6839b864723c194091，main 为 11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0。后续使用 feat/cms-editorial-foundation，不复用已合并分支。当前回归、截图和离线 CMS 限制见 [DEV-05A 验证](cms-editorial-verification.md)，不改写本页旧测试结果。

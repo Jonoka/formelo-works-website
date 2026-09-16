@@ -1,0 +1,89 @@
+# DEV-05A · CMS 文章契约与只读边界
+
+## 交付范围
+
+基于已由 Jonoka 合并的 PR #6 / main `11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0`，仅建立两个既有文章 URL 的离线工程链路。没有连接真实 Sanity 项目，没有写入测试稿、上传资产、发布/撤回、迁移或部署 Studio。
+
+```text
+Studio article + reusable editorial objects
+    → parameterized published-only GROQ projection (unknown JSON)
+    → convertCmsArticles / convertCmsBody (strict runtime validation)
+    → CmsArticleRenderData.body: EditorialBlock[]
+    → existing EditorialBody + EditorialInline / EditorialText
+```
+
+`tests/cms-render.test.ts` 在独立、用后删除的临时 Astro 根目录实际导入原 `EditorialBody.astro`，渲染两文转换结果并检查 HTML。该临时目录不在 `web/src/pages`，不是新页面或第二套文章模板。测试专用输出在 `review/cms-render-offline/`，不进入常规 `web/dist`。
+
+**全站 `loadContent` 仍只接受 mock；`CONTENT_MODE=sanity` 和 production 门禁不解除。** 本轮没有文章局部来源开关、CMS 卡片切换、CMS 封面渲染、实时预览或重建触发器。查询失败不会读取 mock。即使独立读取/转换成功，也不能据此宣称全站 CMS 或网站上线完成。
+
+## 三种数据必须分开
+
+| 数据 | 用途与状态 |
+|---|---|
+| `ArticlePreview` | 当前常规页面的本地采购草稿，`editorial_draft`，本地概念图，没有作者/公开日期/工厂审核字段 |
+| 原始 CMS `Article` / GROQ JSON | 不可信的存储或查询输入；`body: unknown[]` 不能直接交给组件，Studio 校验不是数据库权限保障 |
+| `CmsArticleRenderData` | 严格通过后的独立交付契约，`kind: cms_article`、`cmsPerspective: published`、`websitePublication: not_verified`、`productionAllowed: false`；正文复用原契约，不变成本地草稿 |
+
+Sanity `published` 是查询视图，不是工厂审核结果，也不是网站部署证据。`factReviewStatus` 只有 `pending` / `confirmed`，初始为 pending；技术发布不能自动更改它。作者和日期没有默认值，转换器不使用 `_createdAt`、`_updatedAt`、构建时间或代码提交时间补值。这里的 `now` 只用于拒绝未来日期，不写进内容。
+
+## 字段与正文映射
+
+四类主要文档继续为 `siteSettings`、`page`、`category`、`article`。原五个对象保留；增加七个可复用 schema 类型：`editorialBody`、`editorialTable`、`editorialTableRow`、`editorialCallout`、`editorialTemplate`、`editorialInternalLink`、`editorialExternalLink`。合计四类文档、十二个复用类型；没有作者文档、客户数据或页面构建器。
+
+| CMS 输入 | 交付字段 / 约束 |
+|---|---|
+| `title`、`excerpt`、`seo.seoTitle/seoDescription` | 原值保留；非空、有长度边界，不加工厂宣传、不改写正文 |
+| `slug.current`、`referenceCode` | 只接受 `what-to-send-for-a-clothing-quote` / `WEB-QUOTE-GUIDE` 与 `moq-per-style-per-color` / `WEB-MOQ-GUIDE` 的固定配对；不生成第三个 URL |
+| Portable Text `block` normal/h2/h3 | paragraph / heading；H2/H3 仅纯文本，H3 不能先于 H2；文章至少三个 H2，沿用稳定去重目录算法 |
+| `span`、strong/em、链接注解 | text/link 与可选 marks；保留词间空白。未支持标记、悬空/未使用注解、重复 key 直接失败，不把格式静默抹掉 |
+| bullet/number list，level 1 | 连续同类型条目组成原 list；支持当前一层列表，不支持嵌套层级；上限 30 条 |
+| `editorialTable` | caption / columns / rows；2–6 列、1–30 行，每行列数严格一致，纯文本单元格。原数量表第一列行标题、列组、横向滚动提示和 180 件算例保留 |
+| `editorialCallout` | title + 一个 normal 段落的 inline；不是任意布局容器 |
+| `editorialTemplate` | title / text；原样保留换行、括号提示与长文本，HTML 字符按文本转义，不增加发送或复制操作 |
+| `authorDisplay` | 实际获准公开的署名，缺失/空白失败；离线夹具署名不进入普通页面 |
+| `publishedAt`、`contentUpdatedAt` | 实际 UTC 日期时间，不能未来、不能更新早于发布；缺少公开日期时保留草稿，不编造历史 |
+| `factReviewStatus`、`factConfirmedAt` | confirmed 且真实日期不早于实质内容更新日期；缺失、pending、无效/过期日期失败。填写字段不能替代实际核实 |
+| `coverImage` | 复用 approvedImage。非装饰封面、非空 alt、明确 publicUseApproved:true、已解析的正确 imageAsset；保留 caption、crop、hotspot，不虚构许可 |
+| `relatedCategories`、`relatedArticles` | 最多两个唯一、非自身、已解析且对应正确文档类型的目标；无值允许空数组，不伪造推荐 |
+| `linkToManufacturing` | 可选明确布尔值；没有值不自动生成新 CTA 或页面行为 |
+
+内部链接使用强 reference，必须解析到已发布、已知路由、唯一的 page/category/article；引用 ID 与投影 `_id` 不一致、weak、draft/version、无目标、无事实确认、文章审核 pending 均失败。目录采用正文标题生成；可编辑内部 fragment 仅接受当前已注册的锚点。外链只能是 `config/editorial-sources.json` 已审核的精确 HTTPS 文本链接，不授权远程资源、图片抓取或脚本加载。
+
+封面仅查询资产 ID、URL、尺寸等必要字段，不投影 EXIF/GPS/原文件名。校验资产引用、URL 的项目/数据集、扩展名和尺寸一致；拒绝 SVG 或任意外部 URL。裁切与热点完整保留，但真实图片渲染、加载与许可证明仍待授权验证，不能将此接口说成已完成远程媒体管线。
+
+## 只读模块与失败策略
+
+入口：`web/src/lib/server/cms-article-query.ts`。使用锁定 Node 自带的 fetch 直接调用官方 Query HTTP API，不增加生产客户端依赖。根测试依赖显式声明已有锁图内的 `groq-js@1.30.3`，由 npm 正常更新 lockfile；不是手写 lock 或升级依赖图。
+
+| 设置 | 固定策略 |
+|---|---|
+| API / 视图 | `apiVersion: 2025-02-19`，`perspective: published`；不接受 raw/drafts/release 视图 |
+| 缓存 | 非 CDN 的 `api.sanity.io`；`useCdn:false` 的等价 HTTP 端点；fetch `cache:no-store`，不依赖默认值 |
+| 请求 | 只允许 POST `/data/query/<dataset>`，GROQ 常量 + `params.id/slug`；ID 不插入查询字符串；`returnQuery:false`、`resultSourceMap:false` |
+| 授权范围 | 显式 1–2 个文章文档 ID 白名单，以及其必要引用/资产元数据；不枚举项目、账号、数据集或其他文档正文 |
+| 身份 / 重复 | `_id`、`_originalId` 防御校验；GROQ 同时排除 `drafts.**` / `versions.**`。published slugCount/routeCount 跨所选 ID 计算，不用 `[0]` 隐藏重复 |
+| 网络边界 | 默认 8 秒完整截止时间，含响应正文读取；最大 1 MiB；禁止重定向、无自动重试；仅 Authorization header 持有 token |
+| 可测试性 | transport / now 可注入，默认测试只读内存数据。GROQ 在 groq-js 中真实执行，但不冒充 Sanity 云端鉴权或服务端实现验收 |
+| 错误 | 缺配置、未授权 ID、401、403、其他 HTTP 错误、超时、空/坏 JSON、空结果、错误文档、未知块和违规状态均抛明确错误码，调用者没有 mock 回退 |
+| 日志 | 仅代码控制的错误码/字段路径；不保留原始 fetch error cause、header、token 或私密响应体 |
+
+凭证只在服务器函数闭包内。模块未被 loadContent、路由或浏览器脚本引用，另有 Node 运行时边界。Studio 拒绝 `SANITY_STUDIO_*TOKEN/SECRET/PASSWORD/KEY` 形式的非空变量；这些公开前缀绝不能存 token。`scripts/check-cms-boundary.mjs` 对普通静态产物检查服务器标识、夹具标记和当前显式服务器 token；测试还验证随机假 token 不出现在隔离渲染产物/日志以及扫描器报错中。没有给 CI 配置真实 CMS 密钥。
+
+## 授权后的最小输入（本轮未执行）
+
+账号持有人需确认项目 ID、数据集和只读权限，将最小只读 token 放入安全的服务器进程环境，不能贴到聊天、PR、Studio 公开变量或仓库。指定一个既有文章文档 ID / 既有 slug，并明确允许读取其必要引用与资产元数据；可选第二篇。涉及真实稿件或媒体的写入、上传、技术发布/撤回必须另行授权。
+
+服务器配置解析器只读取调用者显式传入的环境对象：`SANITY_PROJECT_ID`、`SANITY_DATASET`、`SANITY_READ_TOKEN`、`SANITY_ARTICLE_READ_IDS`（逗号分隔 1–2 个已授权 ID）、`SANITY_API_VERSION=2025-02-19`。不从 Studio 配置猜账号、不自动加载文件。随后单独调用 `createArticleReader(config).read(documentId, plannedSlug)`，只查看脱敏的通过/错误码和所选修订，不输出完整响应。此操作不是启动网站 Sanity 模式。
+
+## 官方依据 / 2026-09-16 核对
+
+本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。
+
+- [Query HTTP API](https://www.sanity.io/docs/http-reference/query)：POST/参数、视图、空结果、returnQuery 与 resultSourceMap。
+- [Perspectives](https://www.sanity.io/docs/content-lake/perspectives)：published 与 drafts / Content Releases 的区别；显式 API 日期和视图，不依赖版本默认。
+- [API CDN](https://www.sanity.io/docs/content-lake/api-cdn)：静态构建采用非 CDN API，明确缓存边界。
+- [Block type](https://www.sanity.io/docs/studio/block-type) 与 [Portable Text editor configuration](https://www.sanity.io/docs/studio/portable-text-editor-configuration)：显式 styles/lists/marks/annotations 和自定义对象。新版内置表格编辑器需要 Studio 6.6.0，本项目不升主版本，采用 v5 可用的受控对象。
+- [GROQ-JS](https://github.com/sanity-io/groq-js)：对内存 dataset parse/evaluate，作为离线查询投影测试，不连接 Content Lake。
+- [Image type](https://www.sanity.io/docs/studio/image-type) 与 [Image URLs](https://www.sanity.io/docs/apis-and-sdks/image-urls)：资产引用、URL 与字段上的 crop/hotspot；许可仍需由权利人确认。
+
+官方文档为滚动更新资料；本轮采用的结构已在锁定 v5.31.2 schema 编译及现有 Astro 组件中实际测试，不把新版 API 示例当作已安装功能。
