@@ -1,0 +1,7 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { loadContent } from '../lib/content';
+import { readRuntime } from '../../../config/runtime';
+const { siteSettings, privacyPreview } = await loadContent(readRuntime(import.meta.env).contentMode);
+---
+<LegalLayout notice={privacyPreview} brandName={siteSettings.brandName} />

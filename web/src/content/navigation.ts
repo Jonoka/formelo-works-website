@@ -1,10 +1,10 @@
 import { pageContexts } from '../../../config/page-context';
 import routes from '../../../config/routes.json';
-/** Public links resolve only to implemented content; the Journal remains a home section. */
+/** Ten implemented content routes; the original home #journal anchor is also preserved. */
 export const homepageNavigation = [
   { label: pageContexts.manufacturing.label, href: pageContexts.manufacturing.path },
   { label: pageContexts.factory.label, href: pageContexts.factory.path },
-  { label: 'Journal', href: '/#journal' },
+  { label: pageContexts.blog.label, href: pageContexts.blog.path },
   { label: pageContexts.contact.label, href: pageContexts.contact.path },
 ] as const;
 export const demonstrationNavigation = [
@@ -14,4 +14,5 @@ export const demonstrationNavigation = [
 export const footerNavigation = [
   homepageNavigation[0], homepageNavigation[1],
   { label: 'Process', href: routes.processLink }, homepageNavigation[2], homepageNavigation[3],
+  { label: 'Privacy', href: '/privacy/' },
 ] as const;

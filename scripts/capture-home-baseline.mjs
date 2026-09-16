@@ -1,4 +1,4 @@
-// CI-only, loopback-only review of the accepted PR #4 static build. No website deployment.
+// CI-only, loopback-only review of the accepted PR #5 static build. No website deployment.
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -21,7 +21,7 @@ let browser;
 try {
   browser = await chromium.launch();
   const metrics = [];
-  const targets = [{ path: '/', name: 'homepage' }, { path: '/clothing/t-shirts/', name: 't-shirts' }, { path: '/clothing/hoodies/', name: 'hoodies' }];
+  const targets = [{ path: '/', name: 'homepage' }, { path: '/clothing/t-shirts/', name: 't-shirts' }, { path: '/clothing/hoodies/', name: 'hoodies' }, { path: '/manufacturing/', name: 'manufacturing' }, { path: '/our-factory/', name: 'factory' }, { path: '/contact/', name: 'contact' }];
   for (const target of targets) for (const width of [1440, 390]) {
     const page = await browser.newPage({ viewport: { width, height: width === 390 ? 844 : 900 } });
     const address = server.address();
@@ -41,7 +41,7 @@ try {
     await page.close();
   }
   await writeFile(`${output}/metrics.json`, JSON.stringify(metrics, null, 2));
-  console.log('Captured accepted PR #4 homepage and categories at 1440x900 and 390x844.');
+  console.log('Captured all six accepted PR #5 pages at 1440x900 and 390x844.');
 } finally {
   if (browser) await browser.close();
   await new Promise(done => server.close(done));

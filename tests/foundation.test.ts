@@ -112,9 +112,9 @@ test('category mapping rejects invalid routes, incomplete content, fake approval
   assert.throws(() => validateCategoryPreviews([]), /count mismatch/);
 });
 
-test('six stable page contexts match the ten-route plan without widening the preview', () => {
-  assert.equal(routes.previewPages.length, 6);
-  assert.deepEqual(Object.values(pageContexts).map(item => item.referenceCode), ['WEB-HOME', 'WEB-TSHIRTS', 'WEB-HOODIES', 'WEB-MANUFACTURING', 'WEB-FACTORY', 'WEB-CONTACT']);
+test('nine marketing page contexts match the ten concept routes; Privacy has no source code', () => {
+  assert.equal(routes.previewPages.length, 10);
+  assert.deepEqual(Object.values(pageContexts).map(item => item.referenceCode), ['WEB-HOME', 'WEB-TSHIRTS', 'WEB-HOODIES', 'WEB-MANUFACTURING', 'WEB-FACTORY', 'WEB-CONTACT', 'WEB-BLOG', 'WEB-QUOTE-GUIDE', 'WEB-MOQ-GUIDE']);
   for (const context of Object.values(pageContexts)) {
     assert.equal(routes.pages.find(page => page.path === context.path)?.referenceCode, context.referenceCode);
     assert.ok(routes.previewPages.some(page => page.path === context.path));
@@ -161,10 +161,10 @@ test('all contact identity and schedule fields remain null and cannot silently a
 });
 test('page-specific SEO titles receive their brand suffix only from configuration', async () => {
   const content = await loadContent('mock');
-  const pages = [content.home, ...content.categoryPreviews, content.manufacturingPreview, content.factoryPreview, content.contactPreview];
+  const pages = [content.home, ...content.categoryPreviews, content.manufacturingPreview, content.factoryPreview, content.contactPreview, ...content.articlePreviews, content.privacyPreview];
   const titles = pages.map(page => page.seo.seoTitle);
-  assert.equal(new Set(titles).size, 6);
-  assert.equal(new Set(pages.map(page => page.seo.seoDescription)).size, 6);
+  assert.equal(new Set(titles).size, 9);
+  assert.equal(new Set(pages.map(page => page.seo.seoDescription)).size, 9);
   for (const title of titles) {
     assert.ok(!title.includes(content.siteSettings.brandName));
     assert.equal(titleWithBrand(title, 'Renamed Factory'), `${title} — Renamed Factory`);

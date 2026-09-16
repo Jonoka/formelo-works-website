@@ -1,0 +1,16 @@
+---
+import type { PrivacyPreview } from '../../../shared/editorial';
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import EditorialBody from '../components/EditorialBody.astro';
+import '../styles/editorial.css';
+interface Props { notice: PrivacyPreview; brandName: string }
+const { notice, brandName } = Astro.props;
+---
+<BaseLayout title={notice.seo.seoTitle} description={notice.seo.seoDescription} brandName={brandName} referenceCode={null}>
+  <Breadcrumb label="Privacy" />
+  <article class="legal-page shell" data-preview-kind="legal_preview" data-preview-status={notice.status} data-production-allowed="false">
+    <header><p class="eyebrow">Website information</p><h1>{notice.title}</h1><p class="draft-status">Draft privacy notice — not in effect</p></header>
+    <EditorialBody body={notice.body} />
+  </article>
+</BaseLayout>

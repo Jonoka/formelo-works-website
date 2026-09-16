@@ -1,0 +1,9 @@
+{
+  "status": "explicit_editorial_link_allowlist_not_resource_allowlist",
+  "sources": [{
+    "href": "https://www.shopify.com/blog/minimum-order-quantity",
+    "title": "Shopify: Minimum order quantity — definition and constraints",
+    "reviewedAt": "2026-09-16",
+    "scope": "General MOQ definition only, not factory-specific terms. Reviewed against the source definition and simple/complex constraints sections. This source-check date is not an article publication or approval date."
+  }]
+}

@@ -262,6 +262,7 @@
     },
     {
       "id": "JOURNAL-QUOTE-001",
+      "conceptFallback": { "assetId": "CAT-TS-001", "usage": "registered_concept_reuse", "surfaces": ["home journal", "journal index", "quote article"], "dimensionsHashesAndRenditions": "Use the unchanged CAT-TS-001 record; 16:9 CSS crop, no new binary or generated cover", "replacement": "Dedicated unbranded editorial cover remains pending; replace and register actual source, dimensions, SHA-256 and responsive renditions before approval" },
       "status": "pending_generation",
       "path": null,
       "productionAllowed": false,
@@ -272,6 +273,7 @@
     },
     {
       "id": "JOURNAL-MOQ-001",
+      "conceptFallback": { "assetId": "CAT-HD-001", "usage": "registered_concept_reuse", "surfaces": ["home journal", "journal index", "MOQ article"], "dimensionsHashesAndRenditions": "Use the unchanged CAT-HD-001 record; 16:9 CSS crop, no new binary or generated cover", "replacement": "Dedicated unbranded editorial cover remains pending; not a factory quantity promise; replace and register source, dimensions, SHA-256 and renditions before approval" },
       "status": "pending_generation",
       "path": null,
       "productionAllowed": false,

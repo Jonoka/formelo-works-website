@@ -10,11 +10,11 @@
 | PG-03 T-shirts | 该类样品、实际面料 / 版型 / 定制、MOQ、FAQ | 演示品类待确认；生产验收每类 3 组样品仍需核实 | 原型可用概念图 |
 | PG-04 Hoodies | 区别于 T-shirt 的工艺 / 结构 / 条件 | 不机械替换同一篇正文；样品编号与真实属性 | 原型可用概念图 |
 | PG-05 Our Factory | 真实所在地、生产能力、质量控制、获授权证明 | FACTORY-001；上线前真实工厂照片 / 质检说明 | 工厂内页概念结构已实现；实拍仍待补，质检仅讨论框架 |
-| PG-06 Journal | 两篇已写完的采购指南入口，标题、摘要、封面 | 两篇文章与封面；不得显示假第三篇 | 模板待开发 |
+| PG-06 Journal | 两篇已写完的采购指南入口，标题、摘要、封面 | 两篇文章与封面；不得显示假第三篇 | 两篇可访问 editorial draft 列表已实现；封面明确复用，独立图待补 |
 | PG-07 Contact | 可见邮箱、复制、WhatsApp、工作时段、资料提示 | 真实接待账号、负责人、时区与实际收发确认 | 无表单联系页已实现；账号/人员/时间/地址均 null，不外跳、不复制假账号 |
-| PG-08 Privacy | 实际主体、托管 / 日志 / 跳转 / 统计处理 | 服务商、隐私配置；不复制空泛模板 | 上线前复核 |
-| PG-09 Quote guide | 品类、款数、数量拆分、交付国家；无 Tech Pack 也可问（需确认） | 工厂实际需要的资料；JOURNAL-QUOTE-001 | 提纲在 PRD §6.3 |
-| PG-10 MOQ guide | 每款 / 每色 / 混码解释、示范算法与边界 | 工厂规则；算例标记为说明而非承诺 | 提纲在 PRD §6.3 |
+| PG-08 Privacy | 实际主体、托管 / 日志 / 跳转 / 统计处理 | 实际主体/隐私联系人/服务商/保留期限/生效日 | 可读未生效草稿已实现；实际配置与目标市场要求上线前另行复核 |
+| PG-09 Quote guide | 品类、款数、数量拆分、交付国家；无 Tech Pack 也可问（需确认） | 工厂实际需要的资料；JOURNAL-QUOTE-001 | 完整英文草稿、手动询价模板与清单已实现；无假作者/日期，封面待补 |
+| PG-10 MOQ guide | 每款 / 每色 / 混码解释、示范算法与边界 | 工厂真实规则；假设算例不可污染配置 | 完整英文草稿与明确假设算例已实现；计量规则待工厂确认，封面待补 |
 
 每页补齐：实际英文 H1 / intro / sections、SEO title / description、素材 ID、内链、referenceCode、审核人 / 日期和状态。
 关键词只是候选意图，未提供搜索量或排名保证。不建立国家、颜色、尺码、独立 Process 等额外页。
@@ -25,4 +25,4 @@
 换真实品牌时检查文案、Logo、title / OG、结构化数据、页脚、联系模板与隐私主体。
 更换真实图片时保留适当构图与裁切焦点，更新 alt / caption / asset manifest / 审核记录；不靠把文件名换掉假装审核完成。
 
-本轮新增三页英文预览文案是采购讨论说明，不是工厂终稿。明确需求缺口见 [工厂资料清单](factory-materials-checklist.md)。没有资料不填写审核人或日期；固定页预览不使用正式 CMS 审核字段。六页 title/description 各自不同，品牌尾缀统一拼接。Journal 正式路径仍 /blog/，当前未实现，导航暂指向真实存在的 /#journal；Privacy 正文仍未开发。
+当前十页为概念结构，不是工厂终稿。明确缺口见 [工厂资料清单](factory-materials-checklist.md)。两文通过 loadContent 的 article_preview 读取，editorial_draft / productionAllowed:false，draftUpdatedAt:null；正式 articles:[]，无假作者、公开发布日期或审核记录。Privacy 为 legal_preview，法律主体、隐私联系人、服务商、保留期限、生效日均 null。十页 title/description 独立，品牌尾缀统一。Journal /blog/、文章、Privacy 均可访问；首页 #journal 保留。外部具体定义只引用经实际核对的精确 HTTPS 来源；其余为原创提问建议和假设算术，不编造搜索量、客户案例或工厂经验。

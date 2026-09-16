@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import routes from '../config/routes.json';
+import sources from '../config/editorial-sources.json';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const validScript = '<script type="module" src="/_astro/navigation.fixture.js"></script>';
+const sourceHref = sources.sources[0]!.href;
 
 // Isolated synthetic HTML exercises the ACTUAL checker CLI before the Astro build runs.
 // These fixtures are never published and are not website/browser acceptance evidence.
@@ -26,6 +28,7 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
     mkdirSync(join(root, 'config'), { recursive: true });
     mkdirSync(join(root, 'assets'), { recursive: true });
     writeFileSync(join(root, 'config', 'routes.json'), JSON.stringify(routes));
+    writeFileSync(join(root, 'config', 'editorial-sources.json'), JSON.stringify(sources));
     const assetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'];
     writeFileSync(join(root, 'assets', 'manifest.json'), JSON.stringify({ assets: [...assetIds.map(id => ({ id, status: 'pending_generation', path: 'web/public/media/pending.svg', productionAllowed: false, replacementRequiredBeforeLaunch: true })), { id: 'FACTORY-001', status: 'awaiting_factory', path: null, productionAllowed: false }] }));
     const pageNames = ['404.html', ...routes.previewPages.map(page => page.path === '/' ? 'index.html' : `${page.path.slice(1)}index.html`)];
@@ -34,9 +37,9 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
       const sections = name === 'index.html'
         ? ['capabilities', 'categories', 't-shirts', 'hoodies', 'factory', 'production', 'journal', 'enquiry-guide', 'contact']
             .map(id => `<section id="${id}"></section>`).join('') +
-          '<p>No articles have been published in this preview</p>' +
+          '<p>Not published or factory-approved</p>' +
           '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
-          ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'].map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="lazy"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('')
+          ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'CAT-TS-001', 'CAT-HD-001'].map(id => `<figure data-asset-id="${id}" data-media-kind="placeholder"><img src="/media/pending.svg" width="1200" height="900" alt="Fixture only" loading="lazy"><figcaption>Image pending — no garment photograph is shown.</figcaption></figure>`).join('')
         : name === '404.html' ? '' :
           '<nav aria-label="Breadcrumb"><a href="/">Home</a><span aria-current="page">Fixture category</span></nav>' +
           '<details class="faq-item"><summary>Fixture question</summary>Fixture answer</details>'.repeat(3) +
@@ -44,12 +47,19 @@ function runFixture(script = validScript, bodySuffix = '', moduleCode = '// Loca
       const policy = routes.previewPages.find(page => name === (page.path === '/' ? 'index.html' : `${page.path.slice(1)}index.html`));
       const plan = routes.pages.find(page => page.path === policy?.path);
       const core = policy && ['/manufacturing/', '/our-factory/', '/contact/'].includes(policy.path);
-      const safety = (policy ? `<div class="pending-contact" data-reference-code="${plan?.referenceCode}"><button disabled>Fixture channel</button></div>`.repeat(3) : '') +
+      const article = plan?.template === 'Article';
+      const contacts = !plan || plan.template === 'Legal' ? 0 : article ? 2 : 3;
+      const safety = `<div class="pending-contact" data-reference-code="${plan?.referenceCode}"><button disabled>Fixture channel</button></div>`.repeat(contacts) +
         (policy?.factoryPlaceholder ? '<div data-factory-media-status="awaiting_factory">Factory photography pending</div>' : '') +
         (core ? '<div data-preview-status="concept_only" data-facts-status="unconfirmed" data-production-allowed="false"></div>' : '') +
         (policy?.path === '/manufacturing/' ? ['options', 'moq', 'prepare', 'sampling', 'production', 'faq'].map(id => `<section id="${id}"></section>`).join('') : '') +
         (policy?.path === '/contact/' ? ['email', 'whatsapp', 'person', 'hours', 'timezone', 'address'].map(field => `<div data-contact-field="${field}" data-contact-state="unconfigured"></div>`).join('') : '');
-      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture ${name}"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${sections}${safety}${bodySuffix}${script}</body></html>`);
+      let rendered = sections;
+      if (article) rendered = rendered.replace('<span aria-current="page">', '<li><a href="/blog/">Journal</a></li><span aria-current="page">').replace('<a href="/">Home</a>', '<li><a href="/">Home</a></li>').replace('<span aria-current="page">Fixture category</span>', '<li><span aria-current="page">Fixture article</span></li>');
+      const editorial = (plan?.template === 'Home' || plan?.template === 'BlogIndex' ? ['what-to-send-for-a-clothing-quote', 'moq-per-style-per-color'].map(slug => `<article data-article-card="${slug}" data-preview-status="editorial_draft" data-production-allowed="false"><p>Editorial draft / Not published</p><a href="/blog/${slug}/">Draft</a></article>`).join('') : '') +
+        (article ? `<article data-preview-kind="article_preview" data-preview-status="editorial_draft" data-production-allowed="false" data-cover-usage="registered_concept_reuse"><p>Editorial draft / Not published</p><p>A dedicated editorial cover is pending.</p><nav aria-label="On this page">${[1,2,3].map(i => `<a href="#section-fixture-${i}">Section</a>`).join('')}</nav>${[1,2,3].map(i => `<h2 id="section-fixture-${i}">Fixture section</h2>`).join('')}<div class="editorial-template">Fixture manually selectable text</div><p>Hypothetical example — not this factory’s MOQ</p>${['/blog/', '/contact/', '/clothing/t-shirts/', '/clothing/hoodies/', '/manufacturing/#' + (plan.referenceCode === 'WEB-QUOTE-GUIDE' ? 'prepare' : 'moq')].map(href => `<a href="${href}">Related fixture</a>`).join('')}</article>` : '') +
+        (plan?.template === 'Legal' ? '<article data-preview-status="draft_not_in_effect" data-production-allowed="false">Draft privacy notice — not in effect</article>' : '');
+      writeFileSync(join(dist, name), `<!doctype html><html lang="en"><head><title>Fixture ${name}</title><meta name="description" content="Static policy fixture ${name}"><meta name="robots" content="noindex, nofollow"></head><body><h1>Fixture</h1>${rendered}${safety}${editorial}${bodySuffix}${script}</body></html>`);
     }
     mutate?.(root);
     const result = spawnSync(process.execPath, [checker], { cwd: root, encoding: 'utf8', timeout: 5000 });
@@ -100,7 +110,7 @@ test('external modules still cannot make API requests', () => {
   assert.match(result.output, /must not make network\/API requests/);
 });
 
-test('static checker rejects adding an unlabelled fourth image slot', () => {
+test('static checker rejects adding an unregistered image beyond each page policy', () => {
   const result = runFixture(validScript, '<img src="/media/pending.svg" width="1200" height="900" alt="Unlabelled extra">');
   assert.notEqual(result.status, 0);
   assert.match(result.output, /Registered image slots only/);
@@ -126,16 +136,41 @@ test('route expansion and image-policy changes require explicit checker review',
   for (const extra of [true, false]) {
     const result = runFixture(validScript, '', '// Fixture', false, root => {
       const changed = structuredClone(routes);
-      if (extra) changed.previewPages.push({ path: '/blog/', assetIds: [], imagePolicy: 'no_images', factoryPlaceholder: false });
+      if (extra) changed.previewPages.push({ path: '/extra-journal/', assetIds: [], imagePolicy: 'no_images', factoryPlaceholder: false });
       else changed.previewPages.find(page => page.path === '/contact/')!.assetIds.push('HERO-001');
       writeFileSync(join(root, 'config/routes.json'), JSON.stringify(changed));
     });
-    assert.notEqual(result.status, 0); assert.match(result.output, /six implemented|policy mismatch/);
+    assert.notEqual(result.status, 0); assert.match(result.output, /ten implemented|policy mismatch/);
   }
 });
 test('null channels cannot acquire a copy or sent success state', () => {
   assert.notEqual(runFixture(validScript, '<p>Email copied</p>').status, 0);
   assert.notEqual(runFixture(validScript, '', 'navigator.clipboard.writeText("fixture")').status, 0);
+});
+test('reviewed source anchors pass without granting permission to external resources', () => {
+  const inject = (markup: string) => runFixture(validScript, '', '// Fixture', false, root => {
+    const file = join(root, 'web/dist/blog/moq-per-style-per-color/index.html');
+    writeFileSync(file, readFileSync(file, 'utf8').replace('</body>', `${markup}</body>`));
+  });
+  const valid = `<a href="${sourceHref}" rel="nofollow noreferrer noopener" data-editorial-source="reviewed">Definition source</a>`;
+  const pass = inject(valid); assert.equal(pass.status, 0, pass.output);
+  for (const markup of [valid.replace(sourceHref, 'https://unreviewed.invalid/'), valid.replace(' data-editorial-source="reviewed"', ''), valid.replace('nofollow noreferrer noopener', 'nofollow'), `<link rel="stylesheet" href="${sourceHref}">`, `<link rel="prefetch" href="${sourceHref}">`, '<a href="javascript:alert(1)">Unsafe</a>']) {
+    const fail = inject(markup); assert.notEqual(fail.status, 0); assert.match(fail.output, /unexpected external resource|unreviewed source/);
+  }
+});
+for (const [name, path, from, to, message] of [
+  ['legal marketing bar', 'privacy/index.html', '</body>', '<aside class="mobile-contact-bar"></aside></body>', /Legal and 404/],
+  ['legal fake effective date', 'privacy/index.html', '</body>', '<time datetime="2026-09-01">Effective</time></body>', /No fake legal dates/],
+  ['article fake publication', 'blog/moq-per-style-per-color/index.html', 'data-preview-status="editorial_draft"', 'data-preview-status="published"', /editorial_draft/],
+  ['article incorrect reference', 'blog/moq-per-style-per-color/index.html', 'WEB-MOQ-GUIDE', 'WEB-HOME', /wrong page referenceCode/],
+  ['article broken TOC ordering', 'blog/moq-per-style-per-color/index.html', 'href="#section-fixture-1"', 'href="#section-fixture-3"', /Stable article TOC/],
+  ['article fabricated third card', 'blog/index.html', '</body>', '<div data-article-card="invented"></div></body>', /exactly two real draft cards/],
+  ['article send success', 'blog/what-to-send-for-a-clothing-quote/index.html', '</body>', '<p>Message sent</p></body>', /no fake copy or delivery success/],
+] as const) test(`static policy rejects ${name}`, () => {
+  const result = runFixture(validScript, '', '// Fixture', false, root => {
+    const file = join(root, 'web/dist', path); writeFileSync(file, readFileSync(file, 'utf8').replace(from, to));
+  });
+  assert.notEqual(result.status, 0); assert.match(result.output, message);
 });
 test('robots accepts only the same deny-all directives with Windows or Unix line endings', () => {
   const run = (text: string) => runFixture(validScript, '', '// Fixture', false, root => writeFileSync(join(root, 'web/dist/robots.txt'), text));

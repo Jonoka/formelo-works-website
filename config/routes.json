@@ -1,5 +1,5 @@
 {
-  "status": "ten_routes_planned_six_content_previews_implemented",
+  "status": "ten_content_concept_routes_implemented_not_production_accepted",
   "defaultPreviewIndexable": false,
   "pages": [
     {
@@ -110,11 +110,15 @@
   ],
   "processLink": "/manufacturing/#production",
   "previewPages": [
-    { "path": "/", "assetIds": ["HERO-001", "CAT-TS-001", "CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": true },
+    { "path": "/", "assetIds": ["HERO-001", "CAT-TS-001", "CAT-HD-001", "CAT-TS-001", "CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": true },
     { "path": "/clothing/t-shirts/", "assetIds": ["CAT-TS-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
     { "path": "/clothing/hoodies/", "assetIds": ["CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
     { "path": "/manufacturing/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false },
     { "path": "/our-factory/", "assetIds": [], "imagePolicy": "factory_placeholder", "factoryPlaceholder": true },
-    { "path": "/contact/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false }
+    { "path": "/contact/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false },
+    { "path": "/blog/", "assetIds": ["CAT-TS-001", "CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
+    { "path": "/blog/what-to-send-for-a-clothing-quote/", "assetIds": ["CAT-TS-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
+    { "path": "/blog/moq-per-style-per-color/", "assetIds": ["CAT-HD-001"], "imagePolicy": "registered_concepts", "factoryPlaceholder": false },
+    { "path": "/privacy/", "assetIds": [], "imagePolicy": "no_images", "factoryPlaceholder": false }
   ]
 }

@@ -6,6 +6,9 @@ export const pageContexts = {
   manufacturing: { path: '/manufacturing/', label: 'Manufacturing', referenceCode: 'WEB-MANUFACTURING' },
   factory: { path: '/our-factory/', label: 'Our Factory', referenceCode: 'WEB-FACTORY' },
   contact: { path: '/contact/', label: 'Contact', referenceCode: 'WEB-CONTACT' },
+  blog: { path: '/blog/', label: 'Journal', referenceCode: 'WEB-BLOG' },
+  quoteGuide: { path: '/blog/what-to-send-for-a-clothing-quote/', label: 'Quote guide', referenceCode: 'WEB-QUOTE-GUIDE' },
+  moqGuide: { path: '/blog/moq-per-style-per-color/', label: 'MOQ guide', referenceCode: 'WEB-MOQ-GUIDE' },
 } as const;
 export type ContextKey = keyof typeof pageContexts;
 export type CorePageKey = 'manufacturing' | 'factory' | 'contact';

@@ -1,0 +1,40 @@
+---
+import type { EditorialBlock } from '../../../shared/editorial';
+import { prepareEditorialBody } from '../lib/editorial';
+import EditorialInline from './EditorialInline.astro';
+interface Props { body: EditorialBlock[] }
+const { body } = Astro.props;
+const { blocks } = prepareEditorialBody(body);
+---
+<div class="editorial-prose">
+  {blocks.map(({ block, id }) => {
+    if (block.type === 'heading') {
+      const Heading = block.level === 2 ? 'h2' : 'h3';
+      return <Heading id={id} tabindex="-1">{block.text}</Heading>;
+    }
+    if (block.type === 'paragraph') return <p><EditorialInline content={block.content} /></p>;
+    if (block.type === 'list') {
+      const List = block.ordered ? 'ol' : 'ul';
+      return <List>{block.items.map(item => <li><EditorialInline content={item} /></li>)}</List>;
+    }
+    if (block.type === 'callout') return <aside class="editorial-callout" aria-labelledby={`${id}-title`}><p class="callout-title" id={`${id}-title`}>{block.title}</p><p><EditorialInline content={block.content} /></p></aside>;
+    if (block.type === 'template') return <section class="editorial-template" aria-labelledby={`${id}-title`}><h3 id={`${id}-title`}>{block.title}</h3><pre>{block.text}</pre></section>;
+    if (block.type === 'table') {
+      // Layout only: do not change the example or two-column editorial tables.
+      const quantityTable = block.columns.length === 5 &&
+        ['Style / color', 'S', 'M', 'L', 'Total'].every((column, index) => block.columns[index] === column);
+      return <div class:list={{ 'editorial-quantity-block': quantityTable }}>
+        {quantityTable && <p class="editorial-table-note" id={`${id}-scroll-hint`}>On narrow screens, swipe or scroll horizontally to see every column. Keyboard: focus the table, then use the left and right arrow keys.</p>}
+        <div class:list={['editorial-table', { 'editorial-table--quantity': quantityTable }]} role="region" tabindex="0" aria-labelledby={`${id}-caption`} aria-describedby={quantityTable ? `${id}-scroll-hint` : undefined}>
+          <table>
+            <caption id={`${id}-caption`}>{quantityTable ? <span class="quantity-table-caption">{block.caption}</span> : block.caption}</caption>
+            {quantityTable && <colgroup><col class="quantity-description" /><col class="quantity-number" span="4" /></colgroup>}
+            <thead><tr>{block.columns.map(column => <th scope="col">{column}</th>)}</tr></thead>
+            <tbody>{block.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      </div>;
+    }
+    return null;
+  })}
+</div>
