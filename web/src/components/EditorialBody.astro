@@ -19,7 +19,22 @@ const { blocks } = prepareEditorialBody(body);
     }
     if (block.type === 'callout') return <aside class="editorial-callout" aria-labelledby={`${id}-title`}><p class="callout-title" id={`${id}-title`}>{block.title}</p><p><EditorialInline content={block.content} /></p></aside>;
     if (block.type === 'template') return <section class="editorial-template" aria-labelledby={`${id}-title`}><h3 id={`${id}-title`}>{block.title}</h3><pre>{block.text}</pre></section>;
-    if (block.type === 'table') return <div class="editorial-table" role="region" tabindex="0" aria-labelledby={`${id}-caption`}><table><caption id={`${id}-caption`}>{block.caption}</caption><thead><tr>{block.columns.map(column => <th scope="col">{column}</th>)}</tr></thead><tbody>{block.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody></table></div>;
+    if (block.type === 'table') {
+      // Layout only: do not change the example or two-column editorial tables.
+      const quantityTable = block.columns.length === 5 &&
+        ['Style / color', 'S', 'M', 'L', 'Total'].every((column, index) => block.columns[index] === column);
+      return <div class:list={{ 'editorial-quantity-block': quantityTable }}>
+        {quantityTable && <p class="editorial-table-note" id={`${id}-scroll-hint`}>On narrow screens, swipe or scroll horizontally to see every column. Keyboard: focus the table, then use the left and right arrow keys.</p>}
+        <div class:list={['editorial-table', { 'editorial-table--quantity': quantityTable }]} role="region" tabindex="0" aria-labelledby={`${id}-caption`} aria-describedby={quantityTable ? `${id}-scroll-hint` : undefined}>
+          <table>
+            <caption id={`${id}-caption`}>{quantityTable ? <span class="quantity-table-caption">{block.caption}</span> : block.caption}</caption>
+            {quantityTable && <colgroup><col class="quantity-description" /><col class="quantity-number" span="4" /></colgroup>}
+            <thead><tr>{block.columns.map(column => <th scope="col">{column}</th>)}</tr></thead>
+            <tbody>{block.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      </div>;
+    }
     return null;
   })}
 </div>

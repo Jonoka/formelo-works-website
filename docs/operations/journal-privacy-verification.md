@@ -49,3 +49,33 @@ private-review-source-* 保存当前源，journal-privacy-pages-review-* 保存 
 真实工厂资料、两类真实能力、实际 MOQ、主体/隐私联系人/服务商/保留期限/生效日、真实渠道发送与收件、正式 CMS、正式 canonical/sitemap/Article 结构化数据和生产 SEO 均未完成。没有密钥、真实消息、表单/上传或公开部署。两篇独立概念封面未制作，ASSET-01 保持部分完成。
 
 无真机、Safari/Firefox/Edge 或真实浏览器菜单 200% 缩放验收；当前浏览器范围为固定 Playwright Chromium。CSS 200% 文字与长文压力状态不冒充真机质量验收。全站 noindex 不是私有访问控制；不得公开托管 dist。PR #5 与更早日志保持历史，未改写成当前结果。
+
+## PR #6 手机数量表修正 · 2026-09-16
+
+### 起点与修复范围
+
+重新读取了 PR #6 的 head、普通评论及 review，并检查实际 Windows 分支、HEAD、含未跟踪文件的 status 和远端引用。起点仍为 `feat/journal-privacy-pages@c02116e38b17f61323090b2ba5eaa8cf43c4db31`，工作树干净，远端相同；没有出现需要比较的新提交。main 仍为 `4469a1735465435508a3e510fcb6602e848a5264`。沿用原分支和原 Draft PR，不更改 Ready 状态、合并或部署。
+
+仅修 `/blog/moq-per-style-per-color/` 中 caption 为 “Hypothetical proposal: two styles, three style–color lines, 180 pieces total” 的第二张五列表。原 390px 表格宽 350px、每列 70px；款式/颜色被拆成片段。实际重新构建该起点并保存 320/360/390/1440 的数量表、询价表及 Privacy 表截图，源记录在 `.local/pr6-moq-table-fix/before/source.json`，不是以旧第一张表截图判断。
+
+`EditorialBody` 按既定五个列标题选择数量布局，使用原生 table/caption/colgroup/thead/tbody；行列 th 的 scope、全部数字、三行描述和假设说明不变。专用 CSS 给描述列较大空间，数值列右对齐、不拆行；正文从 15px 增至 16px，随 rem 放大。窄屏只滚动该表，原生横向滚动不依赖网站 JavaScript。可见说明和 aria-describedby 解释触控、滚轮及方向键；区域可聚焦且有焦点样式。caption 保留原生语义，其文字在左右滚动时仍按可见宽度完整换行。其他两列表维持原规则；未改算例、正文、图片、首页、内容模型、依赖或生产限制。
+
+### 测试与截图取证方法
+
+新增 `tests/browser/quantity-table.spec.ts`：精确 caption 定位第二张表，核对三行全部数据与 scope，使用文本 Range 验证 cream/charcoal/hoodie 不碎裂，检查描述/数字列宽、字号、数字不溢出、完整 caption、全部列可达和整页不横向滚动。矩阵为 320/360/390/1440 × 100%/200% CSS 文字 × 有/无 JS；额外以 Chromium 原生模拟触控事件覆盖三种手机宽度的有/无 JS 滑动。预览/开发两个项目合计 44 个新增用例，不把重复执行累加。
+
+同时检查 MOQ 第一张两列表、询价表与 Privacy 表的语义、原等宽布局、字号及溢出。新增普通测试视口内逐行滚动/命中检查，验证末行能读到且不被固定联系条遮挡。整块证据截图过高时只增大捕获视口的高度，保持宽度、文字比例和所有 UI，避免截图本身混入固定条；每张附件记录测试与捕获视口，另保留原高度的末行视口图。不隐藏条、不裁掉数据，也不将 CSS 文字放大称为浏览器菜单缩放或真机。
+
+既有 editorial 截图逻辑改为按 caption 明确捕获两张 MOQ 表，不再只拍 `.editorial-table.first()`。原套件与安全门禁保留；新套件总量应由新提交的完整执行结果确认，旧 73/368 仅作上方历史记录。
+
+早期专项执行发现无 JS 下 addStyleTag 的事件等待超时，现改为测试层在导航 HTML 中加入文字放大样式，仍完整执行无 JS 用例。之后的专项轮次实跑 44 项通过，日志为 `.local/pr6-moq-table-fix/focused-second.txt`。目视复核又发现早期高图截图被固定联系条覆盖末行，故补充上述逐行可见性及取景机制；辅助捕获曾等待 Privacy 本不存在的联系条，已改为先检查元素是否存在。失败/停止日志保留，不列为通过，最终仍须对修正后精确提交完整重跑。
+
+最终专项第四轮 `.local/pr6-moq-table-fix/focused-fourth.txt` 已返回 0，44 项全部通过（约 2.1 分钟），包含新增末行可见性与完整捕获机制。它是提交前的专项证据，不替代下述最终精确 head 的完整 verify / CI。
+
+### 视觉证据与最终提交绑定
+
+已通过独立测试浏览器实际查看修复前 320/360/390 的碎词现象、1440 前后对比，以及修复后窄屏左右滚动视图。随后实际查看 `visual-final/text200-left.png`、`text200-right.png` 和 `regression-and-last-row.png`：320/360/390 的 200%/无 JS 文字保持可读，三行描述与右端数量可通过局部滚动读取；390px 原测试高度的末行位于未隐藏的固定联系条上方；询价/Privacy 两列表保留原生语义、原列宽与正常换行。整块图片的捕获高度与合成图缩放在附件中单独说明，不冒充真机或浏览器菜单缩放，也不扩大为全站最终视觉验收。
+
+Windows 原始过程在 `.local/pr6-moq-table-fix/`；最终完整检查须绑定提交 HEAD/tree 并记录各命令退出码。Linux CI 新增独立的 `c02116e...` 表格基线 checkout/build/capture，产物 `review/moq-table-before/` 明确是修复前；保留原 PR #5 六页比较，不混淆二者。新 head 的截图在 quantity-table 测试目录，source/outcomes 与原始日志保存在私有 CI artifact，包含 `moqTableBeforeSha` 和 `moq_baseline` 结果。
+
+最终 SHA、Windows 完整 verify/仓库/Bash/Python/audit 的实际结果、新 CI run 及修复前后图片入口追加到原 PR #6 的本修复交付评论，并按该精确 head 核查。这样不在提交尚未产生时预填 SHA/CI，也不把旧绿色结果当成本修复通过。Windows Python 的 WSL/Bash 限制仍须如实记录；Linux 成功不等于 Windows 已修好。PR 保持 Draft，等待用户复核；十页概念状态、真实内容/CMS/渠道/生产 SEO 与发布限制均不变。

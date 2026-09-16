@@ -71,8 +71,17 @@ for (const item of pages) {
     if ([390,1440].includes(width)) {
       await capture(page, info, `${item.name}-${width}-viewport`, false);
       if (item.kind === 'article' || item.kind === 'legal') {
-        await page.locator('.editorial-table').first().scrollIntoViewIfNeeded();
-        await capture(page, info, `${item.name}-${width}-table`, false);
+        const captions = item.name === 'moq'
+          ? ['Four different quantity questions', 'Hypothetical proposal: two styles, three style–color lines, 180 pieces total']
+          : item.name === 'quote'
+            ? ['Quantity-planning fields — fill in your own proposal, not a factory minimum']
+            : ['Pending operational details — no values are assumed'];
+        for (const [index, caption] of captions.entries()) {
+          const table = page.getByRole('table', { name: caption, exact: true });
+          await expect(table).toHaveCount(1);
+          await table.scrollIntoViewIfNeeded();
+          await capture(page, info, `${item.name}-${width}-table-${index + 1}`, false);
+        }
         if (item.kind === 'article') { await page.locator('.editorial-template').scrollIntoViewIfNeeded(); await capture(page, info, `${item.name}-${width}-long-text`, false); }
       }
     }

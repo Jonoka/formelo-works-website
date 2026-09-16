@@ -69,6 +69,7 @@ jobs:
               'checkoutSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
               'comparisonSha': '3600f9558465f247dceaa8234971dd9ca0c8a204',
+              'moqTableBeforeSha': 'c02116e38b17f61323090b2ba5eaa8cf43c4db31',
               'scope': 'Ten content previews plus 404: two local editorial drafts and a non-effective legal notice. Not publication, production SEO, CMS or full-site acceptance.',
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
@@ -126,6 +127,20 @@ jobs:
           { git -C .review-baseline rev-parse HEAD; git -C .review-baseline rev-parse HEAD^{tree}; node --version; npm --version; } > review/before/source.txt
           (cd .review-baseline && npm ci && npm run build) 2>&1 | tee review/before/build.txt
           node scripts/capture-home-baseline.mjs 2>&1 | tee review/before/capture.txt
+      - name: Check out the exact pre-fix PR 6 quantity-table baseline
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: c02116e38b17f61323090b2ba5eaa8cf43c4db31
+          path: .review-moq-baseline
+          persist-credentials: false
+      - name: Capture pre-fix quantity and two-column tables on loopback
+        id: moq_baseline
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          (cd .review-moq-baseline && npm ci && npm run build) 2>&1 | tee review/moq-before-build.txt
+          node scripts/capture-quantity-baseline.mjs 2>&1 | tee review/moq-before-capture.txt
       - name: Run responsive and accessibility-oriented browser regressions
         id: browser
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
@@ -155,12 +170,13 @@ jobs:
           VERIFY: ${{ steps.verify.outcome }}
           AUDIT: ${{ steps.audit.outcome }}
           BASELINE: ${{ steps.baseline.outcome }}
+          MOQ_BASELINE: ${{ steps.moq_baseline.outcome }}
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
-          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE']
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
       - name: Retain private screenshots, reports, traces and static output

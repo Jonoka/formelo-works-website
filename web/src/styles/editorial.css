@@ -29,6 +29,17 @@
 .editorial-table th, .editorial-table td { padding: 14px 16px; text-align: left; vertical-align: top; border-block: 1px solid var(--color-control-border); overflow-wrap: anywhere; }
 .editorial-table thead { background: var(--color-divider); }
 .editorial-table th { font-weight: 600; }
+/* The quantity breakdown reserves space for labels; two-column tables stay unchanged. */
+.editorial-quantity-block { min-width: 0; margin: 2rem 0; }
+.editorial-table-note { margin: 0 0 12px; font-size: 1rem; line-height: 1.6; }
+.editorial-table--quantity { margin: 0; container-type: inline-size; }
+.editorial-table--quantity:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+.editorial-table--quantity table { width: max(100%, calc(min(14rem, 80cqi) + 16rem)); font-size: 1rem; }
+.editorial-table--quantity .quantity-description { width: min(14rem, 80cqi); }
+.editorial-table--quantity .quantity-number { width: 4rem; }
+.editorial-table--quantity th, .editorial-table--quantity td { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.editorial-table--quantity th:not(:first-child), .editorial-table--quantity td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.editorial-table--quantity .quantity-table-caption { display: block; width: 100cqi; position: sticky; left: 0; }
 .editorial-template { border: 1px solid var(--color-control-border); padding: 24px 28px; margin: 2rem 0; }
 .editorial-template h3 { margin-top: 0; }
 .editorial-template pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .9375rem; line-height: 1.8; margin: 0; }
