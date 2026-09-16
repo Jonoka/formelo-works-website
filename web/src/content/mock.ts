@@ -5,6 +5,8 @@ import { categoryPreviews } from './category-previews';
 import { manufacturingPreview } from './manufacturing-preview';
 import { factoryPreview } from './factory-preview';
 import { contactPreview } from './contact-preview';
+import { articlePreviews } from './article-previews';
+import { privacyPreview } from './privacy-preview';
 
 /** Proposed customer-facing copy is labelled as a concept; commercial facts remain null. */
 export const mockContent: ContentSnapshot = {
@@ -62,5 +64,6 @@ export const mockContent: ContentSnapshot = {
   categoryPreviews,
   manufacturingPreview,
   factoryPreview, contactPreview,
+  articlePreviews, privacyPreview,
   categories: [], articles: [],
 };

@@ -2,5 +2,6 @@
 interface Props { href: string; label: string; description?: string }
 const { href, label, description } = Astro.props;
 const current = Astro.url.pathname === href;
+const journalParent = href === '/blog/' && !current && Astro.url.pathname.startsWith('/blog/');
 ---
-{current ? <span class="nav-current" aria-current="page">{label}{description && <small>{description}</small>}</span> : <a href={href}>{label}{description && <small>{description}</small>}</a>}
+{current ? <span class="nav-current" aria-current="page">{label}{description && <small>{description}</small>}</span> : <a href={href} class:list={{ 'nav-parent': journalParent }} data-section-parent={journalParent ? 'journal' : undefined}>{label}{description && <small>{description}</small>}</a>}

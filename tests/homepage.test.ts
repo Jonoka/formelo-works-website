@@ -179,11 +179,11 @@ test('rendition format cannot disagree with extension or impersonate a placehold
   const valid = localPreviewFromManifest('HERO-001', 'Fixture.', conceptManifest().data);
   assert.throws(() => validateLocalImage({ ...valid, assetId: 'UI-MEDIA-PENDING-001' }), /impersonate/);
 });
-test('navigation maps the implemented information pages and preserves the real Journal section', () => {
-  assert.deepEqual(homepageNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/#journal', '/contact/']);
-  assert.deepEqual(footerNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/manufacturing/#production', '/#journal', '/contact/']);
+test('navigation maps Journal and Privacy to implemented routes without a fake Clothing hub', () => {
+  assert.deepEqual(homepageNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/blog/', '/contact/']);
+  assert.deepEqual(footerNavigation.map(link => link.href), ['/manufacturing/', '/our-factory/', '/manufacturing/#production', '/blog/', '/contact/', '/privacy/']);
   assert.deepEqual(demonstrationNavigation.map(link => link.href), ['/clothing/t-shirts/', '/clothing/hoodies/']);
   for (const link of [...homepageNavigation, ...footerNavigation, ...demonstrationNavigation]) {
-    assert.ok(!['/clothing/', '/blog/', '/privacy/'].includes(link.href));
+    assert.ok(!['/clothing/', '/#journal'].includes(link.href));
   }
 });

@@ -17,12 +17,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Package the exact tracked source, without .git or local secrets
         run: git archive --format=tar.gz --output="${{ runner.temp }}/review-source.tar.gz" HEAD
       # Official upload-artifact v4 ref checked via GitHub API on 2026-09-13.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: private-review-source-${{ github.sha }}
+          name: private-review-source-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/review-source.tar.gz
           if-no-files-found: error
           retention-days: 14
@@ -34,7 +35,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
   foundation:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       DEPLOY_ENV: local
       CONTENT_MODE: mock
@@ -46,6 +47,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version-file: .nvmrc
@@ -63,14 +65,15 @@ jobs:
           from pathlib import Path
           Path('review/source.json').write_text(json.dumps({
               'headSha': os.environ['PR_HEAD'], 'baseSha': os.environ['PR_BASE'],
-              'checkoutSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
+              'eventSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
+              'checkoutSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
-              'comparisonSha': '4116c2c2d40c16abfb078fe4805089556595f569',
-              'scope': 'Six content previews plus the existing 404. Manufacturing, Factory and Contact are local unconfirmed presentations, not production/CMS acceptance.',
+              'comparisonSha': '3600f9558465f247dceaa8234971dd9ca0c8a204',
+              'scope': 'Ten content previews plus 404: two local editorial drafts and a non-effective legal notice. Not publication, production SEO, CMS or full-site acceptance.',
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
-              'assetLimit': 'Three local AI-generated garment concepts are reused by the homepage and category previews; they are not factory samples or production-approved imagery. Factory photography is still awaiting verified originals.',
-              'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'FACTORY-001']]
+              'assetLimit': 'The same three registered garment concepts are unchanged. T-shirt/hoodie images are explicitly reused in editorial cards and articles; two dedicated covers remain pending. No factory evidence or production-approved imagery.',
+              'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'JOURNAL-QUOTE-001', 'JOURNAL-MOQ-001', 'FACTORY-001']]
           }, indent=2))
           PYCODE
       - name: Pin and verify the runtime
@@ -95,7 +98,7 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee review/unit.txt
-      - name: Build and inspect the six static concept pages plus 404
+      - name: Build and inspect ten static concept pages plus 404
         id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.runtime.outcome == 'success' }}
         run: |
@@ -107,14 +110,14 @@ jobs:
         run: |
           set -o pipefail
           npm exec -- playwright install --with-deps chromium 2>&1 | tee review/browser-install.txt
-      - name: Check out the accepted PR 4 head for the before comparison
+      - name: Check out the accepted PR 5 head for the before comparison
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 4116c2c2d40c16abfb078fe4805089556595f569
+          ref: 3600f9558465f247dceaa8234971dd9ca0c8a204
           path: .review-baseline
           persist-credentials: false
-      - name: Render the accepted homepage and categories without deploying them
+      - name: Render all six accepted PR 5 pages without deploying them
         id: baseline
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: |
@@ -164,7 +167,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: core-information-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
+          name: journal-privacy-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/
             playwright-report/
@@ -179,6 +182,9 @@ jobs:
             docs/operations/pr-4-category-review.md
             docs/design/core-information-handoff.md
             docs/operations/core-information-verification.md
+            docs/design/journal-article-legal-handoff.md
+            docs/operations/journal-privacy-verification.md
+            config/editorial-sources.json
             docs/content/factory-materials-checklist.md
             config/routes.json
           if-no-files-found: error

@@ -78,8 +78,9 @@ test('page metadata, disabled contact actions and local-only requests', async ({
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'Explore the proposed approach' }).click();
   await expect(page).toHaveURL(/#capabilities$/);
-  await expect(page.locator('#journal')).toContainText('No articles have been published');
-  await expect(page.locator('#journal a')).toHaveCount(0);
+  await expect(page.locator('#journal')).toContainText('Not published or factory-approved');
+  await expect(page.locator('#journal [data-article-card]')).toHaveCount(2);
+  await expect(page.locator('#journal .draft-status')).toHaveText(['Editorial draft / Not published', 'Editorial draft / Not published']);
   expect(externalRequests).toEqual([]);
   expect(errors).toEqual([]);
 });
@@ -118,9 +119,11 @@ test('mobile disclosure supports keyboard, Escape, anchor navigation and an unob
   await page.keyboard.press('Enter');
   if (info.project.name === 'preview') await screenshot(page, info, 'homepage-mobile-menu');
   await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Journal', exact: true }).click();
-  await expect(page).toHaveURL(/#journal$/);
+  await expect(page).toHaveURL(/\/blog\/$/);
   await expect(page.locator('.mobile-nav')).not.toHaveAttribute('open', '');
-  await expect(page.locator('#journal')).toBeFocused();
+  await expect(page.locator('h1')).toHaveText('Journal');
+  await page.goto('/#journal');
+  await expect(page.locator('#journal')).toBeInViewport();
 });
 
 test('desktop clothing disclosure opens by keyboard and returns focus on Escape', async ({ page }) => {
@@ -157,10 +160,11 @@ test('content, keyboard navigation and native FAQ work without JavaScript', asyn
     await expect(page.locator('.mobile-nav')).toHaveAttribute('open', '');
     await expect(page.locator('.mobile-contact-bar')).toBeHidden();
     await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Journal', exact: true }).click();
-    await expect(page).toHaveURL(/#journal$/);
-    // Without JS the disclosure remains user-controlled, never a modal/focus trap.
-    await menu.focus();
-    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/blog\/$/);
+    await expect(page.locator('[data-article-card]')).toHaveCount(2);
+    // Cross-page navigation resets disclosure state naturally, even without JS.
+    await expect(page.locator('.mobile-nav')).not.toHaveAttribute('open', '');
+    await page.goto('/#enquiry-guide');
     const summary = page.locator('.faq-item > summary').first();
     await summary.focus();
     await page.keyboard.press('Enter');
@@ -181,14 +185,16 @@ test('reduced-motion preference removes nonessential transitions', async ({ page
   if (info.project.name === 'preview') await screenshot(page, info, 'homepage-reduced-motion');
 });
 
-test('three local garment concepts load as explicit non-production imagery', async ({ page }) => {
+test('three unchanged local concepts and two registered reuses load with provenance', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const figures = page.locator('.preview-image');
-  await expect(figures).toHaveCount(3);
-  const expectedAssets = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'];
+  await expect(figures).toHaveCount(5);
+  const expectedAssets = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'CAT-TS-001', 'CAT-HD-001'];
   for (let index = 0; index < expectedAssets.length; index += 1) {
     const figure = figures.nth(index);
+    await figure.scrollIntoViewIfNeeded();
+    await expect.poll(() => figure.locator('img').evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0)).toBe(true);
     await expect(figure).toHaveAttribute('data-asset-id', expectedAssets[index]!);
     await expect(figure).toHaveAttribute('data-media-kind', 'concept');
     await expect(figure.locator('figcaption')).toContainText('AI-generated garment concept — not a factory sample.');
@@ -210,8 +216,8 @@ test('local concept image failures preserve captions, dimensions and usable cont
     await expect(figure.locator('[data-image-error]')).toBeVisible();
     await expect(figure.locator('[data-image-error]')).toHaveText('Image could not be loaded.');
   }
-  await expect(page.locator('.preview-image figcaption')).toHaveCount(3);
-  for (const frame of await page.locator('.media-frame').all()) expect((await frame.boundingBox())?.height).toBeGreaterThan(200);
+  await expect(page.locator('.preview-image figcaption')).toHaveCount(5);
+  for (const frame of await page.locator('.media-frame').all()) { const box = await frame.boundingBox(); expect(box!.height).toBeGreaterThanOrEqual(box!.width * 9 / 16 - 1); }
   await expect(page.locator('#factory')).toContainText('No generated production imagery.');
   await noOverflow(page);
   if (info.project.name === 'preview') await screenshot(page, info, 'homepage-image-failure');
@@ -261,7 +267,8 @@ test('broken images without JavaScript retain labelled space and native FAQ', as
       await figure.scrollIntoViewIfNeeded();
       await expect(figure.locator('figcaption')).toContainText('AI-generated garment concept');
       await expect(figure.locator('img')).toHaveAttribute('alt', /^AI-generated concept:/);
-      expect((await figure.locator('.media-frame').boundingBox())?.height).toBeGreaterThan(200);
+      const box = await figure.locator('.media-frame').boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(box!.width * 9 / 16 - 1);
     }
     await page.locator('.faq-item > summary').first().click();
     await expect(page.locator('.faq-item').first()).toHaveAttribute('open', '');

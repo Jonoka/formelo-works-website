@@ -94,7 +94,7 @@ for (const category of categories) {
       expect(response.status()).toBe(200);
       if (target.hash) expect(await response.text()).toContain(`id="${target.hash.slice(1)}"`);
     }
-    for (const [label, href] of [['Manufacturing', '/manufacturing/'], ['Our Factory', '/our-factory/'], ['Journal', '/#journal'], ['Contact', '/contact/']]) {
+    for (const [label, href] of [['Manufacturing', '/manufacturing/'], ['Our Factory', '/our-factory/'], ['Journal', '/blog/'], ['Contact', '/contact/']]) {
       await expect(page.locator('.desktop-nav').getByRole('link', { name: label!, exact: true })).toHaveAttribute('href', href!);
     }
     expect(external).toEqual([]); expect(errors).toEqual([]);
@@ -201,7 +201,7 @@ test('unknown category slugs and absent Clothing hub return actual 404s', async 
     await expect(page.locator('.mobile-contact-bar')).toHaveCount(0);
   }
 });
-test('mobile contact labels, arrows and layout follow one rule on all six pages', async ({ page }) => {
+test('marketing contact labels, arrows and layout follow one rule; Legal has none', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const { path } of routes.previewPages) {
     await page.goto(path);

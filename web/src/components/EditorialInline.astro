@@ -1,0 +1,7 @@
+---
+import type { Inline } from '../../../shared/editorial';
+import { validateEditorialLink } from '../lib/editorial';
+interface Props { content: Inline[] }
+const { content } = Astro.props;
+---
+{content.map(item => item.type === 'text' ? item.text : <a href={item.href} rel={validateEditorialLink(item.href) === 'source' ? 'nofollow noreferrer noopener' : undefined} data-editorial-source={validateEditorialLink(item.href) === 'source' ? 'reviewed' : undefined}>{item.text}</a>)}

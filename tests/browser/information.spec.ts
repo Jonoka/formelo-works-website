@@ -104,8 +104,8 @@ for (const item of pages) {
       const response = await request.get(target.pathname); expect(response.status()).toBe(200);
       if (target.hash) expect(await response.text()).toContain(`id="${target.hash.slice(1)}"`);
     }
-    await expect(page.locator('.desktop-nav').getByRole('link', { name: 'Journal', exact: true })).toHaveAttribute('href', '/#journal');
-    await expect(page.locator('.footer-bottom .unavailable')).toContainText('Privacy');
+    await expect(page.locator('.desktop-nav').getByRole('link', { name: 'Journal', exact: true })).toHaveAttribute('href', '/blog/');
+    await expect(page.locator('.footer-bottom').getByRole('link', { name: 'Privacy', exact: true })).toHaveAttribute('href', '/privacy/');
     expect(external).toEqual([]); expect(errors).toEqual([]);
   });
   for (const javaScriptEnabled of [true, false]) {
@@ -215,7 +215,7 @@ for (const javaScriptEnabled of [true, false]) for (const width of [390, 1440]) 
   });
 }
 
-test('all six pages have distinct SEO metadata, and absent routes return real 404s', async ({ page }) => {
+test('all ten pages have distinct SEO metadata, and absent routes return real 404s', async ({ page }) => {
   const titles = new Set<string>(), descriptions = new Set<string>();
   for (const path of allowedPaths) {
     await page.goto(path);
@@ -224,7 +224,7 @@ test('all six pages have distinct SEO metadata, and absent routes return real 40
     titles.add(title); descriptions.add(description!);
     await expect(page.locator('h1')).toHaveCount(1); await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   }
-  for (const path of ['/missing-page/', '/manufacturing/unknown/', '/our-factory/unknown/', '/contact/unknown/', '/clothing/missing/', '/blog/', '/blog/unpublished/', '/privacy/', '/clothing/']) {
+  for (const path of ['/missing-page/', '/manufacturing/unknown/', '/our-factory/unknown/', '/contact/unknown/', '/clothing/missing/', '/blog/unknown/', '/blog/unpublished/', '/privacy/unknown/', '/clothing/']) {
     const response = await page.goto(path); expect(response?.status()).toBe(404);
     await expect(page.locator('h1')).toHaveText('This page is not here.');
     await expect(page.locator('.mobile-contact-bar, .pending-contact')).toHaveCount(0);

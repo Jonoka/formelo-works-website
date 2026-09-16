@@ -1,5 +1,6 @@
 import type { ContentSnapshot } from '../../../shared/content';
 import { mockContent } from '../content/mock';
+import { validateArticlePreviews, validatePrivacyPreview } from './editorial';
 import { validateCategoryPreviews } from './category-preview';
 import { validateManufacturingPreview, validateFactoryPreview, validateContactPreview } from './fixed-preview';
 
@@ -20,5 +21,7 @@ export async function loadContent(mode: string): Promise<ContentSnapshot> {
   validateManufacturingPreview(content.manufacturingPreview);
   validateFactoryPreview(content.factoryPreview);
   validateContactPreview(content.contactPreview);
+  validateArticlePreviews(content.articlePreviews);
+  validatePrivacyPreview(content.privacyPreview);
   return content;
 }

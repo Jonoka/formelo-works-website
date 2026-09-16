@@ -1,3 +1,4 @@
+import type { ArticlePreview, PrivacyPreview } from './editorial';
 import type { CorePageKey, PageReference } from '../config/page-context';
 
 export const pageKeys = ['home', 'manufacturing', 'factory', 'contact', 'blogIndex', 'privacy'] as const;
@@ -176,4 +177,6 @@ export interface ContentSnapshot {
   contactPreview: ContactPreview;
   categories: Category[];
   articles: Article[];
+  articlePreviews: ArticlePreview[];
+  privacyPreview: PrivacyPreview;
 }

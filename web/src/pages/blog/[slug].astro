@@ -1,0 +1,13 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { loadContent } from '../../lib/content';
+import { readRuntime } from '../../../../config/runtime';
+import type { ArticlePreview } from '../../../../shared/editorial';
+export async function getStaticPaths() {
+  const { articlePreviews, siteSettings } = await loadContent(readRuntime().contentMode);
+  return articlePreviews.map(article => ({ params: { slug: article.slug }, props: { article, brandName: siteSettings.brandName } }));
+}
+interface Props { article: ArticlePreview; brandName: string }
+const { article, brandName } = Astro.props;
+---
+<ArticleLayout article={article} brandName={brandName} />
