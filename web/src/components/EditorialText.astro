@@ -1,0 +1,8 @@
+---
+import type { Inline } from '../../../shared/editorial';
+interface Props { item: Inline }
+const { item } = Astro.props;
+const strong = item.marks?.includes('strong');
+const emphasis = item.marks?.includes('em');
+---
+{strong ? (emphasis ? <strong><em>{item.text}</em></strong> : <strong>{item.text}</strong>) : (emphasis ? <em>{item.text}</em> : item.text)}

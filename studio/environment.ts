@@ -1,4 +1,7 @@
 export function requireStudioEnvironment(env: Record<string, string | undefined> = process.env) {
+  if (Object.entries(env).some(([key, value]) => value && /^SANITY_STUDIO_.*(?:TOKEN|SECRET|PASSWORD|KEY)$/.test(key))) {
+    throw new Error('STUDIO_PUBLIC_SECRET_FORBIDDEN: never place server credentials in a public Studio-prefixed variable.');
+  }
   const projectId = env['SANITY_STUDIO_PROJECT_ID']?.trim();
   const dataset = env['SANITY_STUDIO_DATASET']?.trim();
   if (!projectId || !dataset) {

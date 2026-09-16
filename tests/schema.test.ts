@@ -7,9 +7,9 @@ import { requireStudioEnvironment } from '../studio/environment';
 import { validMoq, validSlug } from '../studio/validation';
 import { mockContent } from '../web/src/content/mock';
 
-test('all four document types and five shared object types compile without a Sanity account', () => {
+test('all four document types and twelve shared object types compile without a Sanity account', () => {
   assert.deepEqual(documentTypes.map(type => type.name), ['siteSettings', 'page', 'category', 'article']);
-  assert.equal(schemaTypes.length, 9);
+  assert.equal(schemaTypes.length, 16);
   const schema = Schema.compile({ name: 'formelo-offline-schema', types: schemaTypes });
   for (const type of schemaTypes) assert.ok(schema.get(type.name), `Missing compiled type: ${type.name}`);
 });

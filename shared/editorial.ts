@@ -1,8 +1,9 @@
 import type { LocalPreviewImage, Seo } from './content';
 import type { PageReference } from '../config/page-context';
 
-/** Bounded local editorial model. Not Portable Text, a Sanity Article or an approval record. */
-export type Inline = { type: 'text'; text: string } | { type: 'link'; text: string; href: string };
+/** Bounded rendering contract. A body is not a CMS document or an approval record. */
+export type TextMark = 'strong' | 'em';
+export type Inline = ({ type: 'text'; text: string } | { type: 'link'; text: string; href: string }) & { marks?: TextMark[] };
 export type EditorialBlock =
   | { type: 'heading'; level: 2 | 3; text: string }
   | { type: 'paragraph'; content: Inline[] }

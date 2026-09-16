@@ -1,5 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { validMoq } from '../validation';
+import { editorialObjectTypes } from './editorial';
 
 export const seo = defineType({
   name: 'seo', title: 'SEO', type: 'object', fields: [
@@ -38,4 +39,4 @@ export const sample = defineType({ name: 'sample', type: 'object', fields: [
   defineField({ name: 'techniqueNotes', type: 'text' }),
 ] });
 
-export const objectTypes = [seo, approvedImage, faq, moqPolicy, sample];
+export const objectTypes = [seo, approvedImage, faq, moqPolicy, sample, ...editorialObjectTypes];

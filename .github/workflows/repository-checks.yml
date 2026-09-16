@@ -70,7 +70,8 @@ jobs:
               'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
               'comparisonSha': '3600f9558465f247dceaa8234971dd9ca0c8a204',
               'moqTableBeforeSha': 'c02116e38b17f61323090b2ba5eaa8cf43c4db31',
-              'scope': 'Ten content previews plus 404: two local editorial drafts and a non-effective legal notice. Not publication, production SEO, CMS or full-site acceptance.',
+              'scope': 'DEV-05A offline article schemas, strict conversion, published-only read query and existing body rendering. Default ten mock content URLs plus 404 unchanged; full-site Sanity and production remain blocked.',
+              'cmsBoundary': 'Only synthetic offline fixtures and injected transport. No real project/dataset/token, account lookup, cloud reads/writes, media upload, publication, migration or Studio deployment.',
               'browserScope': 'Pinned Playwright Chromium on Linux; Astro dev and static preview.',
               'notExecuted': ['Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real CMS integration', 'Production deployment'],
               'assetLimit': 'The same three registered garment concepts are unchanged. T-shirt/hoodie images are explicitly reused in editorial cards and articles; two dedicated covers remain pending. No factory evidence or production-approved imagery.',
@@ -179,11 +180,14 @@ jobs:
           keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
+      - name: Collect exact-head CMS editorial review evidence
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' }}
+        run: node scripts/collect-cms-review.mjs
       - name: Retain private screenshots, reports, traces and static output
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: journal-privacy-pages-review-${{ github.event.pull_request.head.sha || github.sha }}
+          name: cms-editorial-foundation-review-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/
             playwright-report/
@@ -200,6 +204,8 @@ jobs:
             docs/operations/core-information-verification.md
             docs/design/journal-article-legal-handoff.md
             docs/operations/journal-privacy-verification.md
+            docs/operations/cms-editorial-verification.md
+            docs/development/cms-editorial-mapping.md
             config/editorial-sources.json
             docs/content/factory-materials-checklist.md
             config/routes.json
