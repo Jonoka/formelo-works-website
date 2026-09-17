@@ -6,11 +6,13 @@ import type { ArticlePreview } from '../../../../shared/editorial';
 import type { CmsArticleDraftPreviewData } from '../../../../shared/cms-draft-preview';
 import { dev05bDraftScope } from '../../../../shared/cms-draft-preview';
 import { createDraftPreviewReader, draftPreviewConfigFromEnvironment } from '../../lib/server/cms-draft-preview-query';
+import { assertCmsDraftPreviewDevCommand } from '../../lib/server/cms-draft-preview-mode';
 export async function getStaticPaths() {
   const runtime = readRuntime();
   const { articlePreviews, siteSettings } = await loadContent(runtime.contentMode);
   let cmsDraft: CmsArticleDraftPreviewData | null = null;
   if (process.env['DEV_CMS_DRAFT_PREVIEW'] === '1') {
+    assertCmsDraftPreviewDevCommand(import.meta.env['FORMELO_ASTRO_COMMAND']);
     if (runtime.deployEnv !== 'local') throw new Error('CMS_DRAFT_PREVIEW_LOCAL_ONLY');
     cmsDraft = await createDraftPreviewReader(draftPreviewConfigFromEnvironment(process.env)).read(dev05bDraftScope.documentId, dev05bDraftScope.slug);
   }

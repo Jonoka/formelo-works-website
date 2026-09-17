@@ -60,7 +60,7 @@ Windows 先用 `where.exe git` 定位实际 Git Bash，本机为 `D:\Git\bin\bas
 
 本地 Studio 用 `npm run studio:dev`，只监听 `127.0.0.1:3333`；本项目当前依赖图要求根 `vite@7.3.6` 供 Sanity CLI/plugin-react，Astro 7.3.2 自己保留嵌套 Vite 8.3.0，Rolldown 继续固定 1.2.8。不要删除这一拆分后再让 npm 自动提升到单一 Vite 8，也不要以升级 Sanity 主版本作为修复。
 
-真实 Draft 预览不是 `CONTENT_MODE=sanity`。只在本地显式设置 `DEV_CMS_DRAFT_PREVIEW=1` 后，既有 `/blog/what-to-send-for-a-clothing-quote/` 才由服务器读取授权 ID；失败直接报错，不 fallback mock。验证可运行 `npm run verify:cms-draft-live -- "<exact expected excerpt>"`，输出只应包含文档 ID/revision/截图计数等脱敏证据。普通 `npm run build` 不设置该变量，并必须继续通过 CMS boundary / secret 扫描。
+真实 Draft 预览不是 `CONTENT_MODE=sanity`。只有本地显式设置 `DEV_CMS_DRAFT_PREVIEW=1` 且实际执行 `astro dev` 时，既有 `/blog/what-to-send-for-a-clothing-quote/` 才由服务器读取授权 ID；失败直接报错，不 fallback mock。任何 `astro build`（根/workspace/直接入口，包含 `--mode development`）若带该开关，必须在配置阶段以 `CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN` 拒绝，早于 token/Draft 网络读取与 HTML 输出；路由还会再次要求实际 command 为 `dev`。普通 build 的 CMS boundary marker/secret 扫描只是第二道防线。当前真实 Draft 的只读审阅可运行 `npm run verify:cms-draft-live`，脚本先独立读取 revision，再验证 published 为空、loopback 页面 revision 一致，并在 `.local/cms-draft-review/<time>/` 生成 `cms-live-*` PNG 与只含哈希/长度/修订的脱敏 evidence；它不修改 Draft。
 
 Studio 保存 Draft、Sanity publish、网站发布继续是三件事。当前测试 Draft 缺作者/发布日期/事实确认/封面许可是有意状态；不要为消除编辑器 validation 填假数据。除非用户另行明确授权，不得 Publish / Unpublish、上传媒体、deploy schema、`sanity deploy`、部署网站、配置 Cloudflare 或 webhook。
 

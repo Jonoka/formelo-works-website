@@ -14,7 +14,7 @@ const { toc } = prepareEditorialBody(article.body);
 ---
 <BaseLayout title={article.seo.seoTitle} description={article.seo.seoDescription} brandName={brandName} showMobileContact referenceCode={article.referenceCode}>
   <Breadcrumb label={article.title} journalParent />
-  <article class="article-page shell" data-preview-kind={article.kind} data-preview-status={article.status} data-production-allowed="false" data-article-slug={article.slug}>
+  <article class="article-page shell" data-preview-kind={article.kind} data-preview-status={article.status} data-production-allowed="false" data-article-slug={article.slug} data-cms-revision={cmsDraft ? article.revision : undefined}>
     <header class="article-header">
       <p class="eyebrow">Journal / Buying with clarity</p>
       <p class="draft-status">{cmsDraft ? 'CMS draft preview / Not published' : 'Editorial draft / Not published'}</p>

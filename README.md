@@ -62,7 +62,7 @@ npm audit --audit-level=high
 npm run preview
 ```
 
-`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际 GROQ 内存查询/严格转换、隔离原组件渲染、实际生产构建阻断、HTML/内链/服务器信息泄漏检查，以及开发 / 静态服务器的 Chromium 回归。普通站点输出仅在 `web/dist/`；测试专用 HTML 证据在 `review/cms-render-offline/`，不是普通页面，Studio 不自动参与构建。
+`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际 GROQ 内存查询/严格转换、隔离原组件渲染、Draft-build 隔离、实际 production 构建阻断、HTML/内链/服务器信息泄漏检查，以及开发 / 静态服务器的 Chromium 回归。Draft-build 隔离会用假 token + 本地 fetch canary 实际调用根 build、workspace build、直接 `astro build` 及 `astro build --mode development`，要求在任何 Draft fetch / HTML 输出前明确拒绝；该测试不接触 Sanity 云端。普通站点输出仅在 `web/dist/`；测试专用 HTML 证据在隔离目录，不是普通页面，Studio 不自动参与构建。
 
 `loadContent` 统一读取 Home / Category / 固定页、明确的 `article_preview` 和 `legal_preview`。正式 `articles` 仍为空，无假作者、公开发布日期或审核记录。受控正文仅支持当前所需节点；>=3 个 H2 自动生成去重目录；允许有效站内链接及 `config/editorial-sources.json` 精确审核的 HTTPS 文本来源链接，不放开第三方资源。`config/page-context.ts` 集中九个营销来源码，Article 仅页脚/移动联系组，Privacy / 404 为 null 且无营销区。SEO 品牌尾缀统一生成；十页逐页图片策略固定。Journal 导航为 `/blog/`、Privacy 页脚有效；原 `/#journal` 与 Manufacturing 六锚点保留。
 
@@ -84,7 +84,7 @@ bash -n scripts/publish-github.sh
 
 所有 HTML 为 noindex，robots 禁抓；不生成假域名 canonical / sitemap。**这些措施不是公网访问控制：本轮没有任何部署，禁止上传 dist 到公共托管。**
 
-正式 published 只读函数仍未接入 `loadContent`。DEV-05B 的真实 Draft reader 只对一个固定项目/数据集/文档 ID 开放，并且仅在本地显式 `DEV_CMS_DRAFT_PREVIEW=1` 时替换询价文章；失败不回退 mock。普通构建继续扫描并拒绝 CMS provider/secret 泄漏。不能用 Draft 保存或 Sanity 技术 publish 替代事实审核或网站上线，不能把离线夹具导入云端。
+正式 published 只读函数仍未接入 `loadContent`。DEV-05B 的真实 Draft reader 只对一个固定项目/数据集/文档 ID 开放；只有显式 `DEV_CMS_DRAFT_PREVIEW=1`、`DEPLOY_ENV=local` 且 Astro **实际命令为 `dev`** 时才替换询价文章。配置集成在 `astro:config:setup` 看到 `command=build` 时会立即报 `CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN`，早于路由、Draft fetch 和 HTML 输出；`--mode development` 不能绕过，路由还会再次核对实际命令。失败不回退 mock，普通构建的 CMS marker/secret 扫描只是第二道防线。不能用 Draft 保存或 Sanity 技术 publish 替代事实审核或网站上线，不能把离线夹具导入云端。
 
 Sanity 必须由账号持有人提供真实授权的环境配置后才可启动，见 [Studio 说明](studio/README.md)。不要把 token 写入任何 `SANITY_STUDIO_` 前缀变量。完整架构见 [技术边界](docs/development/architecture.md)。
 

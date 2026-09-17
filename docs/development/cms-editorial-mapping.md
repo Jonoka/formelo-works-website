@@ -75,7 +75,7 @@ Sanity `published` 是查询视图，不是工厂审核结果，也不是网站�
 
 正式 `web/src/lib/server/cms-article-query.ts` 继续固定 `perspective: published` 和完整发布校验。DEV-05B 另建 `web/src/lib/server/cms-draft-preview-query.ts` 与 `shared/cms-draft-preview.ts`：只允许上述一个 project / dataset / document ID / slug，使用 `perspective: drafts`、`cache:no-store`、最大 1 MiB、完整截止时间、无重试、无 mock fallback；converter 返回 `kind: cms_article_draft_preview`、`websitePublication:not_published`、`productionAllowed:false`，不生成作者、发布日期、事实确认日期或封面许可字段。正文仍经 `convertCmsBody` → `EditorialBlock[]` → 既有 `EditorialBody`，未知块、危险协议、坏表格和未授权内部引用继续失败。
 
-本地页面只有显式 `DEV_CMS_DRAFT_PREVIEW=1` 且 `DEPLOY_ENV=local` 时，才在既有询价文章 URL 上替换为该 Draft；普通 `loadContent` 仍仅接受 mock，默认 build 仍输出原十内容 URL + 404，`CONTENT_MODE=sanity` 和 production 门禁不解除。此预览不是通用 CMS provider、不是公开预览地址，也不允许枚举其他文档。
+本地页面的 Draft 替换需要三层条件：显式 `DEV_CMS_DRAFT_PREVIEW=1`、`DEPLOY_ENV=local`，以及 Astro **实际命令为 `dev`**。`web/astro.config.ts` 的 `astro:config:setup` 读取 Astro 提供的 `command`；只要该开关遇到 `command=build`，立即抛 `CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN`，早于路由执行、Draft HTTP 请求和 HTML 输出。该判断不依赖 npm 脚本名、`NODE_ENV` 或 Vite `mode`，所以 `astro build --mode development` 仍被拒绝。配置阶段同时把实际 command 注入服务端路由，`[slug].astro` 在读取 token / Draft 前再次要求 `dev`。普通 `loadContent` 仍仅接受 mock，默认 build 仍输出原十内容 URL + 404；`CONTENT_MODE=sanity` 和 production 门禁不解除。`check-cms-boundary.mjs` 另扫描 Draft provider / 状态 / 开关标记，但只是第二道防线，不能替代前置拒绝。此预览不是通用 CMS provider、不是公开预览地址，也不允许枚举其他文档。
 
 真实 Studio 已打开该测试 Draft，并只修改技术联调 excerpt。保存前 `_rev` 为 `RyoTMvUwfjfi4GD1LaCRuB`，保存后为 `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`；`factReviewStatus` 仍为 `pending`，作者、公开日期、事实确认、封面与素材许可仍未填写。随后服务器只读 token 实际读到新 revision 和新 excerpt，而正式 published reader 仍得到空结果。没有 publish、unpublish、媒体上传、schema deploy、Studio deploy、网站部署或 Cloudflare 操作。
 

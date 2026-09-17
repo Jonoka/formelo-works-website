@@ -12,11 +12,8 @@ import { articleReaderConfigFromEnvironment, createArticleReader } from '../web/
 import { createDraftPreviewReader, draftPreviewConfigFromEnvironment } from '../web/src/lib/server/cms-draft-preview-query';
 
 loadLocalEnvironment();
-const expectedExcerpt = process.argv[2];
-if (!expectedExcerpt) throw new Error('LIVE_CMS_EVIDENCE: pass the exact expected draft excerpt as the first argument.');
 const draftReader = createDraftPreviewReader(draftPreviewConfigFromEnvironment(process.env));
 const draft = await draftReader.read(dev05bDraftScope.documentId, dev05bDraftScope.slug);
-assert.equal(draft.excerpt, expectedExcerpt, 'LIVE_CMS_EVIDENCE: live draft excerpt does not match the expected saved value.');
 let publishedHidden = false;
 try {
   await createArticleReader(articleReaderConfigFromEnvironment(process.env)).read(dev05bDraftScope.documentId, dev05bDraftScope.slug);
@@ -25,7 +22,8 @@ try {
 }
 assert.equal(publishedHidden, true, 'LIVE_CMS_EVIDENCE: published perspective unexpectedly exposed the draft.');
 
-const output = resolve('.local/cms-draft-live'); mkdirSync(output, { recursive: true });
+const runStamp = new Date().toISOString().replace(/[:.]/g, '-');
+const output = resolve('.local/cms-draft-review', runStamp); mkdirSync(output, { recursive: true });
 const child = spawn(process.execPath, ['scripts/run-tool.mjs', 'astro', 'dev', '--root', 'web', '--host', '127.0.0.1', '--port', '4323'], {
   cwd: process.cwd(), env: { ...process.env, DEV_CMS_DRAFT_PREVIEW: '1', ASTRO_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1' }, stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -57,17 +55,19 @@ try {
     const response = await page.goto(target); assert.equal(response?.status(), 200);
     assert.equal(await page.locator('h1').innerText(), draft.title);
     assert.equal(await page.locator('.article-header .draft-status').innerText(), 'CMS draft preview / Not published');
-    assert.equal(await page.locator('.article-header .intro').innerText(), expectedExcerpt);
+    assert.equal(await page.locator('.article-header .intro').innerText(), draft.excerpt);
+    assert.equal(await page.locator('.article-page').getAttribute('data-cms-revision'), draft.revision, 'Rendered draft revision must match the independent server read.');
     assert.equal(await page.locator('.article-cover').count(), 0, 'Live draft must not invent or reuse an approved CMS cover.');
     assert.equal(await page.locator('.editorial-template pre').count(), 1); assert.equal(await page.locator('table').count(), 1); assert.equal(await page.locator('.article-toc a').count(), 7);
     assert.equal(await page.locator('form, iframe, input, textarea, a[href^="mailto:"], a[href*="wa.me"]').count(), 0);
+    assert.equal(await page.locator('.pending-contact button:not([disabled])').count(), 0, 'Pending contact controls must remain disabled.');
     const size = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth })); assert.ok(size.document <= size.viewport + 1, JSON.stringify(size));
     assert.deepEqual(errors, []); assert.deepEqual(external, []);
     const captures = [
-      { name: `quote-live-${width}`, fullPage: true, prepare: async () => page.evaluate(() => scrollTo(0, 0)) },
-      { name: `quote-live-${width}-viewport`, fullPage: false, prepare: async () => page.evaluate(() => scrollTo(0, 0)) },
-      { name: `quote-live-${width}-table`, fullPage: false, prepare: async () => page.locator('.editorial-table').scrollIntoViewIfNeeded() },
-      { name: `quote-live-${width}-template`, fullPage: false, prepare: async () => page.locator('.editorial-template').scrollIntoViewIfNeeded() },
+      { name: `cms-live-quote-${width}`, fullPage: true, prepare: async () => page.evaluate(() => scrollTo(0, 0)) },
+      { name: `cms-live-quote-${width}-viewport`, fullPage: false, prepare: async () => page.evaluate(() => scrollTo(0, 0)) },
+      { name: `cms-live-quote-${width}-table`, fullPage: false, prepare: async () => page.locator('.editorial-table').scrollIntoViewIfNeeded() },
+      { name: `cms-live-quote-${width}-template`, fullPage: false, prepare: async () => page.locator('.editorial-template').scrollIntoViewIfNeeded() },
     ];
     for (const capture of captures) {
       await capture.prepare(); const path = `${output}/${capture.name}.png`; await page.screenshot({ path, fullPage: capture.fullPage, animations: 'disabled' });
@@ -76,12 +76,15 @@ try {
     }
     await page.close();
   }
-  const evidence = { scope: 'DEV-05B local-only real Sanity draft preview; never a published-site or visual-approval claim.', head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  const hashText = (value: string) => createHash('sha256').update(value).digest('hex');
+  const evidence = { scope: 'DEV-05B local-only real Sanity draft review; distinct from default mock CI screenshots and never a published-site or visual-approval claim.', head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     branch: execFileSync('git', ['branch', '--show-current'], { encoding: 'utf8' }).trim(), platform: process.platform, node: process.version, browser: browser.version(), testedAt: new Date().toISOString(),
-    projectId: dev05bDraftScope.projectId, dataset: dev05bDraftScope.dataset, documentId: draft.documentId, revision: draft.revision, excerpt: draft.excerpt,
-    draftPerspectiveReadable: true, publishedPerspectiveReadable: false, productionAllowed: draft.productionAllowed, screenshots };
+    projectId: dev05bDraftScope.projectId, dataset: dev05bDraftScope.dataset, documentId: draft.documentId, revision: draft.revision, draftSavedAt: draft.draftSavedAt,
+    factReviewStatus: draft.factReviewStatus, titleLength: draft.title.length, titleSha256: hashText(draft.title), excerptLength: draft.excerpt.length, excerptSha256: hashText(draft.excerpt),
+    bodyBlocks: draft.body.length, tables: draft.body.filter(block => block.type === 'table').length, templates: draft.body.filter(block => block.type === 'template').length,
+    draftPerspectiveReadable: true, publishedPerspectiveReadable: false, productionAllowed: draft.productionAllowed, contactsConfigured: false, screenshots };
   writeFileSync(`${output}/evidence.json`, JSON.stringify(evidence, null, 2));
-  console.log(JSON.stringify({ documentId: draft.documentId, revision: draft.revision, publishedPerspectiveReadable: false, screenshots: screenshots.length, evidence: '.local/cms-draft-live/evidence.json' }));
+  console.log(JSON.stringify({ documentId: draft.documentId, revision: draft.revision, publishedPerspectiveReadable: false, screenshots: screenshots.length, evidence: `${output}/evidence.json` }));
 } catch (error) {
   const token = process.env['SANITY_READ_TOKEN']; const safe = token ? serverLog.split(token).join('[REDACTED]') : serverLog;
   if (safe) console.error(safe.slice(-4000)); throw error;
