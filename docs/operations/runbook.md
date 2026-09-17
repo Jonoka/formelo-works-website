@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-私有仓库 `Jonoka/formelo-works-website` 的初始化 PR #1 已合并。DEV-01 在 `feat/project-foundation` 开发工程底座，不向 main 直接写入或强制推送。
-`web/` 为本地 mock 静态工程，`studio/` 为独立配置与模型骨架；没有账号接入或部署。启动和检查命令见根 README。
+私有仓库 `Jonoka/formelo-works-website` 的 PR #6 已由用户合并；本轮基于 main `11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0`，在 `feat/cms-editorial-foundation` 实现 DEV-05A 离线文章链路，不向 main 直接写入或强制推送。
+`web/` 继续是十页 mock 静态工程，独立 CMS schema/转换/只读查询未成为全站 provider；没有账号接入或部署。启动和检查命令见根 README。
 
 ## 本地获取与检查
 
@@ -11,8 +11,8 @@
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
-# DEV-01 PR 尚未合并时：
-git switch --track origin/feat/project-foundation
+# 本轮 PR 尚未合并、且远端目标分支确实存在时：
+git switch --track origin/feat/cms-editorial-foundation
 npm ci
 npm exec -- playwright install chromium
 npm run verify
@@ -26,7 +26,7 @@ bash -n scripts/publish-github.sh
 ## 同步异常
 
 核对 owner / repo、当前分支和远端 SHA。没有写入权限时停止，请用户授权该仓库，不扩大到全部仓库。
-non-fast-forward 时先 fetch 并比较双方历史，合并或另开分支解决，不 force push。失败不得报告为成功，不删除远端仓库来重试。
+non-fast-forward 时先 fetch 并比较双方历史，报告分叉后等待用户决定；不 reset/clean/force push，不另建替代分支绕过已有工作，不自动合并。失败不得报告为成功，不删除远端仓库来重试。
 GitHub API 写入时读取最新 base commit / tree，叠加本次变化，创建 commit 后仅更新任务分支；不要用空 tree 覆盖未知文件。
 
 ## 旧建仓脚本
@@ -43,6 +43,16 @@ GitHub API 写入时读取最新 base commit / tree，叠加本次变化，创�
 本地开发仅监听 127.0.0.1。浏览器测试需 4321 / 4322 空闲；先停止自己启动的本项目服务器，不强行杀死不明进程。遇到内存分配失败应记录环境和失败日志，不把未执行的后续步骤算作通过；Linux CI 结果单独记录。
 
 Sanity 授权后补充真实项目、数据集和只读构建权限，文档只写环境变量名，不写密钥值。未配置的 Studio 应明确失败，而不是填入演示账号以制造构建成功。
+
+## DEV-05A 离线文章检查与只读联调门禁
+
+常规 `npm ci` / `npm run verify` 不需要 Sanity 配置；新增测试与最终产物边界检查由现有命令执行。`groq-js@1.30.3` 是原锁图内版本的显式 devDependency，Query HTTP 模块使用 Node 原生 fetch，不新增生产客户端。锁图仍有已知中危链条，真实 Studio 使用前必须查看当前 audit，禁止用 audit fix --force 隐藏风险。
+
+Windows 先用 `where.exe git` 定位实际 Git Bash，本机为 `D:\Git\bin\bash.exe`；可显式执行 Bash 语法检查，PYTHONUTF8=1 只对当前验证进程启用。本轮向子进程 PATH 加 Git Bash 仍未解决原生 Python 调用系统 WSL Bash 的两个旧 bootstrap 用例，因此只记录 18/20，不冒充全套通过。不为测试修改全局 PATH、安装 WSL、修改期望结果或终止未知服务。Linux CI 与 Windows 结果分别记录。
+
+服务器只读入口与环境变量见 [CMS 映射](../development/cms-editorial-mapping.md)。没有授权时不调用网络默认 transport，不读取无关账号/配置文件、不猜 token。取得项目/数据集、最小 token、指定文档及必要引用/资产读取授权后，才单独执行一篇的 read，输出脱敏状态和修订；不改变 CONTENT_MODE，不启动 Studio，不写入/上传/发布/撤回。只读成功也不是网站上线成功。
+
+当前平台与 head 证据见 [DEV-05A 验证](cms-editorial-verification.md) 及 PR 精确 head 评论；原 [PR #6 记录](journal-privacy-verification.md) 仅作历史。保留旧报告，本轮截图文件按实际生成目录列出，不借旧截图作当前证据。
 
 ## 后续发布与恢复
 

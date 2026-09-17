@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前为 **十个内容 URL、八类模板与工程 404 的本地概念结构**。PR #5 已合并至 `main@4469a1735465435508a3e510fcb6602e848a5264`；本轮 `feat/journal-privacy-pages` 只补 Journal、两篇完整英文采购草稿与未生效 Privacy。检查状态见本轮验证记录，不表示正式 CMS、真实内容、生产 SEO 或全站验收完成；不自动合并或部署。
+> 当前为 **十个内容 URL、八类模板与工程 404 的本地概念结构**。PR #6 已由用户合并至 `main@11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0`。本轮 `feat/cms-editorial-foundation` 只做 DEV-05A 文章 schema → 只读查询 → 严格转换 → 既有正文组件的离线链路；不扩页面，不切换普通页面来源。真实 CMS 待授权，全站 sanity 与 production 门禁保留，不自动合并或部署。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 
@@ -25,7 +25,7 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 已整理：三个完整原始 Markdown 文档、选定首页的 WebP 查看版、当前设计决定与变量、页面和资产清单、协作规则、检查脚本、离线测试及仓库检查 CI。
 **查看图为 768×1152，来自用户选定的 1024×1536 PNG，经过缩小及有损压缩。** PNG 原图和两份 Word 导出仍在原会话的 `formelo-works-website-bootstrap.zip`，未重复上传到 Git；原始及查看版哈希见 [导入清单](docs/reference/import-manifest.json)。Markdown 是后续维护依据。
 
-`web/` 为可运行的 Astro + TypeScript 静态工程；`studio/` 为独立 Sanity 配置及四类内容模型骨架，尚未连接账号。共享内容类型、构建模式校验、单元 / schema / 静态产物 / 浏览器检查和 CI 位于仓库中。
+`web/` 为可运行的 Astro + TypeScript 静态工程；`studio/` 保留四类主要文档，并补齐当前两文所需的受控正文、链接、表格和模板对象，尚未连接账号。独立服务器只读模块、严格转换器与离线 GROQ/原组件渲染测试已实现。字段、状态与失败策略见 [CMS 映射](docs/development/cms-editorial-mapping.md)，实际平台/提交/检查证据见 [DEV-05A 验证](docs/operations/cms-editorial-verification.md)。
 
 在原六页基础上增加 `/blog/`、`/blog/what-to-send-for-a-clothing-quote/`、`/blog/moq-per-style-per-color/`、`/privacy/`；输出十内容 URL 加 404，共 11 个 HTML。三张服装概念图文件保持不变；两文暂复用已登记品类图，独立封面仍待完成。Privacy 为未生效草稿，没有营销联系区、移动联系条或假联系人。本轮见 [Journal / Privacy 验证](docs/operations/journal-privacy-verification.md)、[设计衔接](docs/design/journal-article-legal-handoff.md)、[路由说明](docs/development/routes-and-navigation.md) 与 [工厂资料清单](docs/content/factory-materials-checklist.md)。[PR #5 核心内页记录](docs/operations/core-information-verification.md)、[PR #4 记录](docs/operations/pr-4-category-review.md) 和更早日志保留为历史，不改成当前 head 的结果。
 
@@ -36,18 +36,18 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 ```bash
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
-# 在新克隆中审阅本轮 Journal / Privacy 分支；先确认远端分支存在：
+# 在新克隆中审阅本轮 DEV-05A 分支；先确认远端分支存在：
 git fetch origin
-git switch --track origin/feat/journal-privacy-pages
+git switch --track origin/feat/cms-editorial-foundation
 npm ci
 npm run dev
 # 打开终端打印的本机地址，默认 http://127.0.0.1:4321
 # 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
-main 已包含 PR #5 的验收基线；本轮 PR 合并前在 feat/journal-privacy-pages 审阅。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+main 已包含 PR #6 的文章/隐私/手机数量表基线；本轮 PR 合并前在 feat/cms-editorial-foundation 审阅。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
 
-使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；本轮没有升级该运行时或依赖图。
+使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；本轮没有升级运行时或包版本图，只将已锁定的 groq-js 1.30.3 显式声明为测试依赖，lockfile 由 npm 正常更新。
 
 ## 检查与静态预览
 
@@ -62,13 +62,13 @@ npm audit --audit-level=high
 npm run preview
 ```
 
-`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际生产构建阻断、HTML 和内链检查，以及开发 / 静态服务器的 Chromium 回归。构建输出仅在 `web/dist/`，Studio 不自动参与构建。
+`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际 GROQ 内存查询/严格转换、隔离原组件渲染、实际生产构建阻断、HTML/内链/服务器信息泄漏检查，以及开发 / 静态服务器的 Chromium 回归。普通站点输出仅在 `web/dist/`；测试专用 HTML 证据在 `review/cms-render-offline/`，不是普通页面，Studio 不自动参与构建。
 
 `loadContent` 统一读取 Home / Category / 固定页、明确的 `article_preview` 和 `legal_preview`。正式 `articles` 仍为空，无假作者、公开发布日期或审核记录。受控正文仅支持当前所需节点；>=3 个 H2 自动生成去重目录；允许有效站内链接及 `config/editorial-sources.json` 精确审核的 HTTPS 文本来源链接，不放开第三方资源。`config/page-context.ts` 集中九个营销来源码，Article 仅页脚/移动联系组，Privacy / 404 为 null 且无营销区。SEO 品牌尾缀统一生成；十页逐页图片策略固定。Journal 导航为 `/blog/`、Privacy 页脚有效；原 `/#journal` 与 Manufacturing 六锚点保留。
 
 Windows 可使用现有 `.local/runtime-review-20260913/node-v24.21.0-win-x64` 便携运行时，并把该目录置于当前命令 PATH 前部；它不改变全局 Node。生成的 tokens.css 固定 LF，避免 Windows 换行转换造成字节一致性检查误报。真实浏览器 UI 缩放、真机和真实收发仍需另行授权验证。
 
-检查结果按运行时版本和平台分别记录；旧运行时的绿色 CI 不代表新版本已通过。本轮平台差异、Node 24.21.0 / npm 11.19.1 的 Linux CI 对应 SHA / run ID 和剩余限制，见 [本轮验证记录](docs/operations/journal-privacy-verification.md) 与 PR 当前 head 的检查和审阅记录。PR #5 历史审计包含 Sanity CLI / UUID 链上的 **4 个中危依赖条目**；本轮实际审计另行记录，不宣称零漏洞；Node 二进制与 npm 依赖图的安全核查是两件事。
+检查结果按运行时版本和平台分别记录；旧运行时的绿色 CI 不代表新版本已通过。本轮平台差异、Node 24.21.0 / npm 11.19.1 的 Linux CI 对应 SHA / run ID 和剩余限制，见 [本轮验证记录](docs/operations/cms-editorial-verification.md) 与 PR 当前 head 的检查和审阅记录。PR #5 历史审计包含 Sanity CLI / UUID 链上的 **4 个中危依赖条目**；本轮实际审计另行记录，不宣称零漏洞；Node 二进制与 npm 依赖图的安全核查是两件事。
 
 原文档和建仓安全测试仍保留；Python 3.9+、Git、Bash 为其前提，Linux CI 执行全套：
 
@@ -83,6 +83,8 @@ bash -n scripts/publish-github.sh
 默认 `DEPLOY_ENV=local`、`CONTENT_MODE=mock`、`CONCEPT_MODE=true`、`ANALYTICS_MODE=off`。根 `.env.local` / `.env` 可选，已有进程环境变量优先。`DEPLOY_ENV=production`、`CONTENT_MODE=sanity`、关闭 concept 或开启 analytics 都会报错，而不是回退或输出假的生产内容。
 
 所有 HTML 为 noindex，robots 禁抓；不生成假域名 canonical / sitemap。**这些措施不是公网访问控制：本轮没有任何部署，禁止上传 dist 到公共托管。**
+
+DEV-05A 只读函数未接入 loadContent，不会因某篇文章查询成功而混用普通页面的数据源。测试 transport 与夹具仅离线使用。真实查询须另有项目/数据集、最小服务器只读 token、指定文章 ID 及其必要引用/资产读取许可；没有这些输入时，缺配置/鉴权/超时/空数据明确失败。不能用 CMS 技术发布替代事实审核或网站上线，不能把夹具导入云端。
 
 Sanity 必须由账号持有人提供真实授权的环境配置后才可启动，见 [Studio 说明](studio/README.md)。不要把 token 写入任何 `SANITY_STUDIO_` 前缀变量。完整架构见 [技术边界](docs/development/architecture.md)。
 

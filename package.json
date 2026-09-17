@@ -17,8 +17,8 @@
     "dev": "npm run dev --workspace @formelo/web",
     "preview": "npm run preview --workspace @formelo/web",
     "check": "npm run check:tokens && npm run check --workspaces --if-present && tsc --noEmit -p tsconfig.json",
-    "test": "tsx --test --test-concurrency=1 tests/foundation.test.ts tests/schema.test.ts tests/homepage.test.ts tests/static-output.test.ts tests/editorial.test.ts",
-    "build": "npm run check:tokens && npm run build --workspace @formelo/web && node scripts/check-built-site.mjs",
+    "test": "tsx --test --test-concurrency=1 tests/foundation.test.ts tests/schema.test.ts tests/homepage.test.ts tests/static-output.test.ts tests/editorial.test.ts tests/cms-editorial.test.ts tests/cms-render.test.ts tests/cms-review.test.mjs",
+    "build": "npm run check:tokens && npm run build --workspace @formelo/web && node scripts/check-built-site.mjs && node scripts/check-cms-boundary.mjs",
     "test:browser": "playwright test",
     "verify": "npm run check:runtime && npm run check && npm test && npm run build && npm run test:browser",
     "studio:dev": "npm run dev --workspace @formelo/studio",
@@ -34,6 +34,7 @@
     "@playwright/test": "1.63.0",
     "@sanity/schema": "5.31.2",
     "@types/node": "24.13.4",
+    "groq-js": "1.30.3",
     "tsx": "4.23.13",
     "typescript": "6.0.3"
   }

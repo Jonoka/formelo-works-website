@@ -69,12 +69,26 @@ export interface Category {
   seo: Seo;
 }
 export interface Article {
+  // Persisted CMS shape is untrusted until the dedicated converter validates it.
+  // Never assign this raw body to EditorialBody or treat this as ArticlePreview.
   _type: 'article';
+  _id: string;
+  _rev: string;
   title: string;
   slug: { current: string };
   excerpt: string;
   referenceCode: string;
   seo: Seo;
+  body: unknown[];
+  coverImage: ApprovedImage;
+  authorDisplay: string;
+  publishedAt: string;
+  contentUpdatedAt: string;
+  factReviewStatus: 'pending' | 'confirmed';
+  factConfirmedAt: string;
+  relatedCategories?: { _type: 'reference'; _ref: string }[];
+  relatedArticles?: { _type: 'reference'; _ref: string }[];
+  linkToManufacturing?: boolean;
 }
 export const homepageAssetIds = ['HERO-001', 'CAT-TS-001', 'CAT-HD-001'] as const;
 export type HomepageAssetId = (typeof homepageAssetIds)[number];

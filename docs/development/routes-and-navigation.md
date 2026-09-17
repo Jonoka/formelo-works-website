@@ -18,6 +18,10 @@ config/routes.json 的十个内容 URL、八类模板已实现为本地概念结
 
 来源码的共享类型与值在 config/page-context.ts，必须和十页计划中的对应记录一致。HTML 构建检查对十条路由、资产 ID、图片策略、文章/隐私状态、事实/渠道状态、模块脚本和生产阻断有明确限制；修改路由配置不能自动放开新页面。
 
+## DEV-05A 来源边界
+
+当前两个 Article URL、slug 和来源码不变。CMS schema / 查询 / 严格转换只处理这两个已有文章契约，未接入任何普通路由，未增加作者、标签、CMS 预览或临时页面。默认十页继续 loadContent(mock)，全站 sanity 保护保留，无隐式混合来源。tests 中的隔离 Astro 根目录只用于原 EditorialBody 的离线渲染验证，不属于网站路由。字段/状态和失败策略见 [CMS 映射](cms-editorial-mapping.md)。
+
 ## 导航行为
 
 Logo 返回首页。Clothing 是原生展开控件，只有两条真实品类路径；不链接 /clothing/。Manufacturing / Our Factory / Contact 指向相应内页，当前页面显示 aria-current 文本而非自链接。页脚共享同一规则。

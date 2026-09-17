@@ -30,3 +30,19 @@ Privacy 只记录本地概念现状，状态为 Draft privacy notice — not in 
 ## 授权联调前置条件
 
 账号与接待人提供并获准测试后，再安排邮箱/WhatsApp 的真实打开、主动发送、工厂收件与回复，以及复制成功/失败降级。只打开客户端不算收到询盘；本轮没有发送任何消息。真机、Safari/Firefox/Edge、CMS 接入、Privacy 实际主体/工具文本和生产发布分别安排，不因三页概念完成而关闭。
+
+## DEV-05A 字段对应与阻断阶段
+
+继续使用本清单，不新建一份“已确认工厂事实”。以下只是收集项和校验对应，不代填实际值。
+
+| 待提供 / 确认 | 字段 / 工程对应 | 阻断阶段 |
+|---|---|---|
+| 账号持有人明确的项目、数据集、指定文章 ID、最小服务器只读权限及必要引用/资产元数据读取许可 | SANITY_PROJECT_ID / SANITY_DATASET / SANITY_READ_TOKEN / SANITY_ARTICLE_READ_IDS；固定 SANITY_API_VERSION=2025-02-19 | 真实 CMS 只读联调；当前待授权，绝不猜账号或打印 token |
+| 两文逐项事实及可公开署名 | article.authorDisplay、factReviewStatus、factConfirmedAt；确认人/依据留内部审核记录 | 从草稿到可供交付的数据；没有审核不得用技术 publish 补确认 |
+| 实际公开/更新日期 | article.publishedAt、contentUpdatedAt | 未有公开日期则继续作为本地草稿，不用开发/部署时间代填；禁止未来或相互矛盾日期 |
+| 两文标题、摘要、既有 slug 与来源码、SEO 草稿 | title / excerpt / slug / referenceCode / seo | 字段转换；来源码固定配对不等于工厂正文已审核，生产 SEO 仍单独阻断 |
+| 文内引用对象的可用性与对应事实 | 已发布 page/category/article 强引用、事实日期、文章审核状态；资产引用只查询必要元数据 | 单篇查询转换；坏引用、draft/release、重复路由不能被吞掉 |
+| 独立文章封面与授权范围 | JOURNAL-QUOTE-001 / JOURNAL-MOQ-001 仍待制作；未来 approvedImage 的 asset、alt、publicUseApproved、crop/hotspot | 真实内容/素材替换；测试中的 synthetic true 不是素材许可，不导入云端 |
+| 品类/制造 MOQ、联系方式与 Privacy 事实 | 继续沿用上表原有收集项 | 全站内容、渠道、隐私与生产发布；本轮没有改值或解除阻断 |
+
+当前十页仍使用原 mock 和明确登记的概念图复用。DEV-05A 仅验证离线 schema/查询/转换/正文渲染；真实内容写入、上传、发布/撤回、Studio 构建/部署及工厂消息收发必须单独授权。完整字段和失败策略见 [CMS 映射](../development/cms-editorial-mapping.md)。
