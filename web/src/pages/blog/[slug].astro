@@ -3,11 +3,20 @@ import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { loadContent } from '../../lib/content';
 import { readRuntime } from '../../../../config/runtime';
 import type { ArticlePreview } from '../../../../shared/editorial';
+import type { CmsArticleDraftPreviewData } from '../../../../shared/cms-draft-preview';
+import { dev05bDraftScope } from '../../../../shared/cms-draft-preview';
+import { createDraftPreviewReader, draftPreviewConfigFromEnvironment } from '../../lib/server/cms-draft-preview-query';
 export async function getStaticPaths() {
-  const { articlePreviews, siteSettings } = await loadContent(readRuntime().contentMode);
-  return articlePreviews.map(article => ({ params: { slug: article.slug }, props: { article, brandName: siteSettings.brandName } }));
+  const runtime = readRuntime();
+  const { articlePreviews, siteSettings } = await loadContent(runtime.contentMode);
+  let cmsDraft: CmsArticleDraftPreviewData | null = null;
+  if (process.env['DEV_CMS_DRAFT_PREVIEW'] === '1') {
+    if (runtime.deployEnv !== 'local') throw new Error('CMS_DRAFT_PREVIEW_LOCAL_ONLY');
+    cmsDraft = await createDraftPreviewReader(draftPreviewConfigFromEnvironment(process.env)).read(dev05bDraftScope.documentId, dev05bDraftScope.slug);
+  }
+  return articlePreviews.map(article => ({ params: { slug: article.slug }, props: { article: cmsDraft && article.slug === dev05bDraftScope.slug ? cmsDraft : article, brandName: siteSettings.brandName } }));
 }
-interface Props { article: ArticlePreview; brandName: string }
+interface Props { article: ArticlePreview | CmsArticleDraftPreviewData; brandName: string }
 const { article, brandName } = Astro.props;
 ---
 <ArticleLayout article={article} brandName={brandName} />

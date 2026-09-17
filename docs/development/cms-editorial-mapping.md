@@ -69,11 +69,15 @@ Sanity `published` 是查询视图，不是工厂审核结果，也不是网站�
 
 凭证只在服务器函数闭包内。模块未被 loadContent、路由或浏览器脚本引用，另有 Node 运行时边界。Studio 拒绝 `SANITY_STUDIO_*TOKEN/SECRET/PASSWORD/KEY` 形式的非空变量；这些公开前缀绝不能存 token。`scripts/check-cms-boundary.mjs` 对普通静态产物检查服务器标识、夹具标记和当前显式服务器 token；测试还验证随机假 token 不出现在隔离渲染产物/日志以及扫描器报错中。没有给 CI 配置真实 CMS 密钥。
 
-## 授权后的最小输入（本轮未执行）
+## DEV-05B · 单篇真实 Draft 预览边界
 
-账号持有人需确认项目 ID、数据集和只读权限，将最小只读 token 放入安全的服务器进程环境，不能贴到聊天、PR、Studio 公开变量或仓库。指定一个既有文章文档 ID / 既有 slug，并明确允许读取其必要引用与资产元数据；可选第二篇。涉及真实稿件或媒体的写入、上传、技术发布/撤回必须另行授权。
+2026-09-17 已在用户明确授权下连接真实 Sanity 项目 `iajvl7ka` / dataset `production`，范围仅限文档 `1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`（`what-to-send-for-a-clothing-quote`）。根 `.env.local` 只保存服务器读取配置；`studio/.env.local` 只保存 `SANITY_STUDIO_PROJECT_ID` / `SANITY_STUDIO_DATASET`，不放 token。两文件均被 Git 忽略，检查只确认必要变量存在，不打印值。
 
-服务器配置解析器只读取调用者显式传入的环境对象：`SANITY_PROJECT_ID`、`SANITY_DATASET`、`SANITY_READ_TOKEN`、`SANITY_ARTICLE_READ_IDS`（逗号分隔 1–2 个已授权 ID）、`SANITY_API_VERSION=2025-02-19`。不从 Studio 配置猜账号、不自动加载文件。随后单独调用 `createArticleReader(config).read(documentId, plannedSlug)`，只查看脱敏的通过/错误码和所选修订，不输出完整响应。此操作不是启动网站 Sanity 模式。
+正式 `web/src/lib/server/cms-article-query.ts` 继续固定 `perspective: published` 和完整发布校验。DEV-05B 另建 `web/src/lib/server/cms-draft-preview-query.ts` 与 `shared/cms-draft-preview.ts`：只允许上述一个 project / dataset / document ID / slug，使用 `perspective: drafts`、`cache:no-store`、最大 1 MiB、完整截止时间、无重试、无 mock fallback；converter 返回 `kind: cms_article_draft_preview`、`websitePublication:not_published`、`productionAllowed:false`，不生成作者、发布日期、事实确认日期或封面许可字段。正文仍经 `convertCmsBody` → `EditorialBlock[]` → 既有 `EditorialBody`，未知块、危险协议、坏表格和未授权内部引用继续失败。
+
+本地页面只有显式 `DEV_CMS_DRAFT_PREVIEW=1` 且 `DEPLOY_ENV=local` 时，才在既有询价文章 URL 上替换为该 Draft；普通 `loadContent` 仍仅接受 mock，默认 build 仍输出原十内容 URL + 404，`CONTENT_MODE=sanity` 和 production 门禁不解除。此预览不是通用 CMS provider、不是公开预览地址，也不允许枚举其他文档。
+
+真实 Studio 已打开该测试 Draft，并只修改技术联调 excerpt。保存前 `_rev` 为 `RyoTMvUwfjfi4GD1LaCRuB`，保存后为 `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`；`factReviewStatus` 仍为 `pending`，作者、公开日期、事实确认、封面与素材许可仍未填写。随后服务器只读 token 实际读到新 revision 和新 excerpt，而正式 published reader 仍得到空结果。没有 publish、unpublish、媒体上传、schema deploy、Studio deploy、网站部署或 Cloudflare 操作。
 
 ## 官方依据 / 2026-09-16 核对
 

@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-私有仓库 `Jonoka/formelo-works-website` 的 PR #6 已由用户合并；本轮基于 main `11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0`，在 `feat/cms-editorial-foundation` 实现 DEV-05A 离线文章链路，不向 main 直接写入或强制推送。
-`web/` 继续是十页 mock 静态工程，独立 CMS schema/转换/只读查询未成为全站 provider；没有账号接入或部署。启动和检查命令见根 README。
+私有仓库 `Jonoka/formelo-works-website` 的 PR #7 已由用户合并；DEV-05B 基于 main `accc4dcddaa3161a6fbae4c94ee9860d25739a49`，在 `feat/cms-editorial-integration` 继续单篇真实 Sanity Draft 联调，不向 main 直接写入或强制推送。
+`web/` 默认仍是十页 mock 静态工程；真实 CMS 只接入一个显式、本地、服务器端 Draft preview 路径，不成为全站 provider。真实 Studio 已本地连接账号，但没有 publish、媒体上传或任何部署。启动和检查命令见根 README。
 
 ## 本地获取与检查
 
@@ -12,7 +12,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/feat/cms-editorial-foundation
+git switch --track origin/feat/cms-editorial-integration
 npm ci
 npm exec -- playwright install chromium
 npm run verify
@@ -53,6 +53,16 @@ Windows 先用 `where.exe git` 定位实际 Git Bash，本机为 `D:\Git\bin\bas
 服务器只读入口与环境变量见 [CMS 映射](../development/cms-editorial-mapping.md)。没有授权时不调用网络默认 transport，不读取无关账号/配置文件、不猜 token。取得项目/数据集、最小 token、指定文档及必要引用/资产读取授权后，才单独执行一篇的 read，输出脱敏状态和修订；不改变 CONTENT_MODE，不启动 Studio，不写入/上传/发布/撤回。只读成功也不是网站上线成功。
 
 当前平台与 head 证据见 [DEV-05A 验证](cms-editorial-verification.md) 及 PR 精确 head 评论；原 [PR #6 记录](journal-privacy-verification.md) 仅作历史。保留旧报告，本轮截图文件按实际生成目录列出，不借旧截图作当前证据。
+
+## DEV-05B 单篇真实 Draft 操作
+
+根 `.env.local` 仅服务器使用：`SANITY_PROJECT_ID`、`SANITY_DATASET`、`SANITY_READ_TOKEN`、`SANITY_ARTICLE_READ_IDS`、固定 `SANITY_API_VERSION=2025-02-19`；`studio/.env.local` 只放 `SANITY_STUDIO_PROJECT_ID` / `SANITY_STUDIO_DATASET`。两者都必须保持 Git 忽略，禁止打印 token 或放入 `SANITY_STUDIO_` 公开变量。
+
+本地 Studio 用 `npm run studio:dev`，只监听 `127.0.0.1:3333`；本项目当前依赖图要求根 `vite@7.3.6` 供 Sanity CLI/plugin-react，Astro 7.3.2 自己保留嵌套 Vite 8.3.0，Rolldown 继续固定 1.2.8。不要删除这一拆分后再让 npm 自动提升到单一 Vite 8，也不要以升级 Sanity 主版本作为修复。
+
+真实 Draft 预览不是 `CONTENT_MODE=sanity`。只在本地显式设置 `DEV_CMS_DRAFT_PREVIEW=1` 后，既有 `/blog/what-to-send-for-a-clothing-quote/` 才由服务器读取授权 ID；失败直接报错，不 fallback mock。验证可运行 `npm run verify:cms-draft-live -- "<exact expected excerpt>"`，输出只应包含文档 ID/revision/截图计数等脱敏证据。普通 `npm run build` 不设置该变量，并必须继续通过 CMS boundary / secret 扫描。
+
+Studio 保存 Draft、Sanity publish、网站发布继续是三件事。当前测试 Draft 缺作者/发布日期/事实确认/封面许可是有意状态；不要为消除编辑器 validation 填假数据。除非用户另行明确授权，不得 Publish / Unpublish、上传媒体、deploy schema、`sanity deploy`、部署网站、配置 Cloudflare 或 webhook。
 
 ## 后续发布与恢复
 
