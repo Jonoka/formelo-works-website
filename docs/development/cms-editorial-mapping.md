@@ -79,6 +79,33 @@ Sanity `published` 是查询视图，不是工厂审核结果，也不是网站�
 
 真实 Studio 已打开该测试 Draft，并只修改技术联调 excerpt。保存前 `_rev` 为 `RyoTMvUwfjfi4GD1LaCRuB`，保存后为 `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`；`factReviewStatus` 仍为 `pending`，作者、公开日期、事实确认、封面与素材许可仍未填写。随后服务器只读 token 实际读到新 revision 和新 excerpt，而正式 published reader 仍得到空结果。没有 publish、unpublish、媒体上传、schema deploy、Studio deploy、网站部署或 Cloudflare 操作。
 
+## DEV-05C · 统一文章交付与刷新语义
+
+PR #8 已由用户合并至 `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`，验收 head 为 `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`。DEV-05C 在 `feat/cms-editorial-delivery` / PR #9 上新增 `shared/article-delivery.ts` 与 `web/src/lib/server/article-delivery.ts`，只负责两篇既有文章的交付选择，不把全站 `loadContent` 切换为 Sanity。
+
+三个展示位置——首页 Journal 区、`/blog/` 和 `/blog/[slug]/`——都调用同一个文章集合入口；标题、摘要、slug、referenceCode、来源、状态、revision 与封面状态来自同一已验证记录，`JournalCard` 只是 `articleCardData()` 的投影，详情继续使用原 `ArticleLayout` / `EditorialBody`。没有第二套正文模板，也没有第三套卡片查询。
+
+| 文章模式 | 允许来源 | 当前行为 |
+|---|---|---|
+| `mock` | 两篇本地 `ArticlePreview` | 默认；两篇都标记 `source:local` / `editorial_draft`，沿用登记概念图并明确 dedicated cover pending |
+| `draft-preview` | 授权询价 Draft + 本地 MOQ draft | 仅本地 loopback `astro dev`；询价文章每次请求重新读现有单篇 Sanity Draft，MOQ 是预先声明的本地来源，不是错误回退 |
+| `published` | strict published Sanity records only | 复用已有 published query / converter；两篇必须完整、唯一、通过作者/日期/事实审核/封面许可/引用校验，否则整个集合失败 |
+
+`ARTICLE_CONTENT_MODE` 是文章局部的显式来源选择，不改变 `CONTENT_MODE=mock` 的全站门禁。Draft 模式仍要求 `DEV_CMS_DRAFT_PREVIEW=1`、`DEPLOY_ENV=local`、Astro actual command=`dev`、请求 hostname 为 loopback；build 守卫继续在配置阶段阻断 Draft 网络访问与输出。Published 模式不接受 draft perspective，也不以本地文章补齐空结果或失败条目。
+
+刷新/缓存规则：
+- mock 没有远端读取；
+- Draft dev 每个页面请求重新执行 no-store 读取，因此 Studio 保存后的下一次刷新可看到新 revision；成功结果不跨请求长期缓存；
+- published dev 同样按请求重新读取；
+- 单次实际静态 build 只允许共享一个来源快照，保证 Home / Journal / detail 在该 build 内一致；若同一 build 中来源配置变化则 `ARTICLE_BUILD_SOURCE_CHANGED` 明确失败；
+- 不引入订阅、Visual Editing、客户端 token、实时监听或外部缓存平台。
+
+封面状态也属于同一交付契约。授权真实 Draft 当前没有 `coverImage`，所以三处都显示有意设计的 text-only / no-cover 状态，不能拿本地 T-shirt 概念图冒充 CMS 封面。Published 文章只有 `publicUseApproved:true`、非装饰、alt、资产身份/URL/尺寸、crop/hotspot 等严格校验全部通过后才标记 `coverState:approved`。本地 editorial draft 的概念图继续标记 `local_concept`，三种状态不能互换。
+
+错误处理：缺配置、401/403、其他 HTTP、超时、空结果、不完整 published 集合、重复 slug、缺作者/日期/事实确认/封面、坏引用、未知正文块等都抛受控错误。dev 页面返回明确 503 / 安全错误码；build 直接失败。调用者不返回上一次成功记录，不丢掉失败文章，也不静默改成 mock。
+
+离线 published/draft 浏览器测试使用假 token 和预加载 transport，所有网络请求都在本机拦截，证据目录明确写 `OFFLINE SYNTHETIC RESPONSE; NOT REAL SANITY CONTENT`。它们只证明查询、转换、三处一致性、刷新和失败路径，不代表真实云端 published 内容存在。当前真实云端仍只有已授权询价 Draft；本轮没有发布、撤回、上传媒体、部署或 Webhook。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。
