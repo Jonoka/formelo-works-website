@@ -11,8 +11,9 @@
 | DEV-02 | 字体、设计变量、Header / Footer / CTA / 无 JS 导航 | DEV-01、DESIGN-01 | 1440 / 390 对照截图、空联系方式不外跳 | PR #4 / #5 已合并；本轮补十页导航、文章父栏目及按模板联系区规则；真实渠道未做，不整项关闭 |
 | DEV-03 | Home 与 Category 模板 | DEV-02、ASSET-01 | 保留所选视觉与 PRD 信息，两类差异，手机可用 | 首页与三图已随 PR #3 合并；已合并 PR #4 的单一 Category 模板与两概念品类，正式样品/事实仍待补，不整项关闭 |
 | DEV-04 | 制造、工厂、Journal、Article、Contact、Privacy、404 | DEV-03 | 十内容路由 + 404，不新增 Process 页 | 十页概念结构已实现：本轮补 Journal、两文完整草稿、未生效 Privacy；检查状态见本轮记录。正式事实、CMS、生产 SEO 与全站验收仍开放 |
-| DEV-05 | 全站 Sanity 内容来源、真实内容与重建 | DEV-01；Sanity 授权 | 真实只读与另行授权的发布 / 撤回 / 重建验证 | 保持开放；DEV-05A 不代表全站 provider 完成 |
-| DEV-05A | 两文 schema → 只读查询 → 严格转换 → 原正文契约 | 已合并 PR #6；不依赖真实账号的离线工程 | 实际对象/转换器/查询模块，GROQ 与原组件离线渲染测试；[映射](cms-editorial-mapping.md) / [验证](../operations/cms-editorial-verification.md) | 离线链路已实现，开发阶段 130 测试通过；最终 head 回归见记录，真实只读联调待授权 |
+| DEV-05 | 全站 Sanity 内容来源、真实内容与重建 | DEV-01；Sanity 授权 | 真实只读与另行授权的发布 / 撤回 / 重建验证 | 保持开放；DEV-05A/05B 都不代表全站 provider 完成 |
+| DEV-05A | 两文 schema → 只读查询 → 严格转换 → 原正文契约 | 已合并 PR #6；不依赖真实账号的离线工程 | 实际对象/转换器/查询模块，GROQ 与原组件离线渲染测试；[映射](cms-editorial-mapping.md) / [验证](../operations/cms-editorial-verification.md) | 已随 PR #7 合并；published-only 严格链路与离线基础保留 |
+| DEV-05B | 一篇真实 Draft：Studio 保存 → revisions → 服务器只读 → 本地既有正文呈现 | DEV-05A；用户授权真实项目/单篇 Draft/read token | Studio save 前后 revision、draft/published 隔离、build/dev 隔离、本地 1440/390 真实 CMS 证据、安全负例与最终回归 | PR #8 收尾中：真实 Draft 保持 `41ad5f...b8a7`；读取/渲染/published 隔离已证明，并补 actual Astro command build guard。默认站/CI 仍 mock；全站 CMS 与发布未关闭 |
 | DEV-06 | SEO、联系逻辑、可访问性与完整检查 | DEV-04、DEV-05 | 对应 T / UI-V 测试日志；统计关闭 | 待开始 |
 | CONTENT-01 | 正式品牌 / 能力 / 图片 / 联系 / 两文审核 | 工厂资料 | 审核记录、替换台账、真实设备收发 | 待工厂 |
 | DEV-07 | 授权受控预览、正式发布与恢复 | 用户单独授权、CONTENT-01、质量验收 | 平台访问保护验证、部署 ID、回滚演练 | 未授权发布 |
@@ -44,10 +45,18 @@ PR #5 已于 2026-09-15 合并，head 3600f9558465f247dceaa8234971dd9ca0c8a204�
 
 [设计衔接](../design/journal-article-legal-handoff.md) 与 [本轮验证](../operations/journal-privacy-verification.md) 记录实际检查及限制。ASSET-01 两封面、CONTENT-01 真实材料/审核、DEV-05 CMS、DEV-06 正式 SEO/真实联系/全站验收、DEV-07 授权发布均保持开放。本轮后不扩栏目，转入工厂资料、CMS 与真实渠道联调准备。
 
-## 当前 DEV-05A 文章 CMS 离线基础
+## 历史 DEV-05A 文章 CMS 离线基础
 
 PR #6 已于 2026-09-16 由 Jonoka 合并，最终数量表修复 head cfc1675b2ef364c361b03d6839b864723c194091，main/base 11ee7e633ee76f4cf23d3811bc93f9fdbaa2c9d0。feat/cms-editorial-foundation 从干净 Windows 工作区快进 main 后新建，不复用已合并分支。
 
 只交付两文受控 CMS 模型、运行时转换、显式 published/no-store/参数化只读查询与离线验证；原 EditorialBody 与数量表布局保留，默认十页仍全部 mock。CONTENT_MODE=sanity 未实现保护、production 阻断、空渠道、analytics off、概念 noindex、未生效 Privacy 不解除。真实 CMS 未验证；没有写稿、上传、导入、迁移、发布/撤回或部署授权。
 
 ASSET-01 两封面及真实摄影、CONTENT-01 工厂审核与真实字段、DEV-05 全站 CMS/真实联调/重建、DEV-06 生产 SEO/真渠道/全站验收、DEV-07 上线恢复继续开放。详见 [映射](cms-editorial-mapping.md)、[验证](../operations/cms-editorial-verification.md) 和同一份 [工厂资料清单](../content/factory-materials-checklist.md)。
+
+## DEV-05B · 单篇真实 Sanity Draft 联调
+
+PR #7 已由用户合并至 main `accc4dcddaa3161a6fbae4c94ee9860d25739a49`。`feat/cms-editorial-integration` 只接入 `iajvl7ka/production` 中授权的询价文章 Draft，新增独立 drafts/no-store reader、Draft converter 和本地 opt-in 页面替换；正式 published reader、`loadContent` mock 默认、production 阻断、十页范围与手机数量表修复均保留。
+
+真实 Studio 已本地启动并通过用户 GitHub 登录打开目标 Draft。只修改 excerpt 技术标记后，Content Lake revision 从 `RyoTMvUwfjfi4GD1LaCRuB` 变为 `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`；只读服务器路径与本地 Article 页面读到变化，published perspective 仍不可见。当前没有 publish/unpublish、媒体、schema/Studio/site deploy、Cloudflare/webhook 或全站 CMS 授权；这些不能因 DEV-05B 单篇成功而关闭。
+
+PR #8 收尾增加构建隔离：`DEV_CMS_DRAFT_PREVIEW=1` 必须对应 Astro 实际 `dev` 命令；`astro:config:setup` 在任何 build 路径前置拒绝，路由再防御校验，普通产物扫描继续作为第二道防线。离线回归覆盖根/workspace/direct build 及 `--mode development`，用假 token + fetch canary 证明拒绝发生在 0 次 Draft 网络读取和 HTML 输出前；正常隔离 mock build 仍为 11 HTML。真实 CMS 证据另在本机私有 `.local/cms-draft-review/<time>/`，不与 CI 默认 mock 截图混名或混用。

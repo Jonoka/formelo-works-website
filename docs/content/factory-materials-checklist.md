@@ -37,7 +37,7 @@ Privacy 只记录本地概念现状，状态为 Draft privacy notice — not in 
 
 | 待提供 / 确认 | 字段 / 工程对应 | 阻断阶段 |
 |---|---|---|
-| 账号持有人明确的项目、数据集、指定文章 ID、最小服务器只读权限及必要引用/资产元数据读取许可 | SANITY_PROJECT_ID / SANITY_DATASET / SANITY_READ_TOKEN / SANITY_ARTICLE_READ_IDS；固定 SANITY_API_VERSION=2025-02-19 | 真实 CMS 只读联调；当前待授权，绝不猜账号或打印 token |
+| 账号持有人明确的项目、数据集、指定文章 ID、最小服务器只读权限及必要引用/资产元数据读取许可 | SANITY_PROJECT_ID / SANITY_DATASET / SANITY_READ_TOKEN / SANITY_ARTICLE_READ_IDS；固定 SANITY_API_VERSION=2025-02-19 | DEV-05B 单篇已授权并实际验证 `iajvl7ka/production` + 询价文章 Draft；token 不打印。其他文档/全站读取仍未授权 |
 | 两文逐项事实及可公开署名 | article.authorDisplay、factReviewStatus、factConfirmedAt；确认人/依据留内部审核记录 | 从草稿到可供交付的数据；没有审核不得用技术 publish 补确认 |
 | 实际公开/更新日期 | article.publishedAt、contentUpdatedAt | 未有公开日期则继续作为本地草稿，不用开发/部署时间代填；禁止未来或相互矛盾日期 |
 | 两文标题、摘要、既有 slug 与来源码、SEO 草稿 | title / excerpt / slug / referenceCode / seo | 字段转换；来源码固定配对不等于工厂正文已审核，生产 SEO 仍单独阻断 |
@@ -45,4 +45,4 @@ Privacy 只记录本地概念现状，状态为 Draft privacy notice — not in 
 | 独立文章封面与授权范围 | JOURNAL-QUOTE-001 / JOURNAL-MOQ-001 仍待制作；未来 approvedImage 的 asset、alt、publicUseApproved、crop/hotspot | 真实内容/素材替换；测试中的 synthetic true 不是素材许可，不导入云端 |
 | 品类/制造 MOQ、联系方式与 Privacy 事实 | 继续沿用上表原有收集项 | 全站内容、渠道、隐私与生产发布；本轮没有改值或解除阻断 |
 
-当前十页仍使用原 mock 和明确登记的概念图复用。DEV-05A 仅验证离线 schema/查询/转换/正文渲染；真实内容写入、上传、发布/撤回、Studio 构建/部署及工厂消息收发必须单独授权。完整字段和失败策略见 [CMS 映射](../development/cms-editorial-mapping.md)。
+当前十页默认仍使用原 mock 和明确登记的概念图复用。DEV-05B 只对一篇真实询价 Draft 做本地 Studio 保存、服务器只读与本地预览；该 Draft 仍为 `factReviewStatus=pending`，没有作者、公开日期、事实确认、封面或素材许可，不能转成正式内容。已授权的 Draft 编辑不扩大为其他真实内容写入；媒体上传、publish/unpublish、远端 schema/Studio/site deploy、全站 provider 及工厂消息收发仍必须单独授权。完整字段和失败策略见 [CMS 映射](../development/cms-editorial-mapping.md)。

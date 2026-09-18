@@ -47,8 +47,38 @@ CI 检出实际 PR head，而不是混淆临时 merge SHA。`review/source.json`
 
 截图文件名：`journal-1440.png` / `journal-390.png`、`quote-1440.png` / `quote-390.png`、`moq-1440.png` / `moq-390.png`；位于对应 `test-results/*-preview/` 目录，最终清单须由该次实际输出生成。还保留 MOQ 第二表、两列表及模板特写。不要使用 PR #6 的旧截图判断当前 head。
 
-## 仍开放 / 待授权
+## DEV-05A 时仍开放 / 待授权（历史记录）
 
-真实项目/数据集、最小只读 token、指定文档 ID 与必要引用/资产读取许可未提供；**真实 CMS 读取、权限、数据集可见性及 Studio 启动/构建均未验证**。禁止据此创建/导入/迁移/写稿/上传/发布/撤回或部署。具体最小输入和字段约束见 [CMS 映射](../development/cms-editorial-mapping.md) 与 [工厂资料清单](../content/factory-materials-checklist.md)。
+截至 DEV-05A 完成时，真实项目/数据集、最小只读 token、指定文档 ID 与必要读取许可尚未提供，因此当时的真实 CMS / Studio 均未验证。该段保留为历史基线；2026-09-17 的单篇授权与实际联调结果见下方 DEV-05B，不把后来授权反写成 DEV-05A 已完成。
 
 两篇专用封面仍待完成，真实图片/工厂资料与署名、公开日期、事实审核、许可必须由责任方确认。真实 Safari/Firefox/Edge、真机、浏览器 UI 缩放、邮箱/WhatsApp 收发、生产 SEO、Privacy 上线政策、全站 CMS/重建/发布恢复和完整上线验收未关闭。已知中危依赖在真实 Studio 使用前应复核，不运行 audit fix --force。
+
+## DEV-05B · 真实 Sanity 单篇 Draft 联调 / 2026-09-17
+
+本轮从已合并 PR #7 的 main `accc4dcddaa3161a6fbae4c94ee9860d25739a49` 新建并继续 `feat/cms-editorial-integration`。恢复 WebCodex 后实际发现分支 HEAD 仍为该 SHA，但已有 4 个 modified + 4 个 untracked 的 DEV-05B 工作，因此全部保留并继续，没有 reset、clean、force push 或替代分支。远端当时没有该分支和关联 PR。
+
+真实项目为 `iajvl7ka` / `production`，目标 Draft 基础 ID `1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`。根 `.env.local` 与 `studio/.env.local` 均被 `.gitignore` 命中且未跟踪；只核对必要变量 present/non-empty，未输出 `SANITY_READ_TOKEN`。本地 Studio 仅监听 `127.0.0.1:3333`。首次启动暴露依赖解析冲突：Sanity CLI 6.7.2 的 Vite 7.3.6 与根部 Astro/Vite 8.3.0 混用导致 `Missing field moduleType`；通过在根 devDependencies 显式固定已存在的 `vite@7.3.6`，让 Astro 自己保留嵌套 `vite@8.3.0`，并用原有 `rolldown@1.2.8` override 防止无关补丁漂移后，Studio HTTP 由 500 恢复为 200。未升级 Sanity、Astro 或 Rolldown 版本。
+
+Studio 登录由用户本人通过临时隔离浏览器选择 GitHub 完成；只验证本地认证状态存在，不输出 token 值，也不读取用户日常 Chrome 配置。真实 Draft 在 Studio 中可打开；正式字段缺失与 `factReviewStatus=pending` 保留。只修改 excerpt 技术标记：保存前 `_rev=RyoTMvUwfjfi4GD1LaCRuB`、`_updatedAt=2026-09-17T06:12:50Z`；Studio 编辑后服务器重新查询得到 `_rev=41ad5fd0-211a-4ea2-89e8-433c2906b8a7`、`_updatedAt=2026-09-17T08:43:58Z`，excerpt 变为 `DEV-05B integration draft — Studio save verification...`。没有填写 authorDisplay、publishedAt、contentUpdatedAt、factConfirmedAt、coverImage 或 publicUseApproved。
+
+真实服务器预览脚本随后证明：drafts perspective 可读、published perspective 不可读、`productionAllowed:false`，本地询价文章页面显示新的真实 excerpt，并继续复用原 `EditorialBody`。证据位于忽略目录 `.local/cms-draft-live/`：1440 full-page 为 1440×4722 / SHA-256 `c91ffe30e44346abd80dabbbd728a2df6847979c84cbeb5aee7172a7fce790c9`；390 full-page 为 390×6980 / `856ed1ef5c68d9e2c28f72b4978494d88d11136fd07c530014aa2cb46ca9ad24`。另有 1440/390 viewport、table、template 共 8 张截图；manifest/evidence 记录浏览器 153.0.8010.12、Windows、Node 24.21.0 和测试时间 `2026-09-17T08:45:05.501Z`。生成截图不等同于正式视觉批准。
+
+当前 Windows 最终工作树验证使用 Node **24.21.0** / npm **11.19.1**：干净 `npm ci` 通过并仍报告 4 个 moderate；`npm run verify` 完整通过，其中 `npm run check` 为 Astro 63 files / 0 errors / 0 warnings / 0 hints，`npm test` **148/148**，普通静态构建仍是 11 HTML 且 CMS boundary 通过，Chromium dev + preview 回归 **412/412** 通过（约 6.5 分钟）。`npm run studio:build` 也已在真实 Studio 配置下本地通过。`npm audit` 的已完成查询仍是 `uuid <11.1.1` 经 `typeid-js` / Sanity CLI 链带来的 **4 个 moderate**，修复建议需要 breaking `--force`，因此未执行；随后额外的 `--audit-level=high` 网络重试异常挂起后主动终止，不把它另算通过。`python scripts/check_repository.py` 通过；Windows Python bootstrap 套件再次复现 **18/20**，两项仅因系统 `C:\Windows\System32\bash.exe` 指向无 WSL 发行版而失败；显式 `D:\Git\bin\bash.exe -n scripts/publish-github.sh` 通过。`git diff --check` 通过。以上均来自当前未提交 DEV-05B 工作树；提交后的 GitHub CI 需单独观察，不能用本机结果代替。
+
+未执行且仍未授权：Sanity publish / unpublish、媒体上传、远端 schema deploy、Studio deploy、网站/Cloudflare 部署、webhook、全站 `CONTENT_MODE=sanity`、正式 SEO/联系方式/Privacy、生产 release。DEV-05 全站 provider 与 DEV-07 发布恢复仍保持开放。
+
+## PR #8 Review 收尾：build/dev 隔离与只读真实 Draft 证据 / 2026-09-17
+
+本次验收从 PR #8 head `e2b80904b635f3804f3011430608ca10b6fdbcb3` 重新读取 Review、main、开放 PR 与 Windows 状态后继续；开始时本地/远端任务分支均为该 head，`main/origin/main=accc4dcddaa3161a6fbae4c94ee9860d25739a49`，工作树干净且没有未跟踪文件，因此无需同步。没有 reset、clean、force push、替代分支、自动合并或部署。
+
+Review 指出的缺口先用**离线隔离复现**确认：给旧实现设置 `DEV_CMS_DRAFT_PREVIEW=1`、假 `SANITY_READ_TOKEN=OFFLINE_TEST_ONLY_TOKEN`，用 preload 替换 `fetch` 为本地计数后直接执行真实 `astro build`；结果为 `fetch_calls=1`、`html_files=0`，并因本地 canary 导致 `CMS_TRANSPORT`。这说明旧实现确实在 static build 中进入 Draft reader；该复现没有真实 Sanity 网络请求，输出只在被忽略的 `.local/dev05b-build-probe/`。
+
+修复新增 actual-Astro-command 守卫：`astro:config:setup` 收到 `command=build` 且 Draft 开关开启时立即抛 `CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN`；同时把实际 command 注入服务端路由，`[slug].astro` 在读取 token / Draft 前再次要求 `command=dev`。离线回归用假 token + fetch canary 实际覆盖根 `npm run build`、workspace build、直接 `astro build` 与 `astro build --mode development` 四个入口：全部得到明确 build-forbidden 错误，Draft/network 调用 **0 次**，正常 `web/dist` 未被改写。开关关闭后同一隔离目录直接 Astro mock build 通过，仍为 **11 HTML**、网络调用 0，HTML 不含 Draft/test marker，`check-cms-boundary.mjs` 通过。聚焦 Draft/build/render 套件为 **15/15**；这只是离线执行路径验证，不是 Sanity 云端验证。
+
+真实 CMS 回归本轮保持**只读**，没有再次编辑 Studio/正文/审核字段。根与 Studio `.env.local` 均继续 Git-ignore 且未跟踪，只核对配置匹配/secret 非空，不输出值。服务器读取仍得到 revision `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`、Draft save time `2026-09-17T08:43:58Z`、`factReviewStatus=pending`；published perspective 仍为空。本地 loopback dev 页的 `data-cms-revision` 与服务器 revision 相同，标题/摘要/17 个正文块、1 张表、1 个纯文本模板正确；无 CMS cover、作者/发布日期/事实确认伪值，无 `mailto:` / `wa.me`，pending contact button 仍禁用。
+
+本次真实 CMS 截图使用独立前缀 `cms-live-`，与 CI 默认 mock `quote-*` 等截图明确分开。首轮只读证据在 `.local/cms-draft-review/2026-09-17T10-21-34-671Z/`，manifest 不保存完整标题或摘要，只保存长度与 SHA-256。1440 full-page 为 **1440×4722** / `c91ffe30e44346abd80dabbbd728a2df6847979c84cbeb5aee7172a7fce790c9`，390 full-page 为 **390×6980** / `856ed1ef5c68d9e2c28f72b4978494d88d11136fd07c530014aa2cb46ca9ad24`；另有两端 viewport/table/template 共 8 张原始 PNG。实际目视 1440 页面/表格/模板与 390 首屏/表格/模板，未见明显横向溢出、内容重叠、伪封面或错误启用联系控件；派生审阅缩略图只供目视，不作为最终证据。由于该轮是在未提交修复工作树上运行，最终提交后会再生成 exact-head 的只读 manifest/PNG，并在 PR 评论记录，不把此 manifest 的旧 head 冒充最终提交。
+
+普通 GitHub CI 继续**不含真实 Sanity secret，也不执行真实云端请求**。`review/source.json` 的 scope/cmsBoundary 明确把 CI 描述为 DEV-05B build 隔离、strict contract、默认 mock/browser 回归；本地授权单 Draft 的云端 read 与 `cms-live-*` 私有截图另行取证，不能用 CI mock 截图替代。
+
+本次 Windows 收尾验证仍使用 Node **24.21.0** / npm **11.19.1**：干净 `npm ci` 通过并报告既有 **4 moderate**；完整 `npm run verify` 通过，当前 `npm test` 为 **150/150**，Playwright JSON 为 **412 expected / 0 unexpected / 0 skipped / 0 flaky**，普通 mock build 继续输出 11 HTML 且 CMS boundary 通过。`npm audit --audit-level=high` 完成并仍只报告 Sanity CLI / `typeid-js` / `uuid` 链的 4 moderate；没有 `audit fix --force`。`python scripts/check_repository.py` 通过；Windows 原生 bootstrap unittest 仍为 **18/20**，两项只因系统 WSL `bash.exe` 无发行版；显式 `D:\Git\bin\bash.exe -n scripts/publish-github.sh` 与 `git diff --check` 通过。以上 Windows 结果与后续 Linux GitHub CI 分开记录，不能互相代替。

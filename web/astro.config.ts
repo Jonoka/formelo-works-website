@@ -1,10 +1,12 @@
 import { defineConfig } from 'astro/config';
 import { loadLocalEnvironment, readRuntime } from '../config/runtime';
+import { cmsDraftPreviewCommandGuard } from './src/lib/server/cms-draft-preview-mode';
 
 loadLocalEnvironment();
 readRuntime();
 
 export default defineConfig({
+  integrations: [cmsDraftPreviewCommandGuard()],
   output: 'static',
   trailingSlash: 'always',
   devToolbar: { enabled: false },

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 // Check only the explicitly scoped server token, not unrelated machine/account credentials.
 const root = process.argv[2] ?? 'web/dist';
 const token = process.env.SANITY_READ_TOKEN;
-const forbidden = /SANITY_READ_TOKEN|SANITY_ARTICLE_READ_IDS|cms-article-query|OFFLINE FIXTURE|OFFLINE_TEST_|cdn\.sanity\.io\/images\//;
+const forbidden = /SANITY_READ_TOKEN|SANITY_ARTICLE_READ_IDS|DEV_CMS_DRAFT_PREVIEW|cms-article-query|cms-draft-preview-query|cms_article_draft_preview|CMS draft preview \/ Not published|CMS_DRAFT_PREVIEW|OFFLINE FIXTURE|OFFLINE_TEST_|cdn\.sanity\.io\/images\//;
 let count = 0;
 function inspect(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {

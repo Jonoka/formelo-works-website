@@ -6,11 +6,17 @@ import { schemaTypes } from './schemaTypes';
 import { structure } from './structure';
 
 const singletonIds = new Set(['siteSettings', ...pageKeys.map(key => `page.${key}`)]);
+// Direct property access is required so Sanity/Vite can replace the two public Studio variables in the browser bundle.
+// The shared validator still accepts explicit objects in offline tests and still rejects Studio-prefixed secret names.
+const studioEnvironment = requireStudioEnvironment({
+  SANITY_STUDIO_PROJECT_ID: process.env.SANITY_STUDIO_PROJECT_ID,
+  SANITY_STUDIO_DATASET: process.env.SANITY_STUDIO_DATASET,
+});
 
 export default defineConfig({
   name: 'formelo',
   title: 'FORMELO WORKS — Content',
-  ...requireStudioEnvironment(),
+  ...studioEnvironment,
   plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
