@@ -21,8 +21,8 @@ export function expectedEditorialCaptures() { return [...definitions.values()]; 
 export function editorialCaptureDefinition(name) { return definitions.get(name) ?? null; }
 export function editorialCapturesFromReport(report) {
   if (!report || report.stats?.unexpected !== 0 || report.stats?.skipped !== 0 ||
-      report.stats?.flaky !== 0 || report.stats?.expected !== 412) {
-    throw new Error('CMS_EVIDENCE: the full 412-test browser regression has not passed.');
+      report.stats?.flaky !== 0 || report.stats?.expected !== 430) {
+    throw new Error('CMS_EVIDENCE: the full 430-test DEV-05C browser regression has not passed.');
   }
   const captures = new Map();
   function visit(value) {
