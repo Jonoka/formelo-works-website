@@ -106,6 +106,24 @@ PR #8 已由用户合并至 `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`，�
 
 离线 published/draft 浏览器测试使用假 token 和预加载 transport，所有网络请求都在本机拦截，证据目录明确写 `OFFLINE SYNTHETIC RESPONSE; NOT REAL SANITY CONTENT`。它们只证明查询、转换、三处一致性、刷新和失败路径，不代表真实云端 published 内容存在。当前真实云端仍只有已授权询价 Draft；本轮没有发布、撤回、上传媒体、部署或 Webhook。
 
+## DEV-05D · 全站 published provider 基础
+
+PR #9 已由用户合并至 `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`。DEV-05D 从该 main 建立 `feat/cms-site-provider`，只补全站 Sanity **published 读取的工程基础**；不把普通页面切换到 Sanity，也不调用真实全站 Content Lake。既有单篇 Draft 授权不能扩大解释为 siteSettings / page / category 的读取许可。
+
+`web/src/lib/server/cms-site-query.ts` 使用固定 Query HTTP POST，一次只查询：
+- 一个 published `siteSettings` singleton；
+- `home / manufacturing / factory / contact / blogIndex / privacy` 六个固定 pageKey；
+- `t-shirts / hoodies` 两个固定 category slug；
+- 上述字段校验所需的强引用目标与公开图片最小资产元数据。
+
+策略继续是 `apiVersion=2025-02-19`、`perspective=published`、非 CDN、`cache:no-store`、无重定向/自动重试；完整请求默认 8 秒，响应上限 2 MiB。reader 没有任意 ID 或 slug 参数，缺配置、401/403、其他 HTTP、transport、timeout、空/坏/超大响应都只返回受控错误，不回退 mock。
+
+`shared/cms-site.ts` 产出 `CmsSiteBundle`，但每个对象仍明确 `websitePublication:not_verified` / `productionAllowed:false`。转换要求 singleton 与固定路由唯一且完整，siteSettings 联系格式和 MOQ 完整；Home/Manufacturing/Factory/Contact 等业务页必须有有效 factConfirmedAt，Blog Index / Privacy 可为空；Home 有获准公开的 hero，Home/Manufacturing 有至少三项 FAQ。两个 category 的 source code 正确、至少三组样品且 sampleCode 全站唯一、至少一项 capabilityRow 与一张 evidenceImage、customization/sampling notes 必填、MOQ inherit/override 自洽、relatedArticles 是已发布强引用。页面/品类 SEO title 在该 bundle 内不得重复。
+
+公开图片校验抽到 `shared/cms-image.ts`，文章 cover 与 site/category 图片共用同一套 asset identity、项目/dataset CDN URL、metadata 尺寸、publicUseApproved、非装饰 alt、crop/hotspot 规则，防止两条 provider 产生不同许可标准。Studio 同步把 logo/defaultOgImage、恰好两个 featuredCategories、固定页 factConfirmedAt、Home hero、Home/Manufacturing FAQ 与 category FAQ 的缺项提前标出来；这些编辑器提示不替代服务器校验。
+
+本阶段没有 `templateContent` 迁移。当前 Manufacturing、Factory、Contact、Privacy 与 Category 页面仍有本地 presentation 数据，不能用只有共同 CMS 字段的 bundle 直接替换；因此 `web/src/lib/content.ts` 继续只接受 mock，`CONTENT_MODE=sanity` 继续 fail closed，普通 build 也不会导入或调用 site reader。`siteReaderConfigFromEnvironment` 还要求额外 `SANITY_SITE_READ_ENABLED=1`，用来防止既有单篇 token 被误当成全站读取授权；本阶段不设置该开关。离线 fixture 中的工厂名、联系人、日期、MOQ、样品与图片许可仅为负例/转换测试，禁止上传或当成真实资料。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。

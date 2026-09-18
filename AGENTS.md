@@ -11,7 +11,7 @@ Repository Markdown is the working documentation; imported v1 documents are snap
 - Factory-owned identity, English public site; website team owns web / SEO, factory owns sales and fulfillment.
 - Ten content URLs / eight templates. Use `config/routes.json`.
 - No inquiry forms, customer uploads, customer database, CRM, checkout, payments, order portal, chatbot API, or extra SEO pages without an explicit scope change.
-- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). DEV-05C unifies the two existing article records across Home / Journal / Article while keeping full-site CONTENT_MODE mock; one explicitly authorized real Sanity Draft remains loopback-dev-only and this is not a full-site CMS connection.
+- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). PR #9 / DEV-05C is merged. DEV-05D now builds a strict published-provider foundation for siteSettings + six fixed pages + two categories, but full-site CONTENT_MODE remains mock and template-specific fixed-page content is not yet migrated; one explicitly authorized real Sanity Draft remains loopback-dev-only.
 - Preserve the chosen serif editorial headings, warm off-white, charcoal, brick-red CTA, thin dividers, garment photography and dark footer. Fine spacing / contrast / mobile refinements are allowed; unrelated redesigns are not.
 
 ## Source and truth rules
@@ -50,22 +50,17 @@ Use Node 24.21.0 and npm 11.19.1 (upgrade the bundled npm explicitly), exact dep
 `npm run verify` covers type checking, unit/schema tests, an actual production-build rejection, static-output checks and Chromium tests of both dev and preview. Keep Python bootstrap tests runnable on Linux CI. Never treat these as full PRD or production acceptance.
 `DEPLOY_ENV=production`, unsupported content modes and analytics fail closed. Ordinary CI/builds use no Sanity secret and no live cloud request; tests may exercise invalid/synthetic CMS input through injected transport. Preserve DEV-05A / PR #7 and PR #6 / #5 verification as historical evidence. Do not claim browser, CI, contact delivery or live Sanity integration tests ran unless they actually did.
 
-## Current DEV-05C article delivery
+## Current DEV-05D full-site provider foundation
 
-PR #8 is merged at `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`, accepted head `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`. Continue `feat/cms-editorial-delivery` and PR #9. Re-observe Windows before synchronization; only fast-forward while preserving local changes, untracked files, ignored environment files and historical evidence. Do not reset, clean, force push, replace the branch, merge, mark Ready or deploy automatically.
+PR #9 / DEV-05C is merged at `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`. Continue `feat/cms-site-provider` from that exact main. Re-observe Windows before synchronization; only fast-forward while preserving local changes, untracked files, ignored environment files and historical evidence. Do not reset, clean, force push, replace the branch, merge, mark Ready, publish or deploy automatically.
 
-Read docs/development/cms-editorial-mapping.md and docs/operations/cms-editorial-verification.md. Home Journal cards, the Journal index and Article detail must consume the same server article collection/detail entry. Card title/excerpt/slug/reference/source/status/revision/cover state are projections of that same validated record, not separate hardcoded/query copies.
+Read docs/development/cms-editorial-mapping.md and docs/operations/cms-editorial-verification.md. DEV-05D adds a server-only published bundle for exactly one siteSettings document, the six planned fixed page keys and the two planned category slugs. It must fail on draft/release identities, duplicate routes/singletons, missing required records, stale/future dates, invalid contact/MOQ/sample data, unapproved or malformed images, bad references and unexpected fields.
 
-Article source selection is explicit and independent of full-site `CONTENT_MODE`:
-- default `ARTICLE_CONTENT_MODE=mock`: two local editorial drafts;
-- `draft-preview`: only the authorized quote Draft from project `iajvl7ka` / dataset `production` / base document `1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`; MOQ remains an explicitly local editorial draft;
-- `published`: strict published-only collection using the existing converter; no draft or local fallback if a record is missing or invalid.
+The site provider is **foundation only**. Do not import it into `web/src/lib/content.ts`, do not enable `CONTENT_MODE=sanity`, and do not pretend the current local Manufacturing / Factory / Contact / Privacy presentation objects have been migrated. Their template-specific content remains local until a later explicit integration increment with confirmed factory/legal material. Category published validation must include capability rows, at least one evidence image, required customization/sampling notes and at least three samples/FAQs. Default builds must remain mock-only, 11 HTML, production-blocked and secret-free.
 
-Draft preview still requires `DEV_CMS_DRAFT_PREVIEW=1`, `DEPLOY_ENV=local`, actual Astro command `dev`, and a loopback request/listener. Every build path must reject Draft preview before network access/output. Draft and published dev reads are fresh per request with no-store; one static build may share one immutable-source snapshot only. Do not retain a prior success after auth/query/timeout/conversion failure.
+Reuse the shared strict public-image conversion for article covers and site/category images. Site provider tests use synthetic fixtures and groq-js in-memory evaluation only; do not use the existing single-article token authorization to enumerate real siteSettings/pages/categories. Environment-based site reading additionally requires `SANITY_SITE_READ_ENABLED=1`; leave it unset until separate explicit scope confirmation for a real full-site read.
 
-Real Draft cover is absent, so Home / Journal / Article must all show the deliberate no-image state; never substitute a category concept image as if it were an approved CMS cover. Published covers only render after strict permission/asset validation. Reuse EditorialBody and preserve the MOQ quantity-table fix.
-
-Ordinary CI uses only offline/synthetic CMS data and fake credentials. It may run extra Astro dev servers with `--ignore-lock` only for isolated loopback browser fixtures; this does not loosen the real Draft host/command/build guards. Real CMS regression remains local/read-only unless the user separately authorizes mutation. Media upload, publish/withdraw, schema/Studio/site deployment, webhook and full-site CMS migration remain unauthorized. Known moderate dependency findings remain open; do not claim zero vulnerabilities or use `audit fix --force`.
+Retain DEV-05C article behavior unchanged: Home Journal, Journal index and Article detail share one article delivery entry; draft-preview remains loopback-dev-only for the one authorized quote Draft; published article mode remains strict and never falls back. Media upload, publish/withdraw, schema/Studio/site deployment, webhook and production release remain unauthorized. Known moderate dependency findings remain open; do not claim zero vulnerabilities or use `audit fix --force`.
 
 ## Historical DEV-05A editorial CMS foundation
 

@@ -14,7 +14,8 @@
 | DEV-05 | 全站 Sanity 内容来源、真实内容与重建 | DEV-01；Sanity 授权 | 真实只读与另行授权的发布 / 撤回 / 重建验证 | 保持开放；DEV-05A/05B/05C 都不代表全站 provider 完成 |
 | DEV-05A | 两文 schema → 只读查询 → 严格转换 → 原正文契约 | 已合并 PR #6；不依赖真实账号的离线工程 | 实际对象/转换器/查询模块，GROQ 与原组件离线渲染测试；[映射](cms-editorial-mapping.md) / [验证](../operations/cms-editorial-verification.md) | 已随 PR #7 合并；published-only 严格链路与离线基础保留 |
 | DEV-05B | 一篇真实 Draft：Studio 保存 → revisions → 服务器只读 → 本地既有正文呈现 | DEV-05A；用户授权真实项目/单篇 Draft/read token | Studio save 前后 revision、draft/published 隔离、build/dev 隔离、本地 1440/390 真实 CMS 证据、安全负例与最终回归 | 已由用户合并 PR #8；accepted head `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`，main merge `83dec3f23f264ac034d1b7775eff6ca2b71a8d27`；真实 Draft 保持 `41ad5f...b8a7`，默认站仍 mock |
-| DEV-05C | 文章统一交付：Home Journal / Journal / Article 共用受控集合与详情入口 | 已合并 PR #8；保留 mock / 单篇授权 Draft / strict published 三类来源 | 三处同一记录派生卡片与详情、显式来源/封面状态、失败无静默回退、默认 11 HTML 不变、离线 published/draft 与浏览器回归 | PR #9 `feat/cms-editorial-delivery` 进行中；真实 Draft + 本地 MOQ 是预声明组合，published-only 接口复用原严格转换；不等于全站 `CONTENT_MODE=sanity` |
+| DEV-05C | 文章统一交付：Home Journal / Journal / Article 共用受控集合与详情入口 | 已合并 PR #8；保留 mock / 单篇授权 Draft / strict published 三类来源 | 三处同一记录派生卡片与详情、显式来源/封面状态、失败无静默回退、默认 11 HTML 不变、离线 published/draft 与浏览器回归 | 已由用户合并 PR #9；main `64e881acd04b4c7ae7269d111dd1d3ea51c22044`；真实 Draft 三位置 1440/390 已由用户目视通过，仍不等于全站 `CONTENT_MODE=sanity` |
+| DEV-05D | 全站 published provider 基础：siteSettings + 六个固定 page + 两个 category | 已合并 PR #9；不依赖真实全站写入或发布授权 | 固定 published/no-store 查询、严格 bundle 转换、MOQ/样品/能力行/证据图/公开图片许可校验、Studio 前置校验、离线 GROQ/网络负例；mock 默认不变 | `feat/cms-site-provider` 进行中；真实读取还需独立 `SANITY_SITE_READ_ENABLED=1` 授权门禁；不接 `loadContent`、不迁移 templateContent、不解除 production 门禁 |
 | DEV-06 | SEO、联系逻辑、可访问性与完整检查 | DEV-04、DEV-05 | 对应 T / UI-V 测试日志；统计关闭 | 待开始 |
 | CONTENT-01 | 正式品牌 / 能力 / 图片 / 联系 / 两文审核 | 工厂资料 | 审核记录、替换台账、真实设备收发 | 待工厂 |
 | DEV-07 | 授权受控预览、正式发布与恢复 | 用户单独授权、CONTENT-01、质量验收 | 平台访问保护验证、部署 ID、回滚演练 | 未授权发布 |
@@ -70,4 +71,4 @@ PR #8 已由用户合并至 `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`；DE
 
 Draft 预览每次 dev 请求重新读取，不长期缓存旧 revision；单次静态 build 只共享一个不可变来源快照，来源中途变化直接失败。真实 Draft 没有 CMS 封面时统一显示有意设计的无图状态，不挪用本地概念图；published 封面只有严格许可字段通过后才进入已批准状态。普通默认 build 仍是十个内容 URL + 404，`CONTENT_MODE=sanity`、production、analytics、真实联系方式、Privacy 和发布/部署门禁不解除。
 
-DEV-05C 完成后，文章链路下一主线是**用户另行明确授权的发布 / 撤回 / 重建演练**。现有测试稿不得为了制造 published 成功而补假作者、日期、审核或封面许可；本轮也不创建 Webhook、部署 Studio/schema/site 或扩大 CMS 到其他页面。
+DEV-05C 完成后，文章链路的发布 / 撤回 / 重建演练仍需要用户另行明确授权；现有测试稿不得为了制造 published 成功而补假作者、日期、审核或封面许可。DEV-05D 在此之前先补全站 published provider 的**离线工程基础**，但不创建真实全站文档、不读取未授权内容、不接 `loadContent`、不创建 Webhook，也不部署 Studio/schema/site。
