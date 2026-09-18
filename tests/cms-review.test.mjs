@@ -3,7 +3,7 @@ import test from 'node:test';
 import { editorialCaptureDefinition, expectedEditorialCaptures, editorialCapturesFromReport, editorialPngDimensions } from '../scripts/collect-cms-review.mjs';
 
 const attachment = name => ({ name, contentType: 'image/png', path: `test-results/editorial-fixture/${name}.png` });
-const report = () => ({ stats: { expected: 412, unexpected: 0, skipped: 0, flaky: 0 }, suites: [{ specs: [{ tests: [{ results: [{ attachments: expectedEditorialCaptures().map(({ name }) => attachment(name)) }] }] }] }] });
+const report = () => ({ stats: { expected: 430, unexpected: 0, skipped: 0, flaky: 0 }, suites: [{ specs: [{ tests: [{ results: [{ attachments: expectedEditorialCaptures().map(({ name }) => attachment(name)) }] }] }] }] });
 const attachments = value => value.suites[0].specs[0].tests[0].results[0].attachments;
 // Header fixtures test classification/dimension guards, not actual image decoding.
 const header = (width, height = 900) => {
@@ -49,9 +49,9 @@ test('duplicate and malformed expected attachments fail without accepting arbitr
   }
 });
 test('incomplete, skipped, failed or flaky browser runs cannot produce passing review evidence', () => {
-  for (const patch of [{ expected: 411 }, { unexpected: 1 }, { skipped: 1 }, { flaky: 1 }]) {
+  for (const patch of [{ expected: 429 }, { unexpected: 1 }, { skipped: 1 }, { flaky: 1 }]) {
     const value = report(); Object.assign(value.stats, patch);
-    assert.throws(() => editorialCapturesFromReport(value), /412-test browser regression/);
+    assert.throws(() => editorialCapturesFromReport(value), /430-test DEV-05C browser regression/);
   }
   assert.throws(() => editorialCapturesFromReport(null), /412-test browser regression/);
 });
