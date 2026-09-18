@@ -79,6 +79,18 @@ async function responseData(response: Response, signal: AbortSignal): Promise<un
   try { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as unknown; }
   catch { return fail('response', 'CMS_INVALID_JSON'); }
 }
+/** Query HTTP protocol metadata is validated here and never forwarded to site/page rendering. */
+function queryResult(value: unknown): unknown {
+  const envelope = record(value, 'response', ['ms', 'query', 'result', 'syncTags']);
+  if (!Object.hasOwn(envelope, 'result')) fail('response.result', 'CMS_EMPTY');
+  if (envelope['ms'] != null && (typeof envelope['ms'] !== 'number' || !Number.isFinite(envelope['ms']) || envelope['ms'] < 0)) fail('response.ms');
+  if (envelope['query'] != null) string(envelope['query'], 'response.query', true);
+  if (envelope['syncTags'] != null) {
+    if (!Array.isArray(envelope['syncTags']) || envelope['syncTags'].length > 10000) fail('response.syncTags');
+    for (let index = 0; index < envelope['syncTags'].length; index++) string(envelope['syncTags'][index], `response.syncTags[${index}]`, true);
+  }
+  return envelope['result'];
+}
 
 export function createSiteReader(input: unknown, options: SiteReaderOptions = {}) {
   if (release.name !== 'node' || typeof window !== 'undefined') fail('runtime', 'CMS_SERVER_ONLY');
@@ -106,8 +118,8 @@ export function createSiteReader(input: unknown, options: SiteReaderOptions = {}
           if (response.status === 401) fail('response', 'CMS_UNAUTHENTICATED');
           if (response.status === 403) fail('response', 'CMS_FORBIDDEN');
           if (!response.ok) fail('response', 'CMS_HTTP');
-          const payload = record(await responseData(response, controller.signal), 'response', ['result']);
-          return convertCmsSiteBundle(payload['result'], { projectId: config.projectId, dataset: config.dataset, perspective: 'published', now: now() });
+          const result = queryResult(await responseData(response, controller.signal));
+          return convertCmsSiteBundle(result, { projectId: config.projectId, dataset: config.dataset, perspective: 'published', now: now() });
         })(),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => { controller.abort(); reject(new CmsContentError('CMS_TIMEOUT', 'response')); }, timeoutMs);

@@ -13,7 +13,8 @@ import { fixtureSiteBundle, fixtureSiteContext, fixtureSiteDataset, mutateSite }
 const canary = 'OFFLINE_SITE_TOKEN_CANARY';
 const config = () => ({ projectId: fixtureSiteContext.projectId, dataset: fixtureSiteContext.dataset, token: canary });
 const errorCode = (code?: string) => (error: unknown) => error instanceof CmsContentError && (!code || error.code === code) && !String(error.stack).includes(canary);
-const response = (result: unknown, status = 200) => new Response(JSON.stringify({ result }), { status });
+const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+const response = (result: unknown, status = 200, metadata: Record<string, unknown> = { ms: 4 }) => jsonResponse({ ...metadata, result }, status);
 
 test('published site bundle converts one settings singleton, six fixed routes and two categories without becoming a website-release approval', () => {
   const mapped = convertCmsSiteBundle(fixtureSiteBundle(), fixtureSiteContext);
@@ -90,6 +91,40 @@ test('site reader is fixed published/no-store POST query with no arbitrary docum
   };
   const reader = createSiteReader(config(), { transport, now: () => fixtureSiteContext.now });
   assert.equal((await reader.read()).kind, 'cms_site_bundle'); assert.equal(calls, 1); assert.deepEqual(reader.policy, siteQueryPolicy);
+});
+
+test('site reader accepts the normal Query HTTP envelope with server processing time', async () => {
+  const reader = createSiteReader(config(), { transport: async () => response(fixtureSiteBundle()), now: () => fixtureSiteContext.now });
+  const mapped = await reader.read();
+  assert.equal(mapped.kind, 'cms_site_bundle');
+  assert.equal(Object.hasOwn(mapped, 'ms'), false); assert.equal(Object.hasOwn(mapped, 'syncTags'), false);
+});
+
+test('site reader accepts supported optional Query metadata without forwarding it', async () => {
+  const reader = createSiteReader(config(), {
+    transport: async () => response(fixtureSiteBundle(), 200, { ms: 1.25, syncTags: [canary, 'tag-b'] }),
+    now: () => fixtureSiteContext.now,
+  });
+  const mapped = await reader.read();
+  assert.equal(mapped.kind, 'cms_site_bundle');
+  assert.equal(JSON.stringify(mapped).includes(canary), false);
+});
+
+test('site reader rejects missing result, invalid envelope types and invalid protocol metadata', async () => {
+  const readEnvelope = (body: unknown) => createSiteReader(config(), {
+    transport: async () => jsonResponse(body), now: () => fixtureSiteContext.now,
+  }).read();
+  await assert.rejects(readEnvelope({ ms: 1 }), errorCode('CMS_EMPTY'));
+  await assert.rejects(readEnvelope([]), errorCode('CMS_INVALID'));
+  await assert.rejects(readEnvelope(null), errorCode('CMS_INVALID'));
+  await assert.rejects(readEnvelope({ ms: -1, result: fixtureSiteBundle() }), errorCode('CMS_INVALID'));
+  await assert.rejects(readEnvelope({ ms: 1, syncTags: 'not-an-array', result: fixtureSiteBundle() }), errorCode('CMS_INVALID'));
+});
+
+test('site reader still rejects invalid result and unsupported business fields inside a valid HTTP envelope', async () => {
+  await assert.rejects(createSiteReader(config(), { transport: async () => response({ settings: [], pages: [], categories: [] }), now: () => fixtureSiteContext.now }).read(), errorCode('CMS_INVALID'));
+  const result = fixtureSiteBundle(); mutateSite(result, ['pages', 0, 'privateNote'], 'must stay rejected');
+  await assert.rejects(createSiteReader(config(), { transport: async () => response(result, 200, { ms: 2, syncTags: ['tag-a'] }), now: () => fixtureSiteContext.now }).read(), errorCode('CMS_UNSUPPORTED_FIELD'));
 });
 
 test('missing configuration and malformed config cannot initiate site transport', () => {
