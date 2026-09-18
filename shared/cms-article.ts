@@ -4,6 +4,7 @@ import type { EditorialBlock } from './editorial';
 import type { Seo } from './content';
 import { convertCmsBody } from './cms-body';
 import { array, date, fail, id, record, reference, string, type RecordValue } from './cms-validation';
+import { convertCmsApprovedImage, type CmsApprovedImage } from './cms-image';
 
 export const articleScopes = {
   'what-to-send-for-a-clothing-quote': pageContexts.quoteGuide,
@@ -11,11 +12,7 @@ export const articleScopes = {
 } as const;
 export type ArticleSlug = keyof typeof articleScopes;
 export interface CmsReadContext { projectId: string; dataset: string; perspective: 'published'; now: number }
-export interface CmsCover {
-  source: 'sanity'; assetId: string; url: string; width: number; height: number;
-  alt: string; caption: string | null; publicUseApproved: true; decorative: false;
-  crop: Record<string, number> | null; hotspot: Record<string, number> | null;
-}
+export type CmsCover = CmsApprovedImage;
 /** Validated delivery data, NOT ArticlePreview, a raw CMS document, or website publication approval. */
 export interface CmsArticleRenderData {
   kind: 'cms_article'; source: 'sanity'; documentId: string; revision: string;
@@ -67,36 +64,6 @@ export function resolveCmsReference(value: unknown, field: string, context: CmsR
   if (!routes.pages.some(route => route.path === path)) fail(field, 'CMS_REFERENCE');
   return path;
 }
-function geometry(value: unknown, keys: string[], field: string): Record<string, number> | null {
-  if (value == null) return null;
-  const input = record(value, field, keys), output: Record<string, number> = {};
-  for (const key of keys) {
-    const number = input[key];
-    if (typeof number !== 'number' || !Number.isFinite(number) || number < 0 || number > 1) fail(field, 'CMS_IMAGE');
-    output[key] = number;
-  }
-  if (keys.includes('left') && (output['left']! + output['right']! >= 1 || output['top']! + output['bottom']! >= 1)) fail(field, 'CMS_IMAGE');
-  if (keys.includes('x') && (output['width']! <= 0 || output['height']! <= 0 || output['x']! - output['width']! / 2 < 0 || output['x']! + output['width']! / 2 > 1 || output['y']! - output['height']! / 2 < 0 || output['y']! + output['height']! / 2 > 1)) fail(field, 'CMS_IMAGE');
-  return output;
-}
-function cover(value: unknown, context: CmsReadContext): CmsCover {
-  const image = record(value, 'coverImage', ['_type', 'asset', 'alt', 'caption', 'publicUseApproved', 'decorative', 'crop', 'hotspot']);
-  if (image['_type'] !== 'approvedImage' || image['publicUseApproved'] !== true || image['decorative'] !== false) fail('coverImage', 'CMS_ASSET_APPROVAL');
-  const ref = reference(image['asset'], 'coverImage.asset'), asset = record(ref['document'], 'coverImage.asset.document');
-  const assetId = publishedIdentity(asset, 'coverImage.asset.document');
-  const match = /^image-([a-zA-Z0-9]{16,64})-([1-9][0-9]*)x([1-9][0-9]*)-(jpg|png|webp|avif)$/.exec(assetId);
-  if (ref['_ref'] !== assetId || asset['_type'] !== 'sanity.imageAsset' || !match) fail('coverImage.asset', 'CMS_IMAGE');
-  const width = Number(match[2]), height = Number(match[3]);
-  const dimensions = record(record(asset['metadata'], 'coverImage.asset.metadata')['dimensions'], 'coverImage.asset.metadata.dimensions');
-  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width > 20000 || height > 20000 || dimensions['width'] !== width || dimensions['height'] !== height) fail('coverImage.asset.metadata.dimensions', 'CMS_IMAGE');
-  const url = `https://cdn.sanity.io/images/${context.projectId}/${context.dataset}/${match[1]}-${width}x${height}.${match[4]}`;
-  if (asset['url'] !== url) fail('coverImage.asset.url', 'CMS_IMAGE');
-  return { source: 'sanity', assetId, url, width, height, alt: string(image['alt'], 'coverImage.alt'),
-    caption: image['caption'] == null ? null : string(image['caption'], 'coverImage.caption'),
-    publicUseApproved: true, decorative: false,
-    crop: geometry(image['crop'], ['top', 'bottom', 'left', 'right'], 'coverImage.crop'),
-    hotspot: geometry(image['hotspot'], ['x', 'y', 'width', 'height'], 'coverImage.hotspot') };
-}
 /** No defaults for authors, dates, review or permission; no mock import, fallback or cloud writes. */
 export function convertCmsArticles(value: unknown, context: CmsReadContext): CmsArticleRenderData[] {
   if (context.perspective !== 'published' || !Number.isFinite(context.now) || !/^[a-z0-9]+$/.test(context.projectId) || !/^[a-z0-9][a-z0-9_-]*$/.test(context.dataset)) fail('context', 'CMS_CONFIG');
@@ -132,7 +99,7 @@ export function convertCmsArticles(value: unknown, context: CmsReadContext): Cms
       slug, referenceCode: articleScopes[slug].referenceCode, title: string(doc['title'], `${field}.title`), excerpt: string(doc['excerpt'], `${field}.excerpt`),
       seo: { seoTitle: string(seo['seoTitle'], `${field}.seo.seoTitle`), seoDescription: string(seo['seoDescription'], `${field}.seo.seoDescription`) },
       authorDisplay: string(doc['authorDisplay'], `${field}.authorDisplay`), publishedAt, contentUpdatedAt, factConfirmedAt, factReviewStatus: 'confirmed',
-      cover: cover(doc['coverImage'], context), body,
+      cover: convertCmsApprovedImage(doc['coverImage'], 'coverImage', context), body,
       relatedCategories: related('relatedCategories', 'category'), relatedArticles: related('relatedArticles', 'article'), linkToManufacturing: doc['linkToManufacturing'] === true };
   });
 }

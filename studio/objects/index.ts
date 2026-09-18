@@ -38,5 +38,10 @@ export const sample = defineType({ name: 'sample', type: 'object', fields: [
   defineField({ name: 'fit', type: 'string' }),
   defineField({ name: 'techniqueNotes', type: 'text' }),
 ] });
+export const capabilityRow = defineType({ name: 'capabilityRow', title: 'Capability row', type: 'object', fields: [
+  defineField({ name: 'name', type: 'string', validation: rule => rule.required() }),
+  defineField({ name: 'description', type: 'text', validation: rule => rule.required() }),
+  defineField({ name: 'limitNote', title: 'Optional limitation note', type: 'text' }),
+] });
 
-export const objectTypes = [seo, approvedImage, faq, moqPolicy, sample, ...editorialObjectTypes];
+export const objectTypes = [seo, approvedImage, faq, moqPolicy, sample, capabilityRow, ...editorialObjectTypes];
