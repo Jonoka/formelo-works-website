@@ -7,6 +7,7 @@ import { factoryPreview } from './factory-preview';
 import { contactPreview } from './contact-preview';
 import { articlePreviews } from './article-previews';
 import { privacyPreview } from './privacy-preview';
+import { localHomeSections } from './home-sections';
 
 /** Proposed customer-facing copy is labelled as a concept; commercial facts remain null. */
 export const mockContent: ContentSnapshot = {
@@ -37,6 +38,7 @@ export const mockContent: ContentSnapshot = {
   },
   // Separate local UI model: never serialized or tested as a Sanity document.
   homepagePreview: {
+    sectionCopy: localHomeSections,
     heroTitleLines: ['Custom apparel', 'manufacturing', 'for brands in motion.'],
     heroFactNote: 'Services and terms are not yet factory-confirmed.',
     factsStatus: 'unconfirmed',

@@ -1,8 +1,10 @@
 ---
-import { homepageNavigation, demonstrationNavigation } from '../content/navigation';
+import { homepageNavigation } from '../content/navigation';
+import type { CategoryCard } from '../../../shared/site-delivery';
 import NavigationItem from './NavigationItem.astro';
-interface Props { brandName: string }
-const { brandName } = Astro.props;
+interface Props { brandName: string; categories: CategoryCard[]; source: 'local' | 'sanity' }
+const { brandName, categories, source } = Astro.props;
+const categoryNavigation = categories.map(category => ({ label: category.name, href: category.path }));
 ---
 <header class="site-header shell">
   <a class="wordmark" href="/" aria-label={`${brandName} home`}>{brandName}</a>
@@ -10,7 +12,7 @@ const { brandName } = Astro.props;
     <details class="clothing-menu" data-nav-disclosure>
       <summary>Clothing <span class="disclosure-mark" aria-hidden="true"></span></summary>
       <ul class="clothing-menu-panel">
-        {demonstrationNavigation.map(link => <li><NavigationItem {...link} description="Demonstration category" /></li>)}
+        {categoryNavigation.map(link => <li><NavigationItem {...link} description={source === 'local' ? 'Demonstration category' : 'Published CMS category'} /></li>)}
       </ul>
     </details>
     {homepageNavigation.map(link => <NavigationItem {...link} />)}
@@ -18,10 +20,10 @@ const { brandName } = Astro.props;
   <details class="mobile-nav" data-nav-disclosure>
     <summary>Menu <span class="disclosure-mark" aria-hidden="true"></span></summary>
     <nav aria-label="Mobile navigation">
-      <p class="eyebrow">Clothing / Demonstration categories</p>
-      {demonstrationNavigation.map(link => <NavigationItem {...link} />)}
+      <p class="eyebrow">{source === 'local' ? 'Clothing / Demonstration categories' : 'Clothing / Published CMS categories'}</p>
+      {categoryNavigation.map(link => <NavigationItem {...link} />)}
       {homepageNavigation.map(link => <NavigationItem {...link} />)}
-      <p class="navigation-note">Explore the garment concepts, manufacturing guide and factory profile. Contact channels are not configured yet.</p>
+      <p class="navigation-note">{source === 'local' ? 'Explore the garment concepts, manufacturing guide and factory profile. Contact channels are not configured yet.' : 'Explore the categories, manufacturing guide and factory profile. Contact channels remain inactive under the website release gate.'}</p>
     </nav>
   </details>
 </header>

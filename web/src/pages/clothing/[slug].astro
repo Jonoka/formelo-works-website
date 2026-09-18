@@ -1,15 +1,31 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import CategoryLayout from '../../layouts/CategoryLayout.astro';
-import { loadContent } from '../../lib/content';
-import { readRuntime } from '../../../../config/runtime';
-export const getStaticPaths = (async () => {
-  const { categoryPreviews, siteSettings } = await loadContent(readRuntime().contentMode);
-  return categoryPreviews.map(category => ({
-    params: { slug: category.slug },
-    props: { category, related: categoryPreviews.filter(item => item.slug !== category.slug), brandName: siteSettings.brandName },
-  }));
-}) satisfies GetStaticPaths;
-const { category, related, brandName } = Astro.props;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { cmsCategoryScopes } from '../../../../shared/cms-site';
+import { relatedCategoryArticles } from '../../../../shared/site-delivery';
+import type { ArticleDelivery } from '../../../../shared/article-delivery';
+import { CmsContentError } from '../../../../shared/cms-validation';
+import { loadArticlePage } from '../../lib/server/article-delivery';
+import { safeSiteErrorCode } from '../../lib/server/site-delivery';
+// Never cache page data in getStaticPaths during dev. The fixed route inventory is not a data fallback.
+export const getStaticPaths = (async () => Object.keys(cmsCategoryScopes).map(slug => ({ params: { slug } }))) satisfies GetStaticPaths;
+const site = Astro.locals.siteDelivery;
+const category = site.categories.find(item => item.slug === Astro.params['slug']);
+if (!category) throw new CmsContentError('CMS_INCOMPLETE_COLLECTION', 'category');
+const related = site.cards.filter(item => item.slug !== category.slug);
+let articles: ArticleDelivery[] = [], errorCode: string | null = null;
+if (category.kind === 'cms_category' && category.relatedArticles.length) {
+  try {
+    const result = await loadArticlePage({ command: import.meta.env['FORMELO_ASTRO_COMMAND'], url: Astro.url });
+    if (!result.ok) throw new CmsContentError(result.code, 'category.relatedArticles');
+    articles = relatedCategoryArticles(category, result.collection);
+  } catch (error) {
+    if (import.meta.env['FORMELO_ASTRO_COMMAND'] !== 'dev') throw error;
+    errorCode = safeSiteErrorCode(error); Astro.response.status = 503;
+  }
+}
 ---
-<CategoryLayout category={category} related={related} brandName={brandName} />
+{errorCode ? <BaseLayout title="Category unavailable" description="The selected category content is unavailable. No local substitute is shown." brandName={site.shell.brandName} referenceCode={category.referenceCode}>
+  <section class="shell section-row" data-site-delivery-error={errorCode}><h1>Category unavailable</h1><p>The selected related content is missing or incompatible. No previous or local substitute is shown.</p><p>{errorCode}</p></section>
+</BaseLayout> : <CategoryLayout category={category} related={related} articles={articles} brandName={site.shell.brandName} />}

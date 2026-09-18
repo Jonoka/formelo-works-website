@@ -12,7 +12,7 @@ if (!allowed[tool]?.includes(command)) throw new Error('Unsupported project tool
 const workspace = tool === 'astro' ? 'web' : 'studio';
 if (tool === 'sanity') {
   // Fail before loading the CLI, prompting for an account or contacting Sanity.
-  for (const name of ['.env.local', '.env']) {
+  for (const name of process.env.FORMELO_ENV_FILES === 'ignore' ? [] : ['.env.local', '.env']) {
     const path = fileURLToPath(new URL(`../studio/${name}`, import.meta.url));
     if (existsSync(path)) loadEnvFile(path);
   }

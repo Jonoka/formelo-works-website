@@ -6,9 +6,10 @@ export default defineConfig({
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }], ['json', { outputFile: 'test-results/results.json' }]],
   use: { browserName: 'chromium', trace: 'retain-on-failure' },
   projects: [
-    { name: 'preview', testIgnore: '**/article-delivery-offline.spec.ts', use: { baseURL: 'http://127.0.0.1:4321' } },
-    { name: 'dev', testIgnore: '**/article-delivery-offline.spec.ts', use: { baseURL: 'http://127.0.0.1:4322' } },
+    { name: 'preview', testIgnore: ['**/article-delivery-offline.spec.ts', '**/site-delivery-offline.spec.ts'], use: { baseURL: 'http://127.0.0.1:4321' } },
+    { name: 'dev', testIgnore: ['**/article-delivery-offline.spec.ts', '**/site-delivery-offline.spec.ts'], use: { baseURL: 'http://127.0.0.1:4322' } },
     { name: 'cms-offline', testMatch: '**/article-delivery-offline.spec.ts' },
+    { name: 'site-offline', testMatch: '**/site-delivery-offline.spec.ts' },
   ],
   webServer: [
     { name: 'static-preview', command: 'npm run preview', url: 'http://127.0.0.1:4321', reuseExistingServer: false, timeout: 60000 },

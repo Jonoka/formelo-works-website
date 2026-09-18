@@ -1,4 +1,4 @@
-// Node/server-only published site bundle reader. It is not wired into loadContent until a later integration step.
+// Node/server-only published reader reused by DEV-05E. Default mock delivery never invokes it.
 import { release } from 'node:process';
 import { pageKeys } from '../../../../shared/content';
 import { cmsCategoryScopes, convertCmsSiteBundle, type CmsSiteBundle } from '../../../../shared/cms-site';
@@ -15,6 +15,12 @@ const faq = `_type, _key, question, answer`;
 const moq = `_type, mode, quantity, unit, basis, sizeMixing, conditions, confirmedAt`;
 const sample = `_type, _key, sampleCode, name, summary, images[]{${image}}, fabric, weightGsm, fit, techniqueNotes`;
 const capability = `_type, _key, name, description, limitNote`;
+const homeSection = `_type, eyebrow, title, description`;
+const homeTemplate = `_type, eyebrow, titleLineHints, sections{_type,
+  capabilities{${homeSection}}, categories{${homeSection}}, factory{${homeSection}},
+  process{${homeSection}}, journal{${homeSection}}, faq{${homeSection}}},
+  capabilities[]{_type, _key, title, description}, manufacturingSummary{_type, customization, sampling},
+  factorySummary, factoryImage{${image}}, processSteps[]{_type, _key, title, description}`;
 
 export const siteBundleQuery = `{
   "settings": *[_type == "siteSettings" && ${publishedFilter}]{
@@ -27,7 +33,7 @@ export const siteBundleQuery = `{
   "pages": *[_type == "page" && pageKey in $pageKeys && ${publishedFilter}]{
     _type, _id, _rev, _originalId, pageKey,
     "pageKeyCount": count(*[_type == "page" && pageKey == ^.pageKey && ${publishedFilter}]),
-    title, intro, heroImage{${image}}, faqItems[]{${faq}}, seo{_type, seoTitle, seoDescription}, contentUpdatedAt, factConfirmedAt
+    title, intro, heroImage{${image}}, faqItems[]{${faq}}, templateContent{${homeTemplate}}, seo{_type, seoTitle, seoDescription}, contentUpdatedAt, factConfirmedAt
   },
   "categories": *[_type == "category" && slug.current in $categorySlugs && ${publishedFilter}]{
     _type, _id, _rev, _originalId, name, slug{_type, current},

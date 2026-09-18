@@ -1,13 +1,16 @@
 ---
 import Button from './Button.astro';
 import type { ReferenceCode } from '../../../config/page-context';
-interface Props { id: string; referenceCode: ReferenceCode }
-const { id, referenceCode } = Astro.props;
+import { contactReleasePolicy } from '../../../shared/site-delivery';
+interface Props { id: string; referenceCode: ReferenceCode; sampleCode?: string }
+const { id, referenceCode, sampleCode } = Astro.props;
+const contact = Astro.locals.siteDelivery.shell.contact;
+if (contactReleasePolicy.activationAllowed || contact.enabled || contact.copyingAllowed) throw new Error('CONTACT_STAGE_BLOCKED');
 ---
-<div class="pending-contact" data-reference-code={referenceCode}>
+<div class="pending-contact" data-reference-code={referenceCode} data-sample-code={sampleCode} data-contact-gate={contact.state}>
   <div class="contact-actions" aria-describedby={id}>
     <Button disabled describedBy={id}><span class="button-label">WhatsApp</span><span class="button-arrow" aria-hidden="true">↗</span></Button>
     <Button disabled variant="secondary" describedBy={id}><span class="button-label">Email</span><span class="button-arrow" aria-hidden="true">↗</span></Button>
   </div>
-  <p class="contact-note" id={id}>Contact details pending — channels inactive.</p>
+  <p class="contact-note" id={id}>{contact.note}</p>
 </div>

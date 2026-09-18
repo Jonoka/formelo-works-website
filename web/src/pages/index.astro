@@ -1,77 +1,75 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PendingContact from '../components/PendingContact.astro';
-import PreviewImage from '../components/PreviewImage.astro';
+import ContentImage from '../components/ContentImage.astro';
+import MoqDetails from '../components/MoqDetails.astro';
 import FAQ from '../components/FAQ.astro';
 import Icon from '../components/Icon.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import JournalCard from '../components/JournalCard.astro';
 import ArticleDeliveryError from '../components/ArticleDeliveryError.astro';
 import FactoryPhotographyPending from '../components/FactoryPhotographyPending.astro';
-import { categoryPath } from '../lib/category-preview';
-import { loadContent } from '../lib/content';
 import { loadArticlePage } from '../lib/server/article-delivery';
 import { articleCollectionNotice } from '../../../shared/article-delivery';
-import { readRuntime } from '../../../config/runtime';
 import { pageContexts } from '../../../config/page-context';
-const { siteSettings, home, homepagePreview } = await loadContent(readRuntime().contentMode);
+const { home, cards, shell } = Astro.locals.siteDelivery;
 const journal = await loadArticlePage({ command: import.meta.env['FORMELO_ASTRO_COMMAND'], url: Astro.url });
 if (!journal.ok) Astro.response.status = 503;
-if (import.meta.env['FORMELO_ASTRO_COMMAND'] === 'dev') Astro.response.headers.set('Cache-Control', 'no-store');
-// Presentation hints must never replace an updated, authoritative page title.
-const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ? homepagePreview.heroTitleLines : [home.title];
+const sections = home.sections;
 ---
-<BaseLayout title={home.seo.seoTitle} description={home.seo.seoDescription} brandName={siteSettings.brandName} showMobileContact referenceCode={pageContexts.home.referenceCode}>
+<BaseLayout title={home.seo.seoTitle} description={home.seo.seoDescription} brandName={shell.brandName} showMobileContact referenceCode={pageContexts.home.referenceCode}>
+<div class="home-page" data-page-source={home.source} data-page-status={home.status} data-page-revision={home.revision} data-production-allowed="false">
   <section class="hero shell" aria-labelledby="hero-heading">
     <div class="hero-copy">
-      <p class="eyebrow">{homepagePreview.eyebrow}</p>
-      <h1 id="hero-heading">{heroTitleLines.map(line => <span class="hero-title-line">{line}{' '}</span>)}</h1>
+      <p class="eyebrow">{home.eyebrow}</p>
+      <h1 id="hero-heading">{home.titleLines.map(line => <span class="hero-title-line">{line}{' '}</span>)}</h1>
       <p class="intro">{home.intro}</p>
-      <p class="fact-note">{homepagePreview.heroFactNote}</p>
+      <p class="fact-note">{home.factNote}</p>
       <PendingContact id="hero-contact-note" referenceCode={pageContexts.home.referenceCode} />
-      <a class="text-link" href="#capabilities">Explore the proposed approach <span aria-hidden="true">↓</span></a>
+      <a class="text-link" href="#capabilities">{home.source === 'local' ? 'Explore the proposed approach' : 'Explore capabilities'} <span aria-hidden="true">↓</span></a>
     </div>
-    <PreviewImage image={homepagePreview.heroImage} label="Garments, considered." priority shape="square" sizes="(min-width: 1440px) 650px, (min-width: 768px) 48vw, calc(100vw - 40px)" />
+    <ContentImage image={home.heroImage} label="Garments, considered." priority shape="square" sizes="(min-width: 1440px) 650px, (min-width: 768px) 48vw, calc(100vw - 40px)" />
   </section>
-
   <section class="section-row shell section-grid capabilities" id="capabilities" tabindex="-1" aria-labelledby="capabilities-heading">
-    <div><SectionHeading id="capabilities-heading" eyebrow="From idea to enquiry" lines={['Capabilities']} note="Proposed service areas. Availability and scope are not yet factory-confirmed." /><a class="text-link" href="/manufacturing/">Read the manufacturing guide</a></div>
-    <div class="capability-grid">
-      {homepagePreview.capabilities.map(item => <div class="capability"><Icon name={item.icon} /><h3>{item.title}</h3><p>{item.description}</p></div>)}
+    <div><SectionHeading id="capabilities-heading" eyebrow={sections.capabilities.eyebrow} lines={sections.capabilities.lines} note={sections.capabilities.description} /><a class="text-link" href="/manufacturing/">Read the manufacturing guide</a></div>
+    <div>
+      <div class="capability-grid">{home.capabilities.map(item => <div class="capability"><Icon name={item.icon} /><h3>{item.title}</h3><p>{item.description}</p></div>)}</div>
+      {home.manufacturingSummary && home.defaultMoq && <div class="home-manufacturing-summary">
+        <article><h3>Customization</h3><p>{home.manufacturingSummary.customization}</p><a class="text-link" href="/manufacturing/#options">Manufacturing options</a></article>
+        <article><h3>MOQ conditions</h3><MoqDetails policy={home.defaultMoq} /><a class="text-link" href="/manufacturing/#moq">Quantity guidance</a></article>
+        <article><h3>Sampling</h3><p>{home.manufacturingSummary.sampling}</p><a class="text-link" href="/manufacturing/#sampling">Sampling guidance</a></article>
+      </div>}
     </div>
   </section>
-
   <section class="section-row shell section-grid" id="categories" tabindex="-1" aria-labelledby="categories-heading">
-    <SectionHeading id="categories-heading" eyebrow="Explore the possibilities" lines={['Apparel', 'categories']} note="Two directions to frame a brief. Demonstrations only." />
+    <SectionHeading id="categories-heading" eyebrow={sections.categories.eyebrow} lines={sections.categories.lines} note={sections.categories.description} />
     <div class="category-grid">
-      {homepagePreview.demonstrationCategories.map((category, index) => (
-        <article class="category-card" id={category.anchor} tabindex="-1" aria-labelledby={`${category.anchor}-heading`}>
-          <div class="category-media"><span class="card-number" aria-hidden="true">0{index + 1}</span><PreviewImage image={category.image} label={category.name} sizes="(min-width: 1440px) 450px, (min-width: 1024px) 33vw, (min-width: 768px) 45vw, calc(100vw - 40px)" /></div>
-          <div class="category-copy"><p class="eyebrow">Demonstration category</p><h3 id={`${category.anchor}-heading`}><a href={categoryPath(category.anchor)}>{category.name} <span aria-hidden="true">↗</span></a></h3><p>{category.description}</p></div>
+      {cards.map((category, index) => (
+        <article class="category-card" id={category.slug} tabindex="-1" aria-labelledby={`${category.slug}-heading`} data-category-card={category.slug} data-category-source={category.source} data-category-revision={category.revision}>
+          <div class="category-media"><span class="card-number" aria-hidden="true">0{index + 1}</span><ContentImage image={category.image} label={category.name} sizes="(min-width: 1440px) 450px, (min-width: 1024px) 33vw, (min-width: 768px) 45vw, calc(100vw - 40px)" /></div>
+          <div class="category-copy"><p class="eyebrow">{category.source === 'local' ? 'Demonstration category' : 'Published CMS category'}</p><h3 id={`${category.slug}-heading`}><a href={category.path}>{category.name} <span aria-hidden="true">↗</span></a></h3><p class="category-card-summary">{category.summary}</p></div>
         </article>
       ))}
     </div>
   </section>
-
   <section class="section-row shell section-grid" id="factory" tabindex="-1" aria-labelledby="factory-heading">
-    <div><SectionHeading id="factory-heading" eyebrow="Our factory / Profile pending" lines={['Behind', 'the garment.']} note="Know who makes your clothes. The factory profile, equipment details and original photography still need verification." /><a class="text-link" href="/our-factory/">Explore our factory profile</a></div>
-    <FactoryPhotographyPending />
+    <div><SectionHeading id="factory-heading" eyebrow={sections.factory.eyebrow} lines={sections.factory.lines} note={sections.factory.description} /><a class="text-link" href="/our-factory/">Explore our factory profile</a></div>
+    {home.source === 'local' ? <FactoryPhotographyPending /> : <div class="home-factory-content">
+      <p class="factory-summary">{home.factorySummary}</p>
+      {home.factoryImage ? <ContentImage image={home.factoryImage} label="Factory photograph" sizes="(min-width: 1024px) 800px, calc(100vw - 40px)" /> : <div class="factory-placeholder" data-factory-image="not-supplied"><p>No factory photograph supplied.</p><p>This optional image is omitted. No concept or stock factory image is substituted.</p></div>}
+    </div>}
   </section>
-
   <section class="section-row shell section-grid" id="production" tabindex="-1" aria-labelledby="process-heading">
-    <div><SectionHeading id="process-heading" eyebrow="How a project could take shape" lines={['A straightforward', 'process']} note="Illustrative workflow, not a confirmed factory procedure." /><a class="text-link" href="/manufacturing/#production">Explore the conceptual sequence</a></div>
-    <ol class="process-grid">
-      {homepagePreview.processSteps.map((step, index) => <li><span class="step-number">0{index + 1}</span><h3>{step.title}</h3><p>{step.description}</p>{index < homepagePreview.processSteps.length - 1 && <span class="step-arrow" aria-hidden="true">→</span>}</li>)}
-    </ol>
+    <div><SectionHeading id="process-heading" eyebrow={sections.process.eyebrow} lines={sections.process.lines} note={sections.process.description} /><a class="text-link" href="/manufacturing/#production">{home.source === 'local' ? 'Explore the conceptual sequence' : 'Read the production guide'}</a></div>
+    <ol class="process-grid">{home.processSteps.map((step, index) => <li><span class="step-number">0{index + 1}</span><h3>{step.title}</h3><p>{step.description}</p>{index < home.processSteps.length - 1 && <span class="step-arrow" aria-hidden="true">→</span>}</li>)}</ol>
   </section>
-
   <section class="section-row shell section-grid" id="journal" tabindex="-1" aria-labelledby="journal-heading" data-article-mode={journal.ok ? journal.collection.mode : 'unavailable'}>
-    <SectionHeading id="journal-heading" eyebrow="Journal" lines={['Ideas, process', 'and perspectives']} />
-    <div class="journal-content"><p class="journal-intro serif">Good questions come before good garments.</p>{journal.ok ? <><p>{articleCollectionNotice(journal.collection.mode)}</p><div class="journal-grid home-journal-grid">{journal.collection.articles.map(article => <JournalCard article={article} home />)}</div></> : <ArticleDeliveryError code={journal.code} />}<a class="text-link" href="/blog/">Explore the Journal</a></div>
+    <SectionHeading id="journal-heading" eyebrow={sections.journal.eyebrow} lines={sections.journal.lines} />
+    <div class="journal-content"><p class="journal-intro serif">{sections.journal.description}</p>{journal.ok ? <><p>{articleCollectionNotice(journal.collection.mode)}</p><div class="journal-grid home-journal-grid">{journal.collection.articles.map(article => <JournalCard article={article} home />)}</div></> : <ArticleDeliveryError code={journal.code} />}<a class="text-link" href="/blog/">Explore the Journal</a></div>
   </section>
-
   <section class="section-row shell section-grid enquiry-guide" id="enquiry-guide" tabindex="-1" aria-labelledby="faq-heading">
-    <SectionHeading id="faq-heading" eyebrow="Before the conversation" lines={['A little clarity.', 'A better brief.']} note="Start with the details that matter to your collection." />
+    <SectionHeading id="faq-heading" eyebrow={sections.faq.eyebrow} lines={sections.faq.lines} note={sections.faq.description} />
     <FAQ items={home.faqItems} />
   </section>
+</div>
 </BaseLayout>

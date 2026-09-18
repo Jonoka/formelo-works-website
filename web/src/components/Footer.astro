@@ -3,8 +3,8 @@ import PendingContact from './PendingContact.astro';
 import { footerNavigation } from '../content/navigation';
 import NavigationItem from './NavigationItem.astro';
 import type { ReferenceCode } from '../../../config/page-context';
-interface Props { brandName: string; showMobileContact?: boolean; referenceCode: ReferenceCode | null }
-const { brandName, showMobileContact = false, referenceCode } = Astro.props;
+interface Props { brandName: string; source: 'local' | 'sanity'; showMobileContact?: boolean; referenceCode: ReferenceCode | null }
+const { brandName, source, showMobileContact = false, referenceCode } = Astro.props;
 ---
 <footer class="site-footer" id="contact" tabindex="-1" aria-label="Site footer">
   <div class="shell">
@@ -14,9 +14,9 @@ const { brandName, showMobileContact = false, referenceCode } = Astro.props;
       {referenceCode && <PendingContact id="footer-contact-note" referenceCode={referenceCode} />}
     </div>}
     <div class="footer-bottom">
-      <div><span class="wordmark">{brandName}</span><p class="footer-brand-note">Apparel manufacturing for brands in motion.<br />Provisional brand · Factory facts awaiting confirmation.</p></div>
+      <div><span class="wordmark">{brandName}</span><p class="footer-brand-note">{source === 'local' ? <>Apparel manufacturing for brands in motion.<br />Provisional brand · Factory facts awaiting confirmation.</> : <>Brand from the selected CMS settings.<br />Website release and contact activation are not verified.</>}</p></div>
       <nav aria-label="Footer navigation">{footerNavigation.map(link => <NavigationItem {...link} />)}</nav>
     </div>
   </div>
 </footer>
-{showMobileContact && referenceCode && <aside class="mobile-contact-bar" aria-label="Contact options — not configured"><PendingContact id="mobile-contact-note" referenceCode={referenceCode} /></aside>}
+{showMobileContact && referenceCode && <aside class="mobile-contact-bar" aria-label={source === 'local' ? 'Contact options — not configured' : 'Contact options — inactive'}><PendingContact id="mobile-contact-note" referenceCode={referenceCode} /></aside>}

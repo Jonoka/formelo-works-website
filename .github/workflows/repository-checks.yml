@@ -39,6 +39,10 @@ jobs:
     env:
       DEPLOY_ENV: local
       CONTENT_MODE: mock
+      HOME_CATEGORY_CONTENT_MODE: mock
+      ARTICLE_CONTENT_MODE: mock
+      DEV_CMS_DRAFT_PREVIEW: '0'
+      FORMELO_ENV_FILES: ignore
       CONCEPT_MODE: 'true'
       ANALYTICS_MODE: 'off'
       ASTRO_TELEMETRY_DISABLED: '1'
@@ -68,12 +72,12 @@ jobs:
               'eventSha': os.environ['CHECKOUT_SHA'], 'runId': os.environ['RUN_ID'],
               'checkoutSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
-              'comparisonSha': '3600f9558465f247dceaa8234971dd9ca0c8a204',
+              'comparisonSha': os.environ['PR_BASE'],
               'moqTableBeforeSha': 'c02116e38b17f61323090b2ba5eaa8cf43c4db31',
-              'scope': 'DEV-05C unified article delivery: default mock, authorized one-Draft plus local MOQ, strict published contracts, build/dev isolation and cross-surface browser regressions. Default ten mock content URLs plus 404 remain unchanged; full-site Sanity and production remain blocked.',
+              'scope': 'DEV-05E Home and two Category CMS-to-template integration: fixed GROQ, Query HTTP envelope, strict conversion, shared site snapshot, actual route builds and synthetic browser checks. DEV-05C articles and default ten mock URLs plus 404 are retained. Full-site Sanity and production remain blocked.',
               'cmsBoundary': 'This CI run uses synthetic/offline CMS fixtures, fake test tokens and injected transport only. It has no Sanity secret and performs no live Sanity cloud request. The separately authorized one-Draft local review is recorded outside CI and is not reproduced by this workflow.',
-              'browserScope': 'Pinned Playwright Chromium on Linux; default mock Astro dev/static preview plus isolated synthetic draft-preview and published article-delivery fixtures. Synthetic CMS screenshots are not live Sanity screenshots; CMS-live screenshots remain local-only.',
-              'notExecuted': ['Real Sanity cloud read/write in this CI run', 'Author/editor authentication', 'Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Full-site CMS integration', 'Production deployment'],
+              'browserScope': 'Pinned Chromium on Linux. Current default mock plus isolated DEV-05E published Home/Category inputs and existing DEV-05C article fixtures. Before comparison is this PR actual base, not PR #5. No live Sanity or physical-device claim.',
+              'notExecuted': ['Real Sanity cloud read/write in this CI run', 'Author/editor authentication', 'Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Remaining fixed-page CMS body migration and live full-site CMS validation', 'Production deployment'],
               'assetLimit': 'The same three registered garment concepts are unchanged. T-shirt/hoodie images are explicitly reused in editorial cards and articles; two dedicated covers remain pending. No factory evidence or production-approved imagery.',
               'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'JOURNAL-QUOTE-001', 'JOURNAL-MOQ-001', 'FACTORY-001']]
           }, indent=2))
@@ -112,14 +116,14 @@ jobs:
         run: |
           set -o pipefail
           npm exec -- playwright install --with-deps chromium 2>&1 | tee review/browser-install.txt
-      - name: Check out the accepted PR 5 head for the before comparison
+      - name: Check out the actual PR base for the before comparison
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 3600f9558465f247dceaa8234971dd9ca0c8a204
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           path: .review-baseline
           persist-credentials: false
-      - name: Render all six accepted PR 5 pages without deploying them
+      - name: Render the actual base Home, categories and fixed-page baseline without deployment
         id: baseline
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: |
@@ -164,6 +168,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/collect-cms-review.mjs 2>&1 | tee review/cms-evidence.txt
+      - name: Collect exact-head Home and Category evidence with actual-base comparison
+        id: site_evidence
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.baseline.outcome == 'success' }}
+        run: node scripts/collect-site-review.mjs
       - name: Record outcomes, including skipped checks and evidence collection
         if: always()
         env:
@@ -179,12 +187,13 @@ jobs:
           BASELINE: ${{ steps.baseline.outcome }}
           MOQ_BASELINE: ${{ steps.moq_baseline.outcome }}
           EVIDENCE: ${{ steps.evidence.outcome }}
+          SITE_EVIDENCE: ${{ steps.site_evidence.outcome }}
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
-          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE', 'EVIDENCE']
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE', 'EVIDENCE', 'SITE_EVIDENCE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
       - name: Retain the focused private 1440-390 editorial screenshot pack
@@ -194,6 +203,17 @@ jobs:
           name: cms-editorial-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/cms-editorial/
+            review/source.json
+            review/outcomes.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain private Home and Category base-mock-offline screenshots
+        if: ${{ !cancelled() && steps.site_evidence.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cms-home-category-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            review/site-integration/
             review/source.json
             review/outcomes.json
           if-no-files-found: error

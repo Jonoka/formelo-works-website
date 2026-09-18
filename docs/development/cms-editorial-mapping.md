@@ -126,6 +126,51 @@ Query HTTP 成功响应按**协议 envelope / 业务 result** 两层处理。官
 
 本阶段没有 `templateContent` 迁移。当前 Manufacturing、Factory、Contact、Privacy 与 Category 页面仍有本地 presentation 数据，不能用只有共同 CMS 字段的 bundle 直接替换；因此 `web/src/lib/content.ts` 继续只接受 mock，`CONTENT_MODE=sanity` 继续 fail closed，普通 build 也不会导入或调用 site reader。`siteReaderConfigFromEnvironment` 还要求额外 `SANITY_SITE_READ_ENABLED=1`，用来防止既有单篇 token 被误当成全站读取授权；本阶段不设置该开关。离线 fixture 中的工厂名、联系人、日期、MOQ、样品与图片许可仅为负例/转换测试，禁止上传或当成真实资料。
 
+## DEV-05E · 首页和两品类的实际模板交付
+
+PR #10 已合并；本轮 base 为 `a83a01822a4310597dc2e8106a1a0c04339506e1`。上方 DEV-05A–D 段落记录当时边界，不再解释为本轮禁止接模板。新增链路为：
+
+```text
+page.home.templateContent / existing category + siteSettings
+  → fixed siteBundleQuery projection + normal Query envelope
+  → createSiteReader / strict CmsSiteBundle (all 6 pages + 2 categories)
+  → site-delivery / request locals / one-build snapshot
+  → existing index.astro + clothing/[slug].astro + CategoryLayout
+```
+
+| 模块 | 本地来源 | CMS 来源 | 必填/缺省与状态 |
+|---|---|---|---|
+| 首页 H1/简介/SEO | home.title/intro/seo | page.title/intro/seo | 必填，不补旧 mock；titleLineHints 只有逐字等于当前 title 才使用 |
+| 首页眉题/主图 | homepagePreview.eyebrow/heroImage | templateContent.eyebrow / page.heroImage | 必填；CMS 图必须通过共享许可与尺寸/URL转换 |
+| 六个区块业务标题/介绍 | homepagePreview.sectionCopy（原模板业务文案） | templateContent.sections.*.eyebrow/title/description | 六组固定字段必填，不开放模块/CSS/HTML自由输入 |
+| 能力项 | homepagePreview.capabilities | templateContent.capabilities | 2–4 项标题/说明；图标顺序为代码视觉规则，非编辑字段 |
+| 制造摘要 | 原本无独立摘要 | templateContent.manufacturingSummary + siteSettings.defaultMoq | 定制/打样摘要必填；MOQ模式/数量/单位/依据/混码/条件完整呈现 |
+| 首页品类卡 | categoryPreviews.cardSummary/name/image | 同批 Category.name/intro/heroImage/path | 不新增重复摘要字段；按 featuredCategories 有效顺序，不硬编码详情副本 |
+| 工厂摘要/图片 | 原本 sectionCopy + FactoryPhotographyPending | templateContent.factorySummary/factoryImage | 摘要必填；图可缺，明确显示未提供，不补 AI/库存照片 |
+| 合作流程 | homepagePreview.processSteps | templateContent.processSteps | 3–5 项标题/说明必填 |
+| 首页 FAQ | home.faqItems | page.faqItems | 保留至少 3 条验证，使用现有 FAQ |
+| 首页 Journal | PR #9 文章交付 | 同一 loadArticlePage | 页面/文章来源分别声明，不复制查询/卡片/正文 |
+| 品类 H1/简介/主图/SEO | CategoryPreview | Category.title/intro/heroImage/seo | 必填；CMS 状态不改造成 concept_only/unconfirmed |
+| 样品 | 原单张概念图 + 观察点 | samples[*].sampleCode/name/summary/images | 正式路径保留全部组和多图，编号/名称/简介全显示；概念路径效果保持 |
+| 可选样品规格 | 本地不伪造参数 | fabric/weightGsm/fit/techniqueNotes | 有值才显示，无值不填演示数字 |
+| 能力与限制 | discussion | capabilityRows.name/description/limitNote | 行必填；限制有值则显示，不丢字段 |
+| 定制与打样 | moqNotes/samplingNotes | customizationNotes/samplingNotes | 必填，保留 Manufacturing 对应锚点 |
+| MOQ | 本地未确认说明 | moqMode + effectiveMoq | inherit/override 已在转换层处理；显示计量依据/混码/限制；projectBased 无固定数字 |
+| 证据图/FAQ | 概念路径无假证据 | evidenceImages / faqItems | 所有图片经共享许可检查；FAQ 保持至少 3 条 |
+| 相关文章 | 本地无 published 替身 | relatedArticles → existing ArticleCollection | 无引用则隐藏；缺失/来源不兼容失败，不补本地/第三篇/死链接 |
+| 品类互访/导航 | 本地类别映射 | 同一 CategoryCard 投影 | 面包屑、稳定来源码与固定 URL 不变 |
+| 公共品牌与联系状态 | mock settings | bundle.siteSettings + contactReleasePolicy | 十页头/脚/SEO同品牌；CMS账号及开启位保持原值，网站阶段仍禁用且不输出测试账号 |
+
+业务内容通过上表映射；导航动词、错误/来源/许可状态、样品字段标签和联系控件说明由代码管理。衬线、色彩、分隔线、网格、图标和图片展示尺寸为视觉配置，不是 CMS 可编辑 CSS。
+
+`loadContent('mock')` 仍是本地验证入口；server site-delivery 在明确 `HOME_CATEGORY_CONTENT_MODE=published` 时复用现有 reader，默认路径零 site transport。middleware 为全站布局传递一次请求内的来源，其他五个固定 page 正文仍本地并明示。完整 `CONTENT_MODE=sanity` 保持拒绝。两种文章来源组合均是预先声明：published 页面+published 文章；或 published 页面+local 文章且品类无 published 文章引用。任何查询失败都不改变预选组合。
+
+同一次 Astro build 的非秘密 build ID 限定内容快照；构建中配置变化失败，新构建重新读取，dev 不跨请求缓存。无重试/旧成功内容/mock补齐；dev 脱敏 503，build 抛出明确失败。原 Query envelope 的 ms/syncTags兼容与严格业务白名单均保留。原始 bundle 只在服务器 locals，页面不序列化完整对象；凭证若误混入公开字段，在交付前拒绝。
+
+HomePreview / CategoryPreview 从未强转为正式文档。`websitePublication:not_verified`、`productionAllowed:false`、CMS published、事实日期记录和图片 publicUseApproved 是分开的状态。独立网站阶段门禁继续拒绝联系/复制；不改写 CMS 账号或 channelStatus 来假装无配置。真实材料、全站读取、写入/发布/撤回、媒体和部署授权均未扩大。
+
+本轮工程测试用假配置、内存 GROQ 和注入 Query HTTP transport。合成数据完整包含六页两品类，测试图请求只在本机拦截，PNG 为 TEST 检查图，不挪用三张服装概念图作 CMS 许可证明。隔离进程不读真实 dotenv；HTML/screenshot/脱敏日志位于专用目录。真实 PR #8/#9 Draft 目视已完成，不重新列为缺失。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。

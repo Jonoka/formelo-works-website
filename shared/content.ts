@@ -1,5 +1,6 @@
 import type { ArticlePreview, PrivacyPreview } from './editorial';
 import type { CorePageKey, PageReference } from '../config/page-context';
+import type { CmsHomeTemplateContent, HomeSectionCopy } from './cms-home';
 
 export const pageKeys = ['home', 'manufacturing', 'factory', 'contact', 'blogIndex', 'privacy'] as const;
 export type PageKey = (typeof pageKeys)[number];
@@ -119,6 +120,7 @@ export interface HomeDemoCategory {
 }
 // Local presentation data is not a persisted Sanity Page document.
 export interface HomePreview {
+  sectionCopy: Record<keyof CmsHomeTemplateContent['sections'], HomeSectionCopy & { lines: string[] }>;
   heroTitleLines: string[];
   heroFactNote: string;
   eyebrow: string;

@@ -1,24 +1,13 @@
 ---
 import type { ArticleDelivery } from '../../../shared/article-delivery';
 import PreviewImage from './PreviewImage.astro';
+import { cmsImagePresentation } from '../lib/cms-image-presentation';
 import '../styles/article-delivery.css';
 interface Props { article: ArticleDelivery; detail?: boolean }
 const { article, detail = false } = Astro.props;
 // Approved CMS images are rendered as ordinary images; the strict converter owns URL/permission validation.
 const publishedCover = article.kind === 'cms_article' ? article.cover : null;
-let approvedImage: { src: string; width: number; height: number; position: string } | null = null;
-if (publishedCover) {
-  const { width, height, crop, hotspot } = publishedCover;
-  const left = Math.floor((crop?.['left'] ?? 0) * width), top = Math.floor((crop?.['top'] ?? 0) * height);
-  const cropWidth = Math.max(1, width - left - Math.floor((crop?.['right'] ?? 0) * width));
-  const cropHeight = Math.max(1, height - top - Math.floor((crop?.['bottom'] ?? 0) * height));
-  const src = new URL(publishedCover.url);
-  if (crop) src.searchParams.set('rect', `${left},${top},${cropWidth},${cropHeight}`);
-  src.searchParams.set('w', String(Math.min(cropWidth, 1200))); src.searchParams.set('auto', 'format'); src.searchParams.set('fit', 'max');
-  const x = Math.max(0, Math.min(1, ((hotspot?.['x'] ?? .5) * width - left) / cropWidth));
-  const y = Math.max(0, Math.min(1, ((hotspot?.['y'] ?? .5) * height - top) / cropHeight));
-  approvedImage = { src: src.href, width: cropWidth, height: cropHeight, position: `${x * 100}% ${y * 100}%` };
-}
+const approvedImage = publishedCover ? cmsImagePresentation(publishedCover) : null;
 ---
 {article.kind === 'article_preview' && <div class:list={{ 'article-cover': detail }} data-cover-usage={article.cover.usage} data-cover-pending={article.cover.pendingAssetId} data-cover-state={article.coverState}>
   <PreviewImage image={article.cover.image} label={detail ? 'An editorial garment study' : 'Editorial garment concept'} priority={detail} sizes={detail ? '(min-width: 1024px) 760px, calc(100vw - 40px)' : '(min-width: 1024px) 560px, (min-width: 768px) 44vw, calc(100vw - 40px)'} />

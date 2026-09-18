@@ -7,18 +7,20 @@ import SectionHeading from '../components/SectionHeading.astro';
 import { loadContent } from '../lib/content';
 import { readRuntime } from '../../../config/runtime';
 const { contactPreview: preview, categoryPreviews, siteSettings } = await loadContent(readRuntime().contentMode);
+const selectedSettings = Astro.locals.siteDelivery.cms?.siteSettings ?? siteSettings;
+const contactGate = Astro.locals.siteDelivery.shell.contact;
 const details = [
-  { key: 'email', label: 'Email', value: siteSettings.email, pending: 'Not configured' },
-  { key: 'whatsapp', label: 'WhatsApp', value: siteSettings.whatsappDigits, pending: 'Not configured' },
-  { key: 'person', label: 'Contact person or team', value: siteSettings.contactPersonOrTeam, pending: 'Awaiting confirmation' },
-  { key: 'hours', label: 'Working hours', value: siteSettings.businessHours, pending: 'Awaiting confirmation' },
-  { key: 'timezone', label: 'Time zone', value: siteSettings.timezone, pending: 'Awaiting confirmation' },
-  { key: 'address', label: 'Public address', value: siteSettings.publicAddress, pending: 'Awaiting confirmation' },
+  { key: 'email', label: 'Email', value: selectedSettings.email, pending: 'Not configured' },
+  { key: 'whatsapp', label: 'WhatsApp', value: selectedSettings.whatsappDigits, pending: 'Not configured' },
+  { key: 'person', label: 'Contact person or team', value: selectedSettings.contactPersonOrTeam, pending: 'Awaiting confirmation' },
+  { key: 'hours', label: 'Working hours', value: selectedSettings.businessHours, pending: 'Awaiting confirmation' },
+  { key: 'timezone', label: 'Time zone', value: selectedSettings.timezone, pending: 'Awaiting confirmation' },
+  { key: 'address', label: 'Public address', value: selectedSettings.publicAddress, pending: 'Awaiting confirmation' },
 ];
 ---
 <InformationLayout preview={preview} brandName={siteSettings.brandName}>
   <InformationHero preview={preview} eyebrow="Contact / A conversation about your collection">
-    <section class="contact-details-panel" aria-labelledby="channel-status-heading"><p class="eyebrow" id="channel-status-heading">Contact details pending</p><dl>{details.map(detail => <div data-contact-field={detail.key} data-contact-state={detail.value === null ? 'unconfigured' : 'configured'}><dt>{detail.label}</dt><dd>{detail.value ?? detail.pending}</dd></div>)}</dl></section>
+    <section class="contact-details-panel" aria-labelledby="channel-status-heading"><p class="eyebrow" id="channel-status-heading">{contactGate.note}</p><dl>{details.map(detail => <div data-contact-field={detail.key} data-contact-state={detail.value === null ? 'unconfigured' : 'withheld_by_website_stage'}><dt>{detail.label}</dt><dd>{detail.value === null ? detail.pending : 'Configured in CMS; not activated on this website.'}</dd></div>)}</dl></section>
   </InformationHero>
   <section class="section-row section-grid shell" id="your-brief" tabindex="-1" aria-labelledby="contact-prepare-heading">
     <SectionHeading id="contact-prepare-heading" eyebrow="A useful starting point" lines={['A few details. Your own words.']} note="Keep these notes for a future email or WhatsApp conversation. There is no form or upload on this website." />

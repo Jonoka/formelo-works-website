@@ -1,4 +1,4 @@
-// CI-only, loopback-only review of the accepted PR #5 static build. No website deployment.
+// CI-only, loopback-only review of the actual PR-base static build. No website deployment.
 import { createServer } from 'node:http';
 import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -41,7 +41,7 @@ try {
     await page.close();
   }
   await writeFile(`${output}/metrics.json`, JSON.stringify(metrics, null, 2));
-  console.log('Captured all six accepted PR #5 pages at 1440x900 and 390x844.');
+  console.log('Captured actual-base Home, Category and fixed-page baselines at 1440x900 and 390x844.');
 } finally {
   if (browser) await browser.close();
   await new Promise(done => server.close(done));

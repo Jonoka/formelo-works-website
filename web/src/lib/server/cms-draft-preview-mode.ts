@@ -1,4 +1,5 @@
 import type { AstroIntegration } from 'astro';
+import { randomUUID } from 'node:crypto';
 import { readArticleDeliveryMode } from '../../../../shared/article-delivery';
 
 export const cmsDraftPreviewBuildError = 'CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN: DEV_CMS_DRAFT_PREVIEW is a loopback astro dev feature and cannot be used by astro build.';
@@ -14,7 +15,7 @@ export function cmsDraftPreviewCommandGuard(env: Record<string, string | undefin
     name: 'formelo-cms-draft-preview-command-guard',
     hooks: {
       'astro:config:setup': ({ command, updateConfig }) => {
-        updateConfig({ vite: { define: { 'import.meta.env.FORMELO_ASTRO_COMMAND': JSON.stringify(command) } } });
+        updateConfig({ vite: { define: { 'import.meta.env.FORMELO_ASTRO_COMMAND': JSON.stringify(command), 'import.meta.env.FORMELO_BUILD_ID': JSON.stringify(randomUUID()) } } });
         // Keep this first: even a conflicting source configuration must never start a draft build.
         if (env['DEV_CMS_DRAFT_PREVIEW'] === '1' && command === 'build') throw new Error(cmsDraftPreviewBuildError);
         const mode = readArticleDeliveryMode(env);
