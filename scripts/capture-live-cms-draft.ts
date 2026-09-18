@@ -12,6 +12,7 @@ import { articleReaderConfigFromEnvironment, createArticleReader } from '../web/
 import { createDraftPreviewReader, draftPreviewConfigFromEnvironment } from '../web/src/lib/server/cms-draft-preview-query';
 
 loadLocalEnvironment();
+assert.equal(process.version, 'v24.21.0', 'LIVE_CMS_EVIDENCE: Node 24.21.0 is required for final evidence.');
 const worktree = execFileSync('git', ['status', '--porcelain=v1', '--untracked-files=all'], { encoding: 'utf8' }).trim();
 assert.equal(worktree, '', 'LIVE_CMS_EVIDENCE: exact-head capture requires a clean tracked/untracked worktree.');
 const draftReader = createDraftPreviewReader(draftPreviewConfigFromEnvironment(process.env));
