@@ -3,22 +3,28 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PendingContact from '../../components/PendingContact.astro';
 import JournalCard from '../../components/JournalCard.astro';
+import ArticleDeliveryError from '../../components/ArticleDeliveryError.astro';
 import { loadContent } from '../../lib/content';
+import { loadArticlePage } from '../../lib/server/article-delivery';
+import { articleCollectionNotice } from '../../../../shared/article-delivery';
 import { readRuntime } from '../../../../config/runtime';
 import { pageContexts } from '../../../../config/page-context';
-const { siteSettings, articlePreviews } = await loadContent(readRuntime(import.meta.env).contentMode);
+const { siteSettings } = await loadContent(readRuntime().contentMode);
+const result = await loadArticlePage({ command: import.meta.env['FORMELO_ASTRO_COMMAND'], url: Astro.url });
+if (!result.ok) Astro.response.status = 503;
+if (import.meta.env['FORMELO_ASTRO_COMMAND'] === 'dev') Astro.response.headers.set('Cache-Control', 'no-store');
 const context = pageContexts.blog;
 ---
-<BaseLayout title="Journal — clothing project preparation" description="Two unpublished editorial drafts for clothing buyers: preparing a clear quotation brief and understanding quantities by style, color and size. Factory terms remain unconfirmed." brandName={siteSettings.brandName} showMobileContact referenceCode={context.referenceCode}>
+<BaseLayout title="Journal — clothing project preparation" description="Editorial notes on quotation briefs and clothing quantities. Each article identifies its content source and publication status; factory terms remain unconfirmed." brandName={siteSettings.brandName} showMobileContact referenceCode={context.referenceCode}>
   <Breadcrumb label="Journal" />
-  <div class="journal-page shell" data-preview-kind="journal_preview" data-preview-status="editorial_draft" data-production-allowed="false">
+  <div class="journal-page shell" data-preview-kind="journal_preview" data-preview-status={result.ok && result.collection.mode === 'mock' ? 'editorial_draft' : result.ok ? result.collection.mode : 'unavailable'} data-production-allowed="false" data-article-mode={result.ok ? result.collection.mode : 'unavailable'}>
     <header class="journal-header">
       <p class="eyebrow">Journal / Notes for your next collection</p>
       <h1>Journal</h1>
       <p class="intro">A clearer brief. A more useful conversation.</p>
-      <p>Two complete editorial drafts to help organize your clothing project. Not published or factory-approved; they do not establish services, quantities or commercial terms.</p>
+      {result.ok && <p>{articleCollectionNotice(result.collection.mode)}</p>}
       <PendingContact id="journal-contact-note" referenceCode={context.referenceCode} />
     </header>
-    <div class="journal-grid">{articlePreviews.map(article => <JournalCard article={article} />)}</div>
+    {result.ok ? <div class="journal-grid">{result.collection.articles.map(article => <JournalCard article={article} />)}</div> : <ArticleDeliveryError code={result.code} />}
   </div>
 </BaseLayout>

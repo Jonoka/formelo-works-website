@@ -1,5 +1,5 @@
-import routes from '../config/routes.json';
-import sourcePolicy from '../config/editorial-sources.json';
+import routes from '../config/routes.json' with { type: 'json' };
+import sourcePolicy from '../config/editorial-sources.json' with { type: 'json' };
 import type { EditorialBlock, Inline } from './editorial';
 
 // Pure validation shared by Studio, the CMS adapter and the existing renderer.

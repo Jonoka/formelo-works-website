@@ -1,16 +1,18 @@
 ---
-import type { ArticlePreview } from '../../../shared/editorial';
-import PreviewImage from './PreviewImage.astro';
-import { articlePath } from '../lib/editorial';
+import type { ArticleDelivery } from '../../../shared/article-delivery';
+import { articleCardData } from '../../../shared/article-delivery';
+import ArticleCover from './ArticleCover.astro';
 import '../styles/editorial.css';
-interface Props { article: ArticlePreview; home?: boolean }
+interface Props { article: ArticleDelivery; home?: boolean }
 const { article, home = false } = Astro.props;
+const card = articleCardData(article);
 const Heading = home ? 'h3' : 'h2';
 ---
-<article class="journal-card" data-article-card={article.slug} data-preview-status="editorial_draft" data-production-allowed="false" data-cover-usage={article.cover.usage} data-cover-pending={article.cover.pendingAssetId}>
-  <PreviewImage image={article.cover.image} label="Editorial garment concept" sizes="(min-width: 1024px) 560px, (min-width: 768px) 44vw, calc(100vw - 40px)" />
-  <p class="draft-status">Editorial draft / Not published</p>
-  <Heading><a href={articlePath(article.slug)}>{article.title}</a></Heading>
-  <p class="card-excerpt">{article.excerpt}</p>
-  <p class="small-copy">Reused garment concept. Dedicated cover pending.</p>
+<article class="journal-card" data-article-card={card.slug} data-preview-status={card.status} data-production-allowed="false" data-article-source={card.source} data-article-reference={card.referenceCode} data-cms-perspective={card.cmsPerspective} data-cms-revision={card.revision} data-cover-state={card.coverState} data-cover-usage={article.kind === 'article_preview' ? article.cover.usage : undefined} data-cover-pending={article.kind === 'article_preview' ? article.cover.pendingAssetId : undefined}>
+  <ArticleCover article={article} />
+  <p class="draft-status">{card.statusLabel}</p>
+  <Heading><a href={card.href}>{card.title}</a></Heading>
+  <p class="card-excerpt">{card.excerpt}</p>
+  <p class="small-copy article-source-label">Source: {card.sourceLabel}.</p>
+  {article.kind === 'article_preview' && <p class="small-copy">Reused garment concept. Dedicated cover pending.</p>}
 </article>

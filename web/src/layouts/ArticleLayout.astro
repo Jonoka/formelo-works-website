@@ -1,33 +1,35 @@
 ---
-import type { ArticlePreview } from '../../../shared/editorial';
-import type { CmsArticleDraftPreviewData } from '../../../shared/cms-draft-preview';
+import type { ArticleDelivery } from '../../../shared/article-delivery';
+import { articleCardData } from '../../../shared/article-delivery';
 import BaseLayout from './BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
-import PreviewImage from '../components/PreviewImage.astro';
+import ArticleCover from '../components/ArticleCover.astro';
 import EditorialBody from '../components/EditorialBody.astro';
 import { prepareEditorialBody } from '../lib/editorial';
 import '../styles/editorial.css';
-interface Props { article: ArticlePreview | CmsArticleDraftPreviewData; brandName: string }
+interface Props { article: ArticleDelivery; brandName: string }
 const { article, brandName } = Astro.props;
-const cmsDraft = article.kind === 'cms_article_draft_preview';
+const metadata = articleCardData(article);
 const { toc } = prepareEditorialBody(article.body);
 ---
 <BaseLayout title={article.seo.seoTitle} description={article.seo.seoDescription} brandName={brandName} showMobileContact referenceCode={article.referenceCode}>
   <Breadcrumb label={article.title} journalParent />
-  <article class="article-page shell" data-preview-kind={article.kind} data-preview-status={article.status} data-production-allowed="false" data-article-slug={article.slug} data-cms-revision={cmsDraft ? article.revision : undefined}>
+  <article class="article-page shell" data-preview-kind={article.kind} data-preview-status={article.status} data-production-allowed="false" data-article-slug={article.slug} data-article-source={article.source} data-article-reference={article.referenceCode} data-cms-perspective={article.cmsPerspective} data-cms-revision={metadata.revision} data-cover-state={article.coverState}>
     <header class="article-header">
       <p class="eyebrow">Journal / Buying with clarity</p>
-      <p class="draft-status">{cmsDraft ? 'CMS draft preview / Not published' : 'Editorial draft / Not published'}</p>
+      <p class="draft-status">{metadata.statusLabel}</p>
       <h1>{article.title}</h1>
       <p class="intro">{article.excerpt}</p>
-      {cmsDraft
-        ? <p class="small-copy">CMS draft saved: <time datetime={article.draftSavedAt}>{article.draftSavedAt}</time> — technical save time only; not a publication or fact-review date.</p>
-        : article.draftUpdatedAt && <p class="small-copy">Draft updated: <time datetime={article.draftUpdatedAt}>{article.draftUpdatedAt}</time> — not a publication or review date.</p>}
+      <p class="small-copy article-source-label">Source: {metadata.sourceLabel}.</p>
+      {article.kind === 'cms_article_draft_preview' && <p class="small-copy">CMS draft saved: <time datetime={article.draftSavedAt}>{article.draftSavedAt}</time> — technical save time only; not a publication or fact-review date.</p>}
+      {article.kind === 'article_preview' && article.draftUpdatedAt && <p class="small-copy">Draft updated: <time datetime={article.draftUpdatedAt}>{article.draftUpdatedAt}</time> — not a publication or review date.</p>}
+      {article.kind === 'cms_article' && <div class="small-copy article-publication-details">
+        <p>By {article.authorDisplay}</p>
+        <p>CMS published: <time datetime={article.publishedAt}>{article.publishedAt}</time> · Content updated: <time datetime={article.contentUpdatedAt}>{article.contentUpdatedAt}</time></p>
+        <p>CMS fact review: <time datetime={article.factConfirmedAt}>{article.factConfirmedAt}</time>. These source records do not confirm website release.</p>
+      </div>}
     </header>
-    {!cmsDraft && <div class="article-cover" data-cover-usage={article.cover.usage} data-cover-pending={article.cover.pendingAssetId}>
-      <PreviewImage image={article.cover.image} label="An editorial garment study" priority sizes="(min-width: 1024px) 760px, calc(100vw - 40px)" />
-      <p class="small-copy cover-note">Reused garment concept. A dedicated editorial cover is still pending; this image is not a client design or a factory record.</p>
-    </div>}
+    <ArticleCover article={article} detail />
     <div class="article-reading-grid">
       {toc.length > 0 && <nav class="article-toc" aria-label="On this page"><p class="eyebrow">On this page</p><ol>{toc.map(item => <li><a href={`#${item.id}`}>{item.text}</a></li>)}</ol></nav>}
       <div class="article-body"><EditorialBody body={article.body} /><div class="article-return"><a class="text-link" href="/blog/">← Back to Journal</a></div></div>

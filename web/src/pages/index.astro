@@ -6,12 +6,18 @@ import FAQ from '../components/FAQ.astro';
 import Icon from '../components/Icon.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import JournalCard from '../components/JournalCard.astro';
+import ArticleDeliveryError from '../components/ArticleDeliveryError.astro';
 import FactoryPhotographyPending from '../components/FactoryPhotographyPending.astro';
 import { categoryPath } from '../lib/category-preview';
 import { loadContent } from '../lib/content';
+import { loadArticlePage } from '../lib/server/article-delivery';
+import { articleCollectionNotice } from '../../../shared/article-delivery';
 import { readRuntime } from '../../../config/runtime';
 import { pageContexts } from '../../../config/page-context';
-const { siteSettings, home, homepagePreview, articlePreviews } = await loadContent(readRuntime().contentMode);
+const { siteSettings, home, homepagePreview } = await loadContent(readRuntime().contentMode);
+const journal = await loadArticlePage({ command: import.meta.env['FORMELO_ASTRO_COMMAND'], url: Astro.url });
+if (!journal.ok) Astro.response.status = 503;
+if (import.meta.env['FORMELO_ASTRO_COMMAND'] === 'dev') Astro.response.headers.set('Cache-Control', 'no-store');
 // Presentation hints must never replace an updated, authoritative page title.
 const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ? homepagePreview.heroTitleLines : [home.title];
 ---
@@ -59,9 +65,9 @@ const heroTitleLines = homepagePreview.heroTitleLines.join(' ') === home.title ?
     </ol>
   </section>
 
-  <section class="section-row shell section-grid" id="journal" tabindex="-1" aria-labelledby="journal-heading">
+  <section class="section-row shell section-grid" id="journal" tabindex="-1" aria-labelledby="journal-heading" data-article-mode={journal.ok ? journal.collection.mode : 'unavailable'}>
     <SectionHeading id="journal-heading" eyebrow="Journal" lines={['Ideas, process', 'and perspectives']} />
-    <div class="journal-content"><p class="journal-intro serif">Good questions come before good garments.</p><p>Two editorial drafts for your next brief. Not published or factory-approved.</p><div class="journal-grid home-journal-grid">{articlePreviews.map(article => <JournalCard article={article} home />)}</div><a class="text-link" href="/blog/">Explore the Journal</a></div>
+    <div class="journal-content"><p class="journal-intro serif">Good questions come before good garments.</p>{journal.ok ? <><p>{articleCollectionNotice(journal.collection.mode)}</p><div class="journal-grid home-journal-grid">{journal.collection.articles.map(article => <JournalCard article={article} home />)}</div></> : <ArticleDeliveryError code={journal.code} />}<a class="text-link" href="/blog/">Explore the Journal</a></div>
   </section>
 
   <section class="section-row shell section-grid enquiry-guide" id="enquiry-guide" tabindex="-1" aria-labelledby="faq-heading">

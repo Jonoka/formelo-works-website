@@ -1,0 +1,10 @@
+---
+import '../styles/article-delivery.css';
+interface Props { code: string }
+const { code } = Astro.props;
+---
+<div class="article-delivery-error" role="alert" data-article-delivery-error={code}>
+  <p class="eyebrow">Article content unavailable</p>
+  <p>The selected article source could not be delivered. No local article or draft has been substituted.</p>
+  <p class="small-copy">Error code: <code>{code}</code>. Check the local server configuration, then reload this page.</p>
+</div>

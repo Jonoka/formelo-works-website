@@ -1,4 +1,4 @@
-import routes from '../config/routes.json';
+import routes from '../config/routes.json' with { type: 'json' };
 import { pageContexts } from '../config/page-context';
 import type { EditorialBlock } from './editorial';
 import type { Seo } from './content';

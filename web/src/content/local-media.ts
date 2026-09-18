@@ -1,4 +1,4 @@
-import manifest from '../../../assets/manifest.json';
+import manifest from '../../../assets/manifest.json' with { type: 'json' };
 import type { HomepageAssetId, LocalPreviewImage } from '../../../shared/content';
 import { validateLocalImage } from '../lib/images';
 
