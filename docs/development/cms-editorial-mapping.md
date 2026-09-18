@@ -118,6 +118,8 @@ PR #9 已由用户合并至 `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`。DE
 
 策略继续是 `apiVersion=2025-02-19`、`perspective=published`、非 CDN、`cache:no-store`、无重定向/自动重试；完整请求默认 8 秒，响应上限 2 MiB。reader 没有任意 ID 或 slug 参数，缺配置、401/403、其他 HTTP、transport、timeout、空/坏/超大响应都只返回受控错误，不回退 mock。
 
+Query HTTP 成功响应按**协议 envelope / 业务 result** 两层处理。官方 Query API 的 GET/POST 200 响应包含业务 `result`，并正常带服务器处理时间 `ms`，还可带 `syncTags`；`returnQuery=false` 只控制是否返回提交的 `query`，不意味着响应只有 `result`。site reader 因此只在 envelope 层验证/忽略这些协议元数据并要求 `result` 存在，随后仍把 `result` 原样交给 strict `convertCmsSiteBundle`；协议 metadata 不进入页面数据或日志。`shared/cms-validation.record()` 与 settings/pages/categories 的未知业务字段拒绝规则没有放宽。
+
 `shared/cms-site.ts` 产出 `CmsSiteBundle`，但每个对象仍明确 `websitePublication:not_verified` / `productionAllowed:false`。转换要求 singleton 与固定路由唯一且完整，siteSettings 联系格式和 MOQ 完整；Home/Manufacturing/Factory/Contact 等业务页必须有有效 factConfirmedAt，Blog Index / Privacy 可为空；Home 有获准公开的 hero，Home/Manufacturing 有至少三项 FAQ。两个 category 的 source code 正确、至少三组样品且 sampleCode 全站唯一、至少一项 capabilityRow 与一张 evidenceImage、customization/sampling notes 必填、MOQ inherit/override 自洽、relatedArticles 是已发布强引用。页面/品类 SEO title 在该 bundle 内不得重复。
 
 公开图片校验抽到 `shared/cms-image.ts`，文章 cover 与 site/category 图片共用同一套 asset identity、项目/dataset CDN URL、metadata 尺寸、publicUseApproved、非装饰 alt、crop/hotspot 规则，防止两条 provider 产生不同许可标准。Studio 同步把 logo/defaultOgImage、恰好两个 featuredCategories、固定页 factConfirmedAt、Home hero、Home/Manufacturing FAQ 与 category FAQ 的缺项提前标出来；这些编辑器提示不替代服务器校验。
