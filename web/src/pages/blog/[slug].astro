@@ -9,8 +9,9 @@ import { readRuntime } from '../../../../config/runtime';
 import { articleScopes, articleSlug } from '../../../../shared/cms-article';
 import { findDeliveredArticle, readArticleDeliveryMode } from '../../../../shared/article-delivery';
 export async function getStaticPaths() {
-  // Never persist article data in dev's route props: a normal page reload must read the saved revision.
-  const slugs = readArticleDeliveryMode(process.env) === 'published'
+  // Only a published build derives emitted routes from its shared snapshot. Dev keeps the fixed route scope,
+  // not cached article props, so a reload reads a saved revision and errors reach the safe page state.
+  const slugs = import.meta.env['FORMELO_ASTRO_COMMAND'] === 'build' && readArticleDeliveryMode(process.env) === 'published'
     ? (await loadArticleCollection({ command: import.meta.env['FORMELO_ASTRO_COMMAND'] })).articles.map(article => article.slug)
     : Object.keys(articleScopes);
   return slugs.map(slug => ({ params: { slug } }));
