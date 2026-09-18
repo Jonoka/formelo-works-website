@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-私有仓库 `Jonoka/formelo-works-website` 的 PR #7 已由用户合并；DEV-05B 基于 main `accc4dcddaa3161a6fbae4c94ee9860d25739a49`，在 `feat/cms-editorial-integration` 继续单篇真实 Sanity Draft 联调，不向 main 直接写入或强制推送。
-`web/` 默认仍是十页 mock 静态工程；真实 CMS 只接入一个显式、本地、服务器端 Draft preview 路径，不成为全站 provider。真实 Studio 已本地连接账号，但没有 publish、媒体上传或任何部署。启动和检查命令见根 README。
+PR #8 已由用户合并至 `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`（验收 head `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`）。DEV-05C 使用 `feat/cms-editorial-delivery` / PR #9，把首页 Journal、Journal 列表和文章详情接到同一个受控文章交付入口；不向 main 直接写入、不强制推送、不自动合并或部署。
+`web/` 默认仍是十页 mock 静态工程；文章局部可显式选择 mock、授权 Draft 预览或 strict published。全站 `CONTENT_MODE=sanity` 仍未实现，真实 Studio/CMS 没有 publish、媒体上传、schema/Studio/site deploy 或 Webhook。启动和检查命令见根 README。
 
 ## 本地获取与检查
 
@@ -12,7 +12,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/feat/cms-editorial-integration
+git switch --track origin/feat/cms-editorial-delivery
 npm ci
 npm exec -- playwright install chromium
 npm run verify
@@ -63,6 +63,20 @@ Windows 先用 `where.exe git` 定位实际 Git Bash，本机为 `D:\Git\bin\bas
 真实 Draft 预览不是 `CONTENT_MODE=sanity`。只有本地显式设置 `DEV_CMS_DRAFT_PREVIEW=1` 且实际执行 `astro dev` 时，既有 `/blog/what-to-send-for-a-clothing-quote/` 才由服务器读取授权 ID；失败直接报错，不 fallback mock。任何 `astro build`（根/workspace/直接入口，包含 `--mode development`）若带该开关，必须在配置阶段以 `CMS_DRAFT_PREVIEW_BUILD_FORBIDDEN` 拒绝，早于 token/Draft 网络读取与 HTML 输出；路由还会再次要求实际 command 为 `dev`。普通 build 的 CMS boundary marker/secret 扫描只是第二道防线。当前真实 Draft 的只读审阅可运行 `npm run verify:cms-draft-live`，脚本先独立读取 revision，再验证 published 为空、loopback 页面 revision 一致，并在 `.local/cms-draft-review/<time>/` 生成 `cms-live-*` PNG 与只含哈希/长度/修订的脱敏 evidence；它不修改 Draft。
 
 Studio 保存 Draft、Sanity publish、网站发布继续是三件事。当前测试 Draft 缺作者/发布日期/事实确认/封面许可是有意状态；不要为消除编辑器 validation 填假数据。除非用户另行明确授权，不得 Publish / Unpublish、上传媒体、deploy schema、`sanity deploy`、部署网站、配置 Cloudflare 或 webhook。
+
+## DEV-05C 文章统一交付操作
+
+文章来源由 `ARTICLE_CONTENT_MODE` 显式控制，默认值是 `mock`；它只影响两篇文章，不改变全站 `CONTENT_MODE=mock`。
+
+- 默认开发 / 构建：不设置 `ARTICLE_CONTENT_MODE`，首页、Journal 和详情都使用两篇本地 editorial draft。
+- 授权 Draft 预览：设置 `ARTICLE_CONTENT_MODE=draft-preview` 与 `DEV_CMS_DRAFT_PREVIEW=1`，并使用现有根 `.env.local` 的只读配置。只能运行 loopback `astro dev`；询价文章从现有授权 Draft 读取，MOQ 仍是明确标注的本地 draft。
+- strict published 验证：`ARTICLE_CONTENT_MODE=published` 只接受 allowlist 中完整 published 文档。当前真实云端没有合规 published 两文，不能把 Draft 改成 published 视图来制造成功；离线夹具只用于专用测试目录。
+
+Draft / published dev 都按页面请求重新读取并使用 `cache:no-store`；保存后刷新页面即可读取下一 revision，不需要重启 Astro，也不保留上次成功结果。静态 build 内只共享一次文章来源快照，以保证首页、列表、详情来自同一记录；来源配置在同一 build 中变化会直接失败。
+
+真实 Draft 无封面时，三个位置都显示 text-only 无图状态，不复用本地概念图。只有 strict published converter 已验证公开许可、alt、资产身份/尺寸等字段后，CMS 封面才进入 approved 状态。不要补假作者、日期、审核或图片许可来通过正式校验。
+
+Draft 预览的 build 隔离继续执行：根 build、workspace build、直接 Astro build、`--mode development` 都必须在网络访问和 HTML 输出前拒绝。离线浏览器回归为了与 Playwright 已启动的默认 dev server 共存，额外 Astro dev 使用 Astro 7 的 `--ignore-lock`，仍绑定随机 loopback 端口；这只是测试进程隔离，不是放宽 Draft 的 loopback/actual-command 门禁。
 
 ## 后续发布与恢复
 
