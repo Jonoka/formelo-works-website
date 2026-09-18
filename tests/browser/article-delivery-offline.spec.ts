@@ -43,7 +43,7 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
 
   for (const width of [1440, 390]) test(`same record in all three positions and dedicated offline screenshots at ${width}`, async ({ browser }) => {
     server.setResponse(docs());
-    const document = docs()[0]!;
+    const cmsDocument = docs()[0]!;
     const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 900 } });
     const unexpected = await isolateBrowser(context, server.origin, mode === 'published');
     const page = await context.newPage(), errors: string[] = [];
@@ -54,7 +54,7 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
         const response = await page.goto(`${server.origin}${path}`); expect(response?.status()).toBe(200);
         expect(response?.headers()['cache-control']).toContain('no-store');
         const selector = path === quotePath ? '.article-page' : `[data-article-card="${dev05bDraftScope.slug}"]`;
-        await checkRecord(page, selector, document.title, document.excerpt, document._rev, cover, status);
+        await checkRecord(page, selector, cmsDocument.title, cmsDocument.excerpt, cmsDocument._rev, cover, status);
         await expect(page.locator(selector)).toHaveAttribute('data-cms-perspective', mode === 'draft-preview' ? 'drafts' : 'published');
         await expect(page.locator(selector)).toHaveAttribute('data-article-reference', 'WEB-QUOTE-GUIDE');
         if (mode === 'draft-preview') {
@@ -69,8 +69,8 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
         if (path === quotePath) {
-          await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', document.seo.seoDescription);
-          expect(await page.title()).toContain(document.seo.seoTitle); await expect(page.locator('nav[aria-label="Breadcrumb"] li')).toHaveCount(3);
+          await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', cmsDocument.seo.seoDescription);
+          expect(await page.title()).toContain(cmsDocument.seo.seoTitle); await expect(page.locator('nav[aria-label="Breadcrumb"] li')).toHaveCount(3);
           await expect(page.locator('.editorial-template')).toHaveCount(1);
           if (mode === 'draft-preview') await expect(page.locator('.article-publication-details')).toHaveCount(0);
         }
@@ -83,7 +83,7 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
       expect(errors).toEqual([]); expect(unexpected).toEqual([]);
       expect(server.calls().every(call => call.allowed)).toBe(true);
       writeFileSync(join(output, 'evidence.json'), JSON.stringify({ ...sourceIdentity(), capturedAt: new Date().toISOString(), mode, viewport: width,
-        source: 'OFFLINE SYNTHETIC RESPONSE; NOT REAL SANITY CONTENT', fixtureRevision: document._rev, actualCloudRequests: 0,
+        source: 'OFFLINE SYNTHETIC RESPONSE; NOT REAL SANITY CONTENT', fixtureRevision: cmsDocument._rev, actualCloudRequests: 0,
         fakeCredentialLeaked: false, screenshots: images, checks: ['three-position metadata', 'cover/source distinction', 'independent SEO', 'noindex', 'disabled contacts', 'no overflow'] }, null, 2));
     } finally { await context.close(); }
   });
@@ -93,12 +93,12 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
     const page = await context.newPage();
     try {
       for (const revision of ['first-save', 'second-save']) {
-        const document = docs(revision)[0]!; server.setResponse(docs(revision));
+        const cmsDocument = docs(revision)[0]!; server.setResponse(docs(revision));
         for (const path of ['/', '/blog/', quotePath]) {
           await page.goto(`${server.origin}${path}`);
-          await checkRecord(page, path === quotePath ? '.article-page' : `[data-article-card="${dev05bDraftScope.slug}"]`, document.title, document.excerpt, document._rev, cover, status);
+          await checkRecord(page, path === quotePath ? '.article-page' : `[data-article-card="${dev05bDraftScope.slug}"]`, cmsDocument.title, cmsDocument.excerpt, cmsDocument._rev, cover, status);
         }
-        await page.reload(); await expect(page.locator('.article-page')).toHaveAttribute('data-cms-revision', document._rev);
+        await page.reload(); await expect(page.locator('.article-page')).toHaveAttribute('data-cms-revision', cmsDocument._rev);
       }
     } finally { await context.close(); }
   });
@@ -125,8 +125,8 @@ for (const mode of ['draft-preview', 'published'] as const) test.describe(`isola
     await isolateBrowser(context, server.origin, mode === 'published');
     const page = await context.newPage();
     try {
-      await page.goto(server.origin); await page.keyboard.press('Tab'); await expect(page.locator('.skip-link')).toBeFocused();
-      await page.keyboard.press('Enter'); await expect(page.locator('#main')).toBeFocused();
+      await page.goto(server.origin); await page.keyboard.press('Tab'); await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+      await page.keyboard.press('Enter'); await expect(page.locator('main')).toBeFocused();
       await page.locator('#journal a[href="/blog/"]').click(); await page.locator(`[data-article-card="${dev05bDraftScope.slug}"] h2 a`).click();
       await expect(page.locator('.editorial-template')).toHaveCount(1); await page.locator('.article-return a').click();
       await page.locator('[data-article-card="moq-per-style-per-color"] h2 a').click();
