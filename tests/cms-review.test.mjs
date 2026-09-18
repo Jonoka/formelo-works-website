@@ -53,7 +53,7 @@ test('incomplete, skipped, failed or flaky browser runs cannot produce passing r
     const value = report(); Object.assign(value.stats, patch);
     assert.throws(() => editorialCapturesFromReport(value), /430-test DEV-05C browser regression/);
   }
-  assert.throws(() => editorialCapturesFromReport(null), /412-test browser regression/);
+  assert.throws(() => editorialCapturesFromReport(null), /430-test DEV-05C browser regression/);
 });
 test('invalid PNG headers and zero-height images fail with controlled errors', () => {
   assert.throws(() => editorialPngDimensions('quote-390', Buffer.alloc(8)), /invalid PNG header/);
