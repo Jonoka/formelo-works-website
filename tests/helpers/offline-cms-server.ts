@@ -87,7 +87,7 @@ async function stopOwnedChild(child: ChildProcess): Promise<void> {
 }
 export async function startOfflineCmsServer(mode: OfflineMode) {
   const harness = createOfflineCmsHarness(mode), port = await freePort(), origin = `http://127.0.0.1:${port}`;
-  const child = spawn(process.execPath, [harness.cli, 'dev', '--root', 'web', '--host', '127.0.0.1', '--port', String(port)], { env: harness.env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, [harness.cli, 'dev', '--ignore-lock', '--root', 'web', '--host', '127.0.0.1', '--port', String(port)], { env: harness.env, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
   const capture = (chunk: Buffer) => { log = (log + chunk.toString()).slice(-16384); };
   child.stdout?.on('data', capture); child.stderr?.on('data', capture);
