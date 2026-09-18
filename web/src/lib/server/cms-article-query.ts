@@ -1,4 +1,4 @@
-// Node/build-only boundary. Not imported by loadContent, pages or browser scripts.
+// Node/server-only boundary. Only the controlled article delivery entry and verification scripts import this reader.
 import { release } from 'node:process';
 import { articleSlug, convertCmsArticles, type ArticleSlug, type CmsArticleRenderData } from '../../../../shared/cms-article';
 import { array, CmsContentError, fail, id, record, string } from '../../../../shared/cms-validation';
@@ -12,8 +12,8 @@ const annotations = `_type, _key,
   _type == "editorialExternalLink" => {href},
   _type == "editorialInternalLink" => {fragment, target{${ref}}}`;
 const block = `_type, _key, style, listItem, level, children[]{_type, _key, text, marks}, markDefs[]{${annotations}}`;
-/** No [0] selection or block-type filtering: duplicate documents and unknown blocks must survive to validation. */
-export const articleQuery = `*[_type == "article" && _id == $id && slug.current == $slug && ${publishedFilter}]{
+/** One projection and converter for the existing exact detail query and the authorized collection. */
+const articleProjection = `{
   _type, _id, _rev, _originalId, title, slug{current}, excerpt, referenceCode,
   "slugCount": count(*[_type == "article" && slug.current == ^.slug.current && ${publishedFilter}]),
   seo{seoTitle, seoDescription}, authorDisplay, publishedAt, contentUpdatedAt, factReviewStatus, factConfirmedAt,
@@ -27,6 +27,8 @@ export const articleQuery = `*[_type == "article" && _id == $id && slug.current 
     _type == "editorialTemplate" => {title, text}
   }
 }`;
+export const articleQuery = `*[_type == "article" && _id == $id && slug.current == $slug && ${publishedFilter}]${articleProjection}`;
+export const articleCollectionQuery = `*[_type == "article" && _id in $ids && ${publishedFilter}]${articleProjection}`;
 export interface ArticleReaderConfig { projectId: string; dataset: string; token: string; documentIds: string[] }
 export type ArticleTransport = (url: string, init: RequestInit) => Promise<Response>;
 export interface ArticleReaderOptions { transport?: ArticleTransport; timeoutMs?: number; now?: () => number }
@@ -66,53 +68,60 @@ async function responseData(response: Response, signal: AbortSignal): Promise<un
   } finally { signal.removeEventListener('abort', cancel); await reader.cancel().catch(() => undefined); }
   if (signal.aborted) fail('response', 'CMS_TIMEOUT');
   if (!size) fail('response', 'CMS_EMPTY');
-  const bytes = new Uint8Array(size);
-  let offset = 0;
+  const bytes = new Uint8Array(size); let offset = 0;
   for (const part of parts) { bytes.set(part, offset); offset += part.byteLength; }
   try { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as unknown; }
   catch { return fail('response', 'CMS_INVALID_JSON'); }
 }
-/** Only POST /data/query is exposed; no mutation client, retries, drafts, release views or deployment. */
+/** Only POST /data/query is exposed; no mutations, retries, release views, or draft fallback. */
 export function createArticleReader(input: unknown, options: ArticleReaderOptions = {}) {
   if (release.name !== 'node' || typeof window !== 'undefined') fail('runtime', 'CMS_SERVER_ONLY');
   if (input == null) fail('configuration', 'CMS_NOT_CONFIGURED');
-  const config = validateConfig(input); // private copy, never returned or logged
+  const config = validateConfig(input);
   const transport = options.transport ?? globalThis.fetch;
   const timeoutMs = options.timeoutMs ?? 8000;
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) fail('timeoutMs', 'CMS_CONFIG');
+  async function request(query: string, params: Record<string, string | string[]>): Promise<CmsArticleRenderData[]> {
+    const controller = new AbortController(); let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        (async () => {
+          const url = `https://${config.projectId}.api.sanity.io/v${articleQueryPolicy.apiVersion}/data/query/${config.dataset}?perspective=published&returnQuery=false&resultSourceMap=false`;
+          const response = await transport(url, { method: 'POST', cache: 'no-store', redirect: 'error', credentials: 'omit', signal: controller.signal,
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.token}` }, body: JSON.stringify({ query, params }) });
+          if (!response.ok) {
+            void response.body?.cancel().catch(() => undefined);
+            if (response.status === 401) fail('response', 'CMS_UNAUTHENTICATED');
+            if (response.status === 403) fail('response', 'CMS_FORBIDDEN');
+            fail('response', 'CMS_HTTP');
+          }
+          const envelope = record(await responseData(response, controller.signal), 'response');
+          return convertCmsArticles(envelope['result'], { projectId: config.projectId, dataset: config.dataset, perspective: 'published', now: (options.now ?? Date.now)() });
+        })(),
+        new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new CmsContentError('CMS_TIMEOUT', 'response')); }, timeoutMs); }),
+      ]);
+    } catch (error) {
+      if (controller.signal.aborted) throw new CmsContentError('CMS_TIMEOUT', 'response');
+      if (error instanceof CmsContentError) throw error;
+      throw new CmsContentError('CMS_TRANSPORT', 'response');
+    } finally { if (timer !== undefined) clearTimeout(timer); controller.abort(); }
+  }
   return Object.freeze({
     policy: articleQueryPolicy,
     async read(documentId: string, requestedSlug: ArticleSlug): Promise<CmsArticleRenderData> {
       id(documentId, 'request.documentId');
       if (!config.documentIds.includes(documentId)) fail('request.documentId', 'CMS_NOT_AUTHORIZED');
       const slug = articleSlug(requestedSlug);
-      const controller = new AbortController();
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      try {
-        return await Promise.race([
-          (async () => {
-            const url = `https://${config.projectId}.api.sanity.io/v${articleQueryPolicy.apiVersion}/data/query/${config.dataset}?perspective=published&returnQuery=false&resultSourceMap=false`;
-            const response = await transport(url, { method: 'POST', cache: 'no-store', redirect: 'error', credentials: 'omit', signal: controller.signal,
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.token}` }, body: JSON.stringify({ query: articleQuery, params: { id: documentId, slug } }) });
-            if (!response.ok) {
-              void response.body?.cancel().catch(() => undefined);
-              if (response.status === 401) fail('response', 'CMS_UNAUTHENTICATED');
-              if (response.status === 403) fail('response', 'CMS_FORBIDDEN');
-              fail('response', 'CMS_HTTP');
-            }
-            const envelope = record(await responseData(response, controller.signal), 'response');
-            const articles = convertCmsArticles(envelope['result'], { projectId: config.projectId, dataset: config.dataset, perspective: 'published', now: (options.now ?? Date.now)() });
-            if (articles.length !== 1 || articles[0]!.documentId !== documentId || articles[0]!.slug !== slug) fail('response.result', 'CMS_SCOPE');
-            return articles[0]!;
-          })(),
-          new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new CmsContentError('CMS_TIMEOUT', 'response')); }, timeoutMs); }),
-        ]);
-      } catch (error) {
-        // Fetch/parse errors may contain request headers or a private response. Never retain their cause/stack.
-        if (controller.signal.aborted) throw new CmsContentError('CMS_TIMEOUT', 'response');
-        if (error instanceof CmsContentError) throw error;
-        throw new CmsContentError('CMS_TRANSPORT', 'response');
-      } finally { if (timer !== undefined) clearTimeout(timer); controller.abort(); }
+      const articles = await request(articleQuery, { id: documentId, slug });
+      if (articles.length !== 1 || articles[0]!.documentId !== documentId || articles[0]!.slug !== slug) fail('response.result', 'CMS_SCOPE');
+      return articles[0]!;
+    },
+    async list(): Promise<CmsArticleRenderData[]> {
+      const articles = await request(articleCollectionQuery, { ids: config.documentIds });
+      if (articles.some(article => !config.documentIds.includes(article.documentId))) fail('response.result', 'CMS_SCOPE');
+      if (articles.length !== config.documentIds.length) fail('response.result', 'CMS_INCOMPLETE_COLLECTION');
+      // The allowlist is an explicit editorial order, not query order or a newest-document fallback.
+      return config.documentIds.map(documentId => articles.find(article => article.documentId === documentId) ?? fail('response.result', 'CMS_INCOMPLETE_COLLECTION'));
     },
   });
 }

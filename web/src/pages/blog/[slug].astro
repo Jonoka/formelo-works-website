@@ -1,24 +1,29 @@
 ---
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ArticleDeliveryError from '../../components/ArticleDeliveryError.astro';
 import { loadContent } from '../../lib/content';
+import { loadArticleCollection, loadArticlePage } from '../../lib/server/article-delivery';
 import { readRuntime } from '../../../../config/runtime';
-import type { ArticlePreview } from '../../../../shared/editorial';
-import type { CmsArticleDraftPreviewData } from '../../../../shared/cms-draft-preview';
-import { dev05bDraftScope } from '../../../../shared/cms-draft-preview';
-import { createDraftPreviewReader, draftPreviewConfigFromEnvironment } from '../../lib/server/cms-draft-preview-query';
-import { assertCmsDraftPreviewDevCommand } from '../../lib/server/cms-draft-preview-mode';
+import { articleScopes, articleSlug } from '../../../../shared/cms-article';
+import { findDeliveredArticle, readArticleDeliveryMode } from '../../../../shared/article-delivery';
 export async function getStaticPaths() {
-  const runtime = readRuntime();
-  const { articlePreviews, siteSettings } = await loadContent(runtime.contentMode);
-  let cmsDraft: CmsArticleDraftPreviewData | null = null;
-  if (process.env['DEV_CMS_DRAFT_PREVIEW'] === '1') {
-    assertCmsDraftPreviewDevCommand(import.meta.env['FORMELO_ASTRO_COMMAND']);
-    if (runtime.deployEnv !== 'local') throw new Error('CMS_DRAFT_PREVIEW_LOCAL_ONLY');
-    cmsDraft = await createDraftPreviewReader(draftPreviewConfigFromEnvironment(process.env)).read(dev05bDraftScope.documentId, dev05bDraftScope.slug);
-  }
-  return articlePreviews.map(article => ({ params: { slug: article.slug }, props: { article: cmsDraft && article.slug === dev05bDraftScope.slug ? cmsDraft : article, brandName: siteSettings.brandName } }));
+  // Never persist article data in dev's route props: a normal page reload must read the saved revision.
+  const slugs = readArticleDeliveryMode(process.env) === 'published'
+    ? (await loadArticleCollection({ command: import.meta.env['FORMELO_ASTRO_COMMAND'] })).articles.map(article => article.slug)
+    : Object.keys(articleScopes);
+  return slugs.map(slug => ({ params: { slug } }));
 }
-interface Props { article: ArticlePreview | CmsArticleDraftPreviewData; brandName: string }
-const { article, brandName } = Astro.props;
+const slug = articleSlug(Astro.params.slug);
+const { siteSettings } = await loadContent(readRuntime().contentMode);
+const result = await loadArticlePage({ command: import.meta.env['FORMELO_ASTRO_COMMAND'], url: Astro.url });
+const article = result.ok ? findDeliveredArticle(result.collection, slug) : undefined;
+if (!result.ok) Astro.response.status = 503;
+else if (!article) Astro.response.status = 404;
+if (import.meta.env['FORMELO_ASTRO_COMMAND'] === 'dev') Astro.response.headers.set('Cache-Control', 'no-store');
 ---
-<ArticleLayout article={article} brandName={brandName} />
+{article ? <ArticleLayout article={article} brandName={siteSettings.brandName} /> : <BaseLayout title="Article unavailable" description="The selected article is unavailable. No local or unpublished substitute is shown." brandName={siteSettings.brandName} showMobileContact referenceCode={articleScopes[slug].referenceCode}>
+  <Breadcrumb label="Article unavailable" journalParent />
+  <section class="article-delivery-error-page shell"><h1>Article unavailable</h1><ArticleDeliveryError code={result.ok ? 'ARTICLE_NOT_IN_COLLECTION' : result.code} /><a class="text-link" href="/blog/">← Back to Journal</a></section>
+</BaseLayout>}
