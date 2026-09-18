@@ -6,12 +6,19 @@ export const page = defineType({
     defineField({ name: 'pageKey', type: 'string', readOnly: true, options: { list: [...pageKeys] }, validation: rule => rule.required() }),
     defineField({ name: 'title', type: 'string', validation: rule => rule.required() }),
     defineField({ name: 'intro', type: 'text', validation: rule => rule.required() }),
-    defineField({ name: 'heroImage', type: 'approvedImage' }),
-    defineField({ name: 'faqItems', type: 'array', of: [{ type: 'faq' }] }),
+    defineField({ name: 'heroImage', type: 'approvedImage', validation: rule => rule.custom((value, context) =>
+      (context.parent as { pageKey?: string } | undefined)?.pageKey !== 'home' || value ? true : 'Home requires an approved hero image.') }),
+    defineField({ name: 'faqItems', type: 'array', of: [{ type: 'faq' }], validation: rule => rule.custom((value, context) => {
+      const key = (context.parent as { pageKey?: string } | undefined)?.pageKey;
+      return key !== 'home' && key !== 'manufacturing' || Array.isArray(value) && value.length >= 3 ? true : 'Home and Manufacturing require at least three FAQs.';
+    }) }),
     defineField({ name: 'seo', type: 'seo', validation: rule => rule.required() }),
     defineField({ name: 'contentUpdatedAt', type: 'datetime', validation: rule => rule.required() }),
-    defineField({ name: 'factConfirmedAt', type: 'date' }),
-    // Fixed templateContent field groups are deliberately deferred to DEV-05.
+    defineField({ name: 'factConfirmedAt', type: 'date', validation: rule => rule.custom((value, context) => {
+      const key = (context.parent as { pageKey?: string } | undefined)?.pageKey;
+      return !['home', 'manufacturing', 'factory', 'contact'].includes(key ?? '') || value ? true : 'Business pages require a fact-confirmation date.';
+    }) }),
+    // Template-specific content groups remain deferred to a later DEV-05 integration increment.
   ],
   preview: { select: { title: 'title', subtitle: 'pageKey' } },
 });

@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-PR #8 已由用户合并至 `main@83dec3f23f264ac034d1b7775eff6ca2b71a8d27`（验收 head `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`）。DEV-05C 使用 `feat/cms-editorial-delivery` / PR #9，把首页 Journal、Journal 列表和文章详情接到同一个受控文章交付入口；不向 main 直接写入、不强制推送、不自动合并或部署。
-`web/` 默认仍是十页 mock 静态工程；文章局部可显式选择 mock、授权 Draft 预览或 strict published。全站 `CONTENT_MODE=sanity` 仍未实现，真实 Studio/CMS 没有 publish、媒体上传、schema/Studio/site deploy 或 Webhook。启动和检查命令见根 README。
+PR #9 / DEV-05C 已由用户合并至 `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`。DEV-05D 使用 `feat/cms-site-provider` 建立 siteSettings、六个固定 page、两个 category 的 strict published provider 基础；不向 main 直接写入、不强制推送、不自动合并、发布或部署。
+`web/` 默认仍是十页 mock 静态工程；文章局部可显式选择 mock、授权 Draft 预览或 strict published。新的全站 reader 尚未接入 `loadContent`，固定页 templateContent 也未迁移，因此 `CONTENT_MODE=sanity` 继续明确失败。真实 Studio/CMS 没有全站读取授权、publish、媒体上传、schema/Studio/site deploy 或 Webhook。启动和检查命令见根 README。
 
 ## 本地获取与检查
 
@@ -12,7 +12,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/feat/cms-editorial-delivery
+git switch --track origin/feat/cms-site-provider
 npm ci
 npm exec -- playwright install chromium
 npm run verify
@@ -77,6 +77,16 @@ Draft / published dev 都按页面请求重新读取并使用 `cache:no-store`�
 真实 Draft 无封面时，三个位置都显示 text-only 无图状态，不复用本地概念图。只有 strict published converter 已验证公开许可、alt、资产身份/尺寸等字段后，CMS 封面才进入 approved 状态。不要补假作者、日期、审核或图片许可来通过正式校验。
 
 Draft 预览的 build 隔离继续执行：根 build、workspace build、直接 Astro build、`--mode development` 都必须在网络访问和 HTML 输出前拒绝。离线浏览器回归为了与 Playwright 已启动的默认 dev server 共存，额外 Astro dev 使用 Astro 7 的 `--ignore-lock`，仍绑定随机 loopback 端口；这只是测试进程隔离，不是放宽 Draft 的 loopback/actual-command 门禁。
+
+## DEV-05D 全站 published provider 基础
+
+`web/src/lib/server/cms-site-query.ts` 是 server-only、published-only、no-store 的固定 bundle reader，只查询一个 siteSettings singleton、`pageKeys` 中六个固定 page 和 `t-shirts / hoodies` 两个 category。它没有任意文档 ID/slug 输入，不接受 drafts/release 视图，不执行 mutation，不自动重试；默认完整请求截止 8 秒、响应上限 2 MiB。token 仍只来自服务器环境，普通页面、浏览器 bundle 和默认 CI 不应包含它。
+
+`shared/cms-site.ts` 对查询结果做严格转换：singleton/route 唯一性、完整集合、公开联系人格式、MOQ 模式/日期、业务页事实日期、Home hero、Home/Manufacturing FAQ、category referenceCode/categoryCode、至少三组样品及全站唯一 sampleCode、至少一项能力行和一张证据图、必填 customization/sampling notes、related article 引用、SEO title 唯一性都失败关闭。Blog Index / Privacy 的 `factConfirmedAt` 可为空；业务页必须填写。公开图片统一走 `shared/cms-image.ts`，与文章封面共享 asset ID、项目/dataset CDN URL、尺寸、alt、publicUseApproved、crop/hotspot 校验。
+
+这一阶段**不启用** `CONTENT_MODE=sanity`。Manufacturing / Factory / Contact / Privacy 等现有模板仍依赖本地 presentation/template 数据，尚未建成完整 CMS templateContent 映射；把共同元数据 query 成功不能当成这些页面已迁移。普通 `loadContent('mock')`、十内容 URL + 404、production block、concept/noindex、空联系方式和 analytics off 必须保持。
+
+所有 DEV-05D 自动测试使用 OFFLINE synthetic fixture 与 groq-js 内存 dataset；不得把这些假品牌、联系人、日期、MOQ、样品或许可写入 Sanity。既有单篇 `SANITY_READ_TOKEN` 授权也不能自动推定为 siteSettings/page/category 的真实读取许可；环境 helper 还要求显式 `SANITY_SITE_READ_ENABLED=1`。该开关当前保持未启用，真实全站读取须另行明确授权范围后再做。
 
 ## 后续发布与恢复
 

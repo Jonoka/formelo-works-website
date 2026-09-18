@@ -60,7 +60,7 @@ test('browser-output scanner fails without disclosing a supplied token and rejec
   const temporary = mkdtempSync(join(root, '.local/cms-secret-scan-'));
   const canary = `OFFLINE_TEST_${randomUUID()}`;
   try {
-    for (const content of [canary, 'SANITY_READ_TOKEN', 'cms-article-query', 'cms-draft-preview-query', 'cms_article_draft_preview', 'CMS draft preview / Not published', 'DEV_CMS_DRAFT_PREVIEW', 'OFFLINE FIXTURE']) {
+    for (const content of [canary, 'SANITY_READ_TOKEN', 'SANITY_SITE_READ_ENABLED', 'cms-article-query', 'cms-draft-preview-query', 'cms-site-query', 'cms_article_draft_preview', 'cms_site_bundle', 'cms_site_settings', 'cms_category', 'cms_page', 'CMS draft preview / Not published', 'DEV_CMS_DRAFT_PREVIEW', 'OFFLINE FIXTURE']) {
       writeFileSync(join(temporary, 'output.js'), JSON.stringify(content));
       const result = spawnSync(process.execPath, ['scripts/check-cms-boundary.mjs', temporary], { cwd: root, env: { ...process.env, SANITY_READ_TOKEN: canary }, encoding: 'utf8' });
       assert.notEqual(result.status, 0); assert.ok(!(result.stdout + result.stderr).includes(canary));
