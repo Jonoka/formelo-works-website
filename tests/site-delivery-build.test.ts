@@ -92,13 +92,13 @@ const failureCases: [string, string, (state: OfflineSiteState) => void][] = [
   ['broken reference', 'CMS_INVALID', state => mutateSite(state.bundle!, ['categories', 0, 'relatedArticles', 0, '_ref'], 'missing.document')],
   ['unapproved image', 'CMS_ASSET_APPROVAL', state => mutateSite(state.bundle!, ['categories', 0, 'heroImage', 'publicUseApproved'], false)],
   ['unsafe copy', 'CMS_UNSAFE_TEXT', state => mutateSite(state.bundle!, ['pages', 0, 'templateContent', 'factorySummary'], '<script>alert(1)</script>')],
-  ['unknown projected business field', 'CMS_UNSUPPORTED_FIELD', state => { state.resultPatch = { path: ['pages', 0, 'templateContent', 'style'], value: 'invalid' }; }],
+  ['unknown projected business field', 'CMS_UNSUPPORTED_FIELD', state => { state.resultPatch = { path: ['settings', 0, 'style'], value: 'invalid' }; }],
   ['401', 'CMS_UNAUTHENTICATED', state => { state.status = 401; }],
   ['403', 'CMS_FORBIDDEN', state => { state.status = 403; }],
   ['timeout', 'CMS_TIMEOUT', state => { state.delayMs = 10000; }],
 ];
 for (const [name, code, change] of failureCases) test(`actual three-page published build fails without fallback: ${name}`, { timeout: 90000 }, () => {
-  const harness = createOfflineSiteHarness(), ordinary = hashTree('web/dist');
+  const harness = createOfflineSiteHarness('mock'), ordinary = hashTree('web/dist');
   try {
     const state: OfflineSiteState = { bundle: siteDeliveryFixture() }; change(state); harness.setState(state);
     const output = join(harness.directory, 'failed-dist'), result = build(harness, output), log = (result.stdout ?? '') + (result.stderr ?? '');

@@ -2,7 +2,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { startOfflineSiteServer } from '../helpers/offline-site-server';
+import { startOfflineSiteServer, type OfflineSiteState } from '../helpers/offline-site-server';
 import { offlineImage } from '../helpers/offline-image';
 import { siteDeliveryFixture } from '../fixtures/site-delivery';
 import { fixtureApprovedImage, mutateSite } from '../fixtures/cms-site';
@@ -132,12 +132,13 @@ test.describe('DEV-05E isolated actual site templates', () => {
     const context = await browser.newContext(); await isolate(context, server.origin); const page = await context.newPage();
     try {
       await page.goto(server.origin);
-      for (const [state, code] of [
+      const failures: [OfflineSiteState, string][] = [
         [{ status: 401 }, 'CMS_UNAUTHENTICATED'], [{ status: 403 }, 'CMS_FORBIDDEN'],
         [{ delayMs: 10000 }, 'CMS_TIMEOUT'],
-        [{ resultPatch: { path: ['pages', 0, 'templateContent'], value: null } }, 'CMS_INVALID'],
-      ] as const) {
-        server.setState({ ...state, ...('resultPatch' in state ? { resultPatch: { ...state.resultPatch, path: [...state.resultPatch.path] } } : {}) });
+        [{ resultPatch: { path: ['pages'], value: [] } }, 'CMS_INVALID'],
+      ];
+      for (const [state, code] of failures) {
+        server.setState(state);
         for (const [path] of pages) {
           const response = await page.goto(server.origin + path); expect(response?.status()).toBe(503);
           await expect(page.locator('[data-site-delivery-error]')).toHaveAttribute('data-site-delivery-error', code);
