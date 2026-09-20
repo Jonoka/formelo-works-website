@@ -85,6 +85,33 @@ def validate_generated_asset(asset: dict[str, Any], root: Path) -> list[str]:
     return errors
 
 
+
+def validate_ci_workflow(workflow: str) -> list[str]:
+    """Keep bootstrap validation independent from artifact-service availability."""
+    errors: list[str] = []
+    try:
+        bootstrap_start = workflow.index('  bootstrap:')
+        foundation_start = workflow.index('  foundation:', bootstrap_start)
+        bootstrap = workflow[bootstrap_start:foundation_start]
+        upload = bootstrap.index('uses: actions/upload-artifact@')
+        required = [
+            'name: Validate documentation and assets',
+            'name: Validate shell syntax',
+            'name: Run offline bootstrap safety tests',
+        ]
+        for marker in required:
+            position = bootstrap.index(marker)
+            if position > upload:
+                errors.append('Bootstrap validation must run before artifact upload: ' + marker.removeprefix('name: '))
+        package = bootstrap.index('name: Package the exact tracked source')
+        if package > upload:
+            errors.append('Tracked source must be packaged before its artifact upload.')
+        if 'continue-on-error:' in bootstrap:
+            errors.append('Bootstrap must not hide validation or artifact failures with continue-on-error.')
+    except ValueError as exc:
+        errors.append('Bootstrap CI structure is incomplete or reordered: ' + str(exc))
+    return errors
+
 def validate(root: Path) -> dict[str, Any]:
     root = root.resolve()
     errors: list[str] = []
@@ -201,8 +228,9 @@ def validate(root: Path) -> dict[str, Any]:
         workflow = safe_path('.github/workflows/repository-checks.yml').read_text(encoding='utf-8')
         require('contents: read' in workflow and 'persist-credentials: false' in workflow, 'CI must have read-only permissions and no persisted checkout credential.')
         require('pull_request_target' not in workflow and 'secrets.' not in workflow, 'Bootstrap CI must not use elevated triggers or secrets.')
-        require('scripts/check_repository.py' in workflow and 'unittest discover' in workflow, 'CI check commands missing.')
-        checks.append('CI is a repository-check workflow, not website deployment.')
+        require('scripts/check_repository.py' in workflow and 'unittest discover' in workflow and 'bash -n scripts/publish-github.sh' in workflow, 'CI check commands missing.')
+        errors.extend(validate_ci_workflow(workflow))
+        checks.append('CI is a repository-check workflow; bootstrap validation precedes artifact retention.')
     except (OSError, KeyError, ValueError, TypeError, struct.error) as exc:
         errors.append('Validation could not finish: ' + str(exc))
     return {'status': 'passed' if not errors else 'failed', 'checks': checks, 'errors': errors}

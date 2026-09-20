@@ -18,21 +18,24 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Package the exact tracked source, without .git or local secrets
-        run: git archive --format=tar.gz --output="${{ runner.temp }}/review-source.tar.gz" HEAD
-      # Official upload-artifact v4 ref checked via GitHub API on 2026-09-13.
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: private-review-source-${{ github.event.pull_request.head.sha || github.sha }}
-          path: ${{ runner.temp }}/review-source.tar.gz
-          if-no-files-found: error
-          retention-days: 14
       - name: Validate documentation and assets
         run: python3 scripts/check_repository.py
       - name: Validate shell syntax
         run: bash -n scripts/publish-github.sh
       - name: Run offline bootstrap safety tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Package the exact tracked source, without .git or local secrets
+        id: source_package
+        run: git archive --format=tar.gz --output="${{ runner.temp }}/review-source.tar.gz" HEAD
+      # Artifact retention is intentionally last: quota/service failures must not skip bootstrap validation.
+      # Official upload-artifact v4 ref checked via GitHub API on 2026-09-13.
+      - name: Retain private exact tracked source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: private-review-source-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/review-source.tar.gz
+          if-no-files-found: error
+          retention-days: 3
   foundation:
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -206,7 +209,7 @@ jobs:
             review/source.json
             review/outcomes.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 5
       - name: Retain private Home and Category base-mock-offline screenshots
         if: ${{ !cancelled() && steps.site_evidence.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -217,33 +220,36 @@ jobs:
             review/source.json
             review/outcomes.json
           if-no-files-found: error
-          retention-days: 14
-      - name: Retain private screenshots, reports, traces and static output
+          retention-days: 5
+      - name: Retain compact private diagnostics and failure traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: cms-editorial-integration-review-${{ github.event.pull_request.head.sha || github.sha }}
+          name: cms-ci-diagnostics-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
-            review/
-            playwright-report/
-            test-results/
-            web/dist/
+            review/source.json
+            review/outcomes.json
+            review/runtime.txt
+            review/install.txt
+            review/typecheck.txt
+            review/unit.txt
+            review/build.txt
+            review/browser-install.txt
+            review/browser.txt
+            review/verify.txt
+            review/audit.json
+            review/cms-evidence.txt
+            review/before/source.txt
+            review/before/build.txt
+            review/before/capture.txt
+            review/moq-before-build.txt
+            review/moq-before-capture.txt
+            review/cms-editorial/evidence.json
+            review/site-integration/evidence.json
+            test-results/results.json
+            test-results/**/trace.zip
+            test-results/**/error-context.md
             assets/manifest.json
-            assets/reference/homepage-selected-v1.webp
-            docs/design/homepage-handoff.md
-            docs/design/homepage-asset-handoff.md
-            docs/operations/pr-3-homepage-review.md
-            docs/design/category-handoff.md
-            docs/operations/pr-4-category-review.md
-            docs/design/core-information-handoff.md
-            docs/operations/core-information-verification.md
-            docs/design/journal-article-legal-handoff.md
-            docs/operations/journal-privacy-verification.md
-            docs/operations/cms-editorial-verification.md
-            docs/operations/pr-7-ci-repair.md
-            docs/development/cms-editorial-mapping.md
-            config/editorial-sources.json
-            docs/content/factory-materials-checklist.md
             config/routes.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 5
