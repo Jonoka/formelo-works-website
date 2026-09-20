@@ -232,6 +232,30 @@ page.pageKey + page.templateContent: pageTemplateContent
 
 实际离线验证通过真实 GROQ、HTTP envelope（含 ms/可选syncTags）、reader、converter、原路由/模板，双修订修改标题之外的正文；不是把测试 HTML 塞到页面。测试审批字段仅为 synthetic，真实请求为零，图片本机拦截。所有真实文档和发布授权仍待另行明确，当前不能由技术接线自动解除生产门禁。
 
+## DEV-05G · 真实来源盘点，不更改渲染契约 / 2026-09-20
+
+PR #12 已由 Jonoka 于 `2026-09-20T08:10:40Z` 合并；actual base `15155608981d0c092de928e319e717dd7f7af731`。五页同 head 的用户视觉确认已关闭，不重新开审。本节只记录真实输入状况，不再增加字段、schema、provider、页面或合成工程；上述已验收模块映射继续有效。
+
+新增批准来自本会话用户回复“批准”，范围为 `iajvl7ka/production` 本站 siteSettings、六固定 pageKey、t-shirts/hoodies、两既定文章 slug 和必要引用/公开媒体元数据；允许按选择器读 ID/元数据，再按需读正文及既有 loopback 核对。不含任何真实内容或环境文件修改、媒体、发布/撤回、扩展 Draft 预览或部署。
+
+一次性诊断与生产 reader 严格分开：诊断用固定 POST Query、`apiVersion=2025-02-19`、非 CDN/no-store、8秒全请求截止与2MiB上限，显式 `perspective=raw` 以区分 draft/published，GROQ 排除 `versions.**`；页面只匹配六 pageKey 或 Studio 已定义的对应 `page.<key>` ID，品类与文章只匹配指定 slug，settings 只匹配本站约定的 document type。只投影 ID/revision/时间、字段存在布尔值与集合计数，计数和最多100条返回必须一致，超限明确失败；不用 `[0]` 隐藏重复。此 raw 诊断绝不送入正式 published reader，也不修改其固定查询或校验。
+
+| 模板交付入口 | 本次真实输入 | 当前结论 |
+|---|---|---|
+| siteSettings → shared shell/MOQ/featuredCategories | 匹配数0；无 draft/published | 全站 published 快照缺共同前置；没有用本地 settings 补齐 |
+| 6 page → Home/Manufacturing/Factory/Contact/Journal/Legal | 每个 pageKey 匹配数0 | 没有可核验的真实标题/正文/模板字段；技术映射不等于真实文档存在 |
+| 2 category → 原 Category/相关卡片 | 每个 slug 匹配数0 | 样品、能力、FAQ、MOQ及许可媒体需真实材料；不导入测试记录 |
+| 询价 article → 原 one-Draft reader/article-delivery | 单一 Draft，revision `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`，无 published | 原 Draft 转换通过；已读标题/摘要/SEO/正文，仍缺正式要素；仅原 dev/local/loopback 路径可核对 |
+| MOQ article → article-delivery | 指定 slug 匹配数0 | 现有本地 MOQ 明确 local，并非云端读取或失败回退 |
+
+本次结果限于当前凭证/选择器可见范围，不声明未授权/不同键/ACL隐藏的内容不存在。逐页模块、字段/许可/引用缺口、材料责任人与本地/上线阻断状态统一维护在[原工厂资料清单](../content/factory-materials-checklist.md)，不另建第二份事实源。诊断未返回原始私密正文、联系方式或客户资料进入Git。
+
+询价记录的 title/excerpt/SEO 和受控正文通过 unchanged createDraftPreviewReader → convertCmsDraftPreviewArticle；19个存储块合为17个渲染块，包含7个H2/1表/1模板，来源码配对正确。限定引用探测没有实际引用注解/related记录，且无封面，所以没有查询其他资产。authorDisplay/publishedAt/contentUpdatedAt/factConfirmedAt/coverImage均未设，factReviewStatus=pending；这些是具体缺口，不把可选关联字段当成必填，也不为读取预填首次公开日期。
+
+当前没有符合 strict published 的站点 bundle 或两篇集合，因此不启用 HOME_CATEGORY/FIXED published，不将 Draft 放入它们，不重建另一套宽松页面。使用原单篇预览时 Home/Journal 只有询价卡片是真实 Draft，页面栏目/其余内容仍为声明的本地来源。截图生成、实际源revision、检查、人工确认与附件留存继续分开；最终本地页面运行记录以 PR exact-head 证据为准。
+
+公开协议依据于本轮再次核对：[Query HTTP API](https://www.sanity.io/docs/http-reference/query) 和 [Perspectives](https://www.sanity.io/docs/content-lake/perspectives)。raw 只用于当前批准的诊断；正式 reader 仍 published-only、错误脱敏、无重试/旧内容/mock回退。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。

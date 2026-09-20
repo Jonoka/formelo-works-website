@@ -190,3 +190,31 @@ Windows 侧也保持平台限制的准确口径：本轮 `python -X utf8 scripts
 ### 真实边界与下一阶段
 
 无真实环境读取/修改、SANITY_SITE_READ_ENABLED启用、云端文档枚举/写入/媒体/发布/撤回、Schema/Studio/site/Webhook/Cloudflare部署或实际消息。测试事实/许可/法律审核字段只是synthetic，不代表真实经营证据；Privacy仍未生效，联系/复制/production/analytics/SEO门禁未解除。下一步须取得同一份[工厂资料清单](../content/factory-materials-checklist.md)中的最小真实资料与明确只读范围，再分别授权本地页面核对、编辑发布/撤回重建、收发渠道、正式SEO及部署；不再拆一轮只有provider/schema的准备。
+
+## DEV-05G · 限定真实只读盘点 / 2026-09-20
+
+### 前置与新增授权
+
+本轮实查 PR #12 MERGED，mergedBy=Jonoka、mergedAt=`2026-09-20T08:10:40Z`，reviewed head=`d3b4de2dc6e22fb3fe85dae1a7e61a9e4da237ad`，最新 main/merge=`15155608981d0c092de928e319e717dd7f7af731`。最终 [Review](https://github.com/Jonoka/formelo-works-website/pull/12#pullrequestreview-5260037006) 与 [用户五页确认](https://github.com/Jonoka/formelo-works-website/pull/12#issuecomment-5748486969) 均读取；视觉不是新缺口。原288/461/Linux22与Windows WSL/4 moderate仅作为对应head历史，不作本轮成绩。artifact配额失败和未留存状态仍独立，不推定用户放弃留存要求。
+
+Windows 开始为旧fixed分支/d3b4de2、完整porcelain为空、无开放PR、目标分支不存在；fetch后确认本地main可安全快进，ff到1515560后新建`chore/cms-live-readiness`。没有reset/clean/force push/覆盖ignored环境或历史证据。
+
+用户在本会话对上一条完整最小授权回复“批准”；授权记录时间为`2026-09-20T08:19:49.763Z`，不是伪造消息原始时间戳。项目/数据集=`iajvl7ka/production`；siteSettings、6指定pageKey、2category slug、2article slug及必要引用/公开媒体元数据；允许安全读取既有本机服务器凭证、限定ID发现/元数据/必要正文和既有loopback核对。没有云端写入或发布授权。
+
+### 真实读取结果
+
+本轮前置盘点发生在head1515560，Node24.21.0/Windows；使用真实HTTP传输，不注入synthetic结果。`08:19:49.763Z`至`08:19:51.572Z`完成1次限定raw元数据POST，HTTP200且正常ms/syncTags；排除release versions，返回计数与条目数均1。实际只有原询价Draft；settings、6page、2category、MOQ文章共10个逻辑记录为0，全部匹配published为0。只针对当前凭证可见/批准选择器作结论，不枚举无关或不同键记录。
+
+`08:21:02.244Z`至`08:21:04.159Z`再做2次只读POST：指定询价ID的最小引用探测，以及unchanged `createDraftPreviewReader` 的真实draft查询/严格转换。revision仍`41ad5fd0-211a-4ea2-89e8-433c2906b8a7`，保存时间`2026-09-17T08:43:58Z`；pending/not_published/productionAllowed=false，存储body19块→原渲染17块，7个H2/1表/1模板。title/excerpt/SEO/来源码通过；缺作者、公开/实质更新/事实日期和封面。引用展平后0个实际注解和0个related对象，不把初步嵌套数组计数写成真实引用条数。没有可读取的图片资产，因此未发起媒体枚举。
+
+脱敏证据只在ignored `.local/cms-live-readiness/2026-09-20T08-19-49-763Z/`：`metadata.json`、`reference-and-draft.json`及对应固定查询文本。只记录批准范围/状态/字段布尔值/计数/ID/revision/时间/查询hash，不保存raw响应或私密正文；两次操作均核对根`.env.local`字节未变。无token值输出、Git/普通CI密钥、默认网站配置修改或site-read flag持久启用。
+
+逐页行动项和责任方见[同一工厂资料清单](../content/factory-materials-checklist.md)；source→template边界见[现有映射](../development/cms-editorial-mapping.md)。不存在的文档不能只记一个converter错误；已按11个逻辑记录列清。本次没有合格published集合，不调用正式site reader反复制造首个缺项错误，也不放宽其契约。
+
+### 页面证据、检查与后续边界
+
+本节元数据/reader成功不是截图或全站成功。唯一可用的真实内容路径是旧询价Draft的actual-dev/local/loopback预览；其Home/Journal卡片周围的栏目和其他内容仍mock。页面与1440/390截图须由原`capture-live-cms-draft.ts`在干净、精确head运行后另记该PR交付证据，包含head/revision/源与截图hash；不得用旧图改名或把缺失九个内容URL列为真实呈现通过。
+
+本轮提交范围仅现有Markdown中的授权/盘点/缺口记录，无应用、schema/query/converter、测试、依赖图或lockfile变更。执行对应仓库检查、CI顺序两项回归与git diff检查；完整verify和云端写入不因文档任务自动运行。若普通PR工作流自动触发，其实际Linux状态另记，不主动重复全量运行或探测配额。所有新截图、人工确认和远端留存状态继续分别报告。
+
+下一步先提供并审核工厂/品牌/图片/正文资料，再另行批准10个缺失逻辑记录的Draft创建和现有询价稿指定字段编辑；媒体、扩大草稿预览、发布/撤回/重建、渠道、实际政策/SEO与部署各自授权。当前只读盘点完成不等于内容齐备、正式SEO、法律生效或全站CMS上线。

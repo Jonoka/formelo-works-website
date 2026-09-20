@@ -68,3 +68,35 @@ Home 与两品类的模板接线只使用隔离合成输入。新增首页区块
 先明确**只读范围**：项目/数据集（不能仅沿用单篇权限推定）、1个 siteSettings、指定6个 pageKey、2个 category slug、指定两文ID及这些文档必要的引用/公开媒体元数据；只读 token 留安全本机环境，不贴聊天、不进普通 CI。该固定 query 会检查这些路线的完整性/唯一性，授权须覆盖它的实际范围。读取许可不包含枚举无关文档。
 
 其后按阶段分别授权：真实内容编辑/必要模型迁移和媒体上传；本地只读页面核对；指定文档发布/撤回及本地重建失败恢复；指定账号邮箱/WhatsApp主动发送、工厂收件和回复；实际政策生效/正式SEO；指定平台与可见范围的部署/恢复。每一步记录具体对象、动作和核验结果，前一步许可不自动授予后一步。现有 iajvl7ka/production 单篇询价 Draft 授权保持原范围，本轮未启用 SANITY_SITE_READ_ENABLED、未修改真实环境文件、未发送消息。
+
+## DEV-05G · 已授权的真实内容盘点 / 2026-09-20
+
+本节追加当前实际结果，上述 A–F 的未授权/未读取描述仍为历史。PR #12 已合并，实际代码起点为 `15155608981d0c092de928e319e717dd7f7af731`。用户在本会话对明确只读范围回复“批准”；首次记录于 `2026-09-20T08:19:49.763Z`（日本时间 17:19:49）。授权仅限 `iajvl7ka/production` 本站 siteSettings、六 pageKey、两个 category slug、两个 article slug 及必要引用/公开媒体元数据，允许按选择器查 ID、draft/published 状态、必要正文及既有本地 loopback 核对；不含任何云端写入。
+
+实际元数据查询 HTTP 200，正常 envelope 带 ms/syncTags。按受限选择器返回 **1 个 Draft、0 个 published**，未见重复的匹配逻辑 ID。下表“未查到”指当前凭证可见的批准范围内 0 条，不证明不存在被 ACL 隐藏、使用其他 slug/pageKey 或不相关的文档；本轮没有扩大枚举去猜这些记录。没有文档时，不把它写成“已读正文但缺几个字段”。
+
+| 记录 / 页面模块 | 实际来源与 draft / published 数量 | 必要字段、引用、图片缺口及材料责任方 | 可本地核对 / 上线阻塞 |
+|---|---|---|---|
+| siteSettings（Studio singleton `siteSettings`） | Sanity 限定查询未查到；0 / 0 | 整条记录未读到。工厂确认 brandName/factoryName、接待人、时段/时区/公开地址和渠道；统一 defaultMoq 模式/单位/款色依据/混码/条件/真实确认日；品牌负责人提供获准 logo/defaultOgImage；网站团队维护两品类强引用及渠道状态 | 阻塞全部 site published 快照；渠道存在或 enabled 也不解除网站动作门禁 |
+| Home `/`，pageKey=home | 未查到；0 / 0 | H1/简介/独立 SEO、受控首页各模块、FAQ、许可 hero、两品类及制造/工厂摘要、业务事实日期；工厂确认事实，网站团队整理英文，权利人确认图片 | 未完成真实 Home 呈现；仅可展示已有询价 Draft 卡片，不代表页面正文已切换 |
+| Manufacturing `/manufacturing/` | 未查到；0 / 0 | 整页受控文案、定制方式、MOQ 因素、资料准备、打样、流程、至少3 FAQ、六区块与 relatedLinks；工厂区分采购指南和真实承诺，MOQ 只用 settings | 未完成；页面与 settings/相关引用共同阻塞 |
+| Our Factory `/our-factory/` | 未查到；0 / 0 | 必需介绍、overview/overviewNote、制造安排、质量说明、事实日期及相关链接；工厂确认厂内/外协实际责任。hero/gallery/资质说明可暂缺；不以假图假证补齐 | 未完成；必需正文阻塞；可选图/资质缺失本身不阻塞允许的无图状态 |
+| Contact `/contact/` | 未查到；0 / 0 | H1/简介/SEO、准备事项/说明/相关内链、事实日期；页面不复制经营或渠道字段，工厂提供事实、网站团队整理文案 | 未完成；账号启用、真实收发仍未授权 |
+| Journal `/blog/`，pageKey=blogIndex | 未查到；0 / 0 | 栏目标题/简介/eyebrow/columnNote/SEO/真实内容更新时间；网站团队整理。文章卡片继续来自原 article-delivery，不另建文章数组 | 未完成真实栏目；原询价卡片可局部预览，MOQ 仍是声明的 local 草稿 |
+| Privacy `/privacy/` | 未查到；0 / 0 | 受控政策正文、至少3 H2、标题/简介/SEO、法律审核状态；责任人确认实际处理流程。policyStatus 仍 draft_not_in_effect；主体/邮箱/服务商/期限/生效等保留现阶段未设，不伪填 | 未完成；可先形成未生效 Draft，但实际法律审核、生效及上线另行处理 |
+| T-shirts `/clothing/t-shirts/` | slug=t-shirts 未查到；0 / 0 | 名称/介绍/SEO/固定代码、许可 hero、至少3组真实编号样品/图、能力与限制、至少1证据图、定制/打样、MOQ inherit或完整override、FAQ、事实日期/可选文章引用；工厂与图片权利人确认 | 未完成；当前 T-shirts 本地概念不证明真实能力 |
+| Hoodies `/clothing/hoodies/` | slug=hoodies 未查到；0 / 0 | 同品类契约，但须提供本品类真实资料，不能复制测试样品/参数/许可；工厂与图片权利人确认 | 未完成；当前 Hoodie 概念图不能变成真实生产证据 |
+| 询价文章 `/blog/what-to-send-for-a-clothing-quote/` | 找到原 Draft；1 / 0。ID `1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`，revision `41ad5fd0-211a-4ea2-89e8-433c2906b8a7` | title/excerpt/body/SEO/来源码可读；缺 authorDisplay、publishedAt、contentUpdatedAt、factConfirmedAt、coverImage；factReviewStatus=pending。工厂/编辑确认正文及署名/审核，权利人确认独立封面。首次公开日期只能在获准实际发布时记录，不为了读取预填 | 仅原 actual-dev/local/loopback Draft reader 可用，已通过；不能走 published。页面截图独立记录，不等于正式内容审核 |
+| MOQ 文章 `/blog/moq-per-style-per-color/` | 限定 slug 未查到；0 / 0 | 整条记录未读到；本地 editorial draft 不等于云端文档。工厂审核计量解释，编辑确认正文/署名/真实更新与审核日期，权利人提供封面；公开日期在获准发布时处理 | 未完成；不能拿本地 MOQ 卡片当作 CMS 成功或第三篇文章补齐 |
+
+### 现有询价 Draft 的细项依据
+
+查询只找到 `drafts.1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`，保存时间仍 `2026-09-17T08:43:58Z`。后续限定 ID 的引用投影得到 0 个实际 internal/external annotations、0 个 relatedCategories/relatedArticles；这些关联数组是可选项，不应伪造为必填缺口。没有 coverImage，因此未发起任何图片资产枚举；“图片许可缺失”不能写成“图片已授权”。初步嵌套数组计数不作为实际引用条数，使用展平后的引用诊断。
+
+原正式 one-Draft reader 在 `2026-09-20T08:21:04.159Z` 完成真实读取与严格转换：19 个存储 body 块合并为17个原渲染块、7个H2、1张表、1个纯文本模板。状态仍 pending / not_published / productionAllowed=false；通过的是 Draft 契约，不是 published 契约或事实审核。完整固定页 bundle 与两篇 published 集合均无就绪输入，不反复调用直到只得到首个错误。
+
+### 下一次最小材料与精确授权（尚未授予）
+
+先补本表对应的真实品牌/经营/MOQ、六页正文、两品类样品与图片依据、两文编辑/事实审核及政策资料；允许未确认内容继续标记 Draft/pending，不能填假批准值制造通过。材料就绪后，若确认当前未查到的记录确需新建，最小云端写入范围是 **1 siteSettings + 6 page + 2 category + 1 MOQ article，共10个缺失逻辑记录的 Draft 创建，以及现有询价 Draft 的指定字段编辑**。ID由批准的选择器/Studio约定确定，不导入整套合成 fixture；每次写入先复核现状与修订，避免重复创建。
+
+以上创建/编辑仍需用户另行明确批准，当前没有执行。媒体上传、扩大草稿预览能力、技术发布/撤回、本地重建恢复、邮箱/WhatsApp真实收发、政策生效、正式SEO与指定平台部署均需各自对象/动作/可见范围授权；此次只读批准不涵盖它们。缺 settings/固定页/品类时，不能通过放宽正式 reader 或把真实 CMS 对象强转概念对象来预览。

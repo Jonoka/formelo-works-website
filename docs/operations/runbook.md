@@ -2,8 +2,10 @@
 
 ## 当前状态
 
-PR #11 / DEV-05E 已由用户合并至 `main@53604896f5a554231389455596489eb22d9fabb4`。DEV-05F 使用 `feat/cms-fixed-page-integration` 将另外五个固定正文接到既有 site reader/delivery 和原模板；不向 main 直接写入、不强制推送、不自动 Ready、合并、发布或部署。
-默认仍是十内容 URL + 404 的 mock 静态工程。HOME_CATEGORY 开关只管既有三页，FIXED_PAGE 开关成组管理五页；合法组合见下方。`CONTENT_MODE=sanity` 和 production 继续失败关闭。真实全站读取、内容/媒体写入、发布/撤回、schema/Studio/site deploy 与 Webhook 均未获准。历史阶段说明保留原时点含义。
+PR #12 / DEV-05F 已由用户合并至 `main@15155608981d0c092de928e319e717dd7f7af731`。DEV-05G 在 `chore/cms-live-readiness` 做获准的限定真实只读盘点，当前已查到1个询价Draft、其余10个逻辑记录未查到；同一[工厂清单](../content/factory-materials-checklist.md)是逐页缺口来源。不向main直接提交，不自动Ready/合并/部署。
+默认仍是十内容URL+404的mock站点；既有三页/五页/文章来源模式及全部校验保持。2026-09-20用户“批准”只增加指定settings/6pageKey/2category slug/2article slug及必要引用/媒体元数据的读权限，允许必要正文与现有loopback核对。真实写入/媒体上传/发布撤回/扩展草稿预览/渠道/政策生效/SEO/生产/部署均未获准。以下A–F说明保留历史含义，不能覆盖当前有限只读批准。
+
+盘点先读受控元数据，不输出密钥/原始私密内容；使用本机既有服务器凭证不修改env，诊断结果与截图保存在ignored `.local/cms-live-readiness/`或`.local/cms-draft-review/`。正式reader不改为raw或宽松转换；不存在/仅草稿分别报告，不补mock。仅原询价Draft可临时以actual-dev/local/loopback运行，HOME_CATEGORY/FIXED仍mock，单篇卡片成功不等于全站CMS。具体查询范围、UTC时间、revision与证据口径见[验证](cms-editorial-verification.md)。文档变更只跑相应仓库/顺序检查，下面完整安装/verify命令用于需要它们的工程任务，不为只读盘点重复多套浏览器。
 
 ## 本地获取与检查
 
@@ -12,7 +14,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/feat/cms-fixed-page-integration
+git switch --track origin/chore/cms-live-readiness
 npm ci
 npm exec -- playwright install chromium
 npm run verify
