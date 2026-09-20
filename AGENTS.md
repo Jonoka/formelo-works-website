@@ -11,7 +11,7 @@ Repository Markdown is the working documentation; imported v1 documents are snap
 - Factory-owned identity, English public site; website team owns web / SEO, factory owns sales and fulfillment.
 - Ten content URLs / eight templates. Use `config/routes.json`.
 - No inquiry forms, customer uploads, customer database, CRM, checkout, payments, order portal, chatbot API, or extra SEO pages without an explicit scope change.
-- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). PR #9–#12 / DEV-05C–F are user-merged; all planned CMS template paths exist. DEV-05G performs explicitly authorized limited live readiness reads, not content creation or website release. Default content remains mock; the existing one-Draft preview remains actual-dev/local/loopback-only.
+- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). PR #9–#13 / DEV-05C–G are user-merged; all planned CMS template paths exist. DEV-05H prepares launch copy on content/cms-launch-drafts; the approved limited read scope remains valid, but batch cloud Draft writes still require separate approval. Default content remains mock; the existing one-Draft preview remains actual-dev/local/loopback-only.
 - Preserve the chosen serif editorial headings, warm off-white, charcoal, brick-red CTA, thin dividers, garment photography and dark footer. Fine spacing / contrast / mobile refinements are allowed; unrelated redesigns are not.
 
 ## Source and truth rules
@@ -50,7 +50,17 @@ Use Node 24.21.0 and npm 11.19.1 (upgrade the bundled npm explicitly), exact dep
 `npm run verify` covers type checking, unit/schema tests, an actual production-build rejection, static-output checks and Chromium tests of both dev and preview. Keep Python bootstrap tests runnable on Linux CI. Never treat these as full PRD or production acceptance.
 `DEPLOY_ENV=production`, unsupported content modes and analytics fail closed. Ordinary CI/builds use no Sanity secret and no live cloud request; tests may exercise invalid/synthetic CMS input through injected transport. Preserve DEV-05A / PR #7 and PR #6 / #5 verification as historical evidence. Do not claim browser, CI, contact delivery or live Sanity integration tests ran unless they actually did.
 
-## Current DEV-05G limited live readiness
+## Current DEV-05H launch-copy boundary
+
+PR #13 was user-merged at `2026-09-20T11:41:09Z`, reviewed head `2af2e2a7e56f832fba1e7314c8c94ac10b20a83a`, actual merge/base `b8624a0fba90a4442dc3cbe45c47112e428b23f8`. Continue `content/cms-launch-drafts`, not merged `chore/cms-live-readiness`. Recheck latest main, PRs and Windows status before further work; the recorded base is historical, not a permanent development starting point.
+
+Read `docs/content/cms-launch-drafts.en.md` for proposed English copy and its exact write allowlist. The original factory-materials checklist remains the sole factual-gap register; Chinese questions are not public copy. This stage changes documentation only, not templates/schema/query/runtime/tests/dependencies. Drafts may remain incomplete: never fill fake factory facts, images, samples, author/contact/legal values, review/public dates or an unconfirmed projectBased MOQ policy.
+
+No current batch-write approval is recorded. The scoped read refresh found the same original quote Draft/revision, not a permanent unconditional creation list. A later explicit approval may cover at most ten still-missing logical Drafts and only the original quote excerpt. Reread selectors/IDs/revision; do not overwrite a newly existing record. Require non-overwriting create and revision-guarded field patches through an authorized supported tool; report refusal or unsupported protection rather than bypassing it. Do not migrate the quote body or replace unknown fields. This batch leaves unready references unset; no weak refs, invented targets or publication to resolve them.
+
+Keep required published validation, default mock, existing one-Draft isolation, contacts disabled, Privacy not in effect, analytics off, noindex and production block. No media, publishing/unpublishing, messages, preview expansion or deployment. Actual Draft saves, if later approved, must be reported separately from Git. Run the appropriate docs/repository checks; do not manually repeat full browser suites for these Markdown edits. Automatic Linux CI and artifact retention remain separate; retain the closed check-order fix and do not claim CI all green. Keep the PR Draft.
+
+## Historical DEV-05G limited live readiness
 
 PR #12 was merged by Jonoka at `2026-09-20T08:10:40Z`; reviewed head `d3b4de2dc6e22fb3fe85dae1a7e61a9e4da237ad`, actual merge/base `15155608981d0c092de928e319e717dd7f7af731`. Work on `chore/cms-live-readiness`, not the merged fixed-page branch. Five-page visual confirmation is already accepted. Prior 288/461/Linux22 results are historical; artifact quota/retention exceptions remain distinct and are not a green CI claim or waiver.
 

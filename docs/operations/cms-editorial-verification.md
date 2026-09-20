@@ -218,3 +218,41 @@ Windows 开始为旧fixed分支/d3b4de2、完整porcelain为空、无开放PR、
 本轮提交范围仅现有Markdown中的授权/盘点/缺口记录，无应用、schema/query/converter、测试、依赖图或lockfile变更。执行对应仓库检查、CI顺序两项回归与git diff检查；完整verify和云端写入不因文档任务自动运行。若普通PR工作流自动触发，其实际Linux状态另记，不主动重复全量运行或探测配额。所有新截图、人工确认和远端留存状态继续分别报告。
 
 下一步先提供并审核工厂/品牌/图片/正文资料，再另行批准10个缺失逻辑记录的Draft创建和现有询价稿指定字段编辑；媒体、扩大草稿预览、发布/撤回/重建、渠道、实际政策/SEO与部署各自授权。当前只读盘点完成不等于内容齐备、正式SEO、法律生效或全站CMS上线。
+
+## DEV-05H · 首发内容待审稿 / 2026-09-20
+
+### 前置及Windows实查
+
+GitHub实读PR #13为MERGED，用户Jonoka于 `2026-09-20T11:41:09Z` 合并；head与已审阅 `2af2e2a7e56f832fba1e7314c8c94ac10b20a83a` 相同，最新main/merge为 `b8624a0fba90a4442dc3cbe45c47112e428b23f8`，开工开放PR为空。[最终Review](https://github.com/Jonoka/formelo-works-website/pull/13#pullrequestreview-5260147483)逐项必要检查和artifact留存/合并例外继续区分；其Linux run `35499796482`的288/461/22等结果仅为PR #13历史，不报成本轮通过。已关闭的CI顺序问题没有重修。
+
+Windows实际项目 `D:\独立站\formelo-works-website` 开工分支 `chore/cms-live-readiness` / HEAD `2af2e2a7e56f832fba1e7314c8c94ac10b20a83a`；`git status --porcelain=v1 --untracked-files=all`为空。目标分支本地/远端均不存在。fetch后本地main从1515560以 `merge --ff-only origin/main` 快进至b8624a0，再新建 `content/cms-launch-drafts`。未reset/clean/force，未复用已合并分支，环境文件和历史证据未编辑。一次简写project的fetch在启动前被runner拒绝；改用返回的注册project ID后成功，不把该拒绝写成执行成功或文件变动。
+
+### 只读变化核对和云端结果
+
+沿用已有 `iajvl7ka/production` 有限只读许可，经Sanity连接器做一次raw限定元数据查询（排除release versions；count和最多40条、固定scope），再精确读取原询价Draft的必要字段/正文以制定最小改稿。没有无关枚举、媒体查询或env读取。当前授权选择器结果与PR #13一致，原询价Draft未变；该结果不是全库结论或永久创建清单。
+
+脱敏结果：目标 `drafts.1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae`，revision `41ad5fd0-211a-4ea2-89e8-433c2906b8a7`，保存时间 `2026-09-17T08:43:58Z`，19个存储正文块、pending、无匹配published；作者、内容/公开/事实日期和封面均未设。当前title/slug/referenceCode匹配原询价路由；excerpt有已知联调前缀，提出excerpt-only修改。未把原始API响应、云端整篇私密正文或凭证写入Git。
+
+**本批没有云端写入授权，未调用创建/编辑/删除/发布/撤回或上传。** 实际新增0、编辑0；原询价只读后保持不变。最多10个缺失逻辑记录仍仅为候选；没有保存后的revision或成功清单可报告，写后复核“不适用：未执行写入”，不是待补的成功证据。字段级未完成/待授权项目见英文稿；本轮无写入尝试，也无写入失败记录。
+
+### 已完成的内容工作和范围
+
+新增 [cms-launch-drafts.en.md](../content/cms-launch-drafts.en.md)：settings已知值、六pageKey、两品类、MOQ全文和原询价excerpt改稿；字段表精确区分可写英文/结构/状态与未设事实/图片/引用/日期。每部分有来源性质说明，Home/Factory专属事实留缺，类别能力不从mock推断，未确认MOQ不写projectBased或inherit。中文可回答问题统一追加原工厂清单H01–H11，不要求工厂英文终稿。
+
+正文采用原有模块及editorialBody录入说明，不新增大型PRD、JSON导入器、内容provider或平行预览。不修改模板、schema、query/converter、运行时、依赖、lockfile、测试、CI或门禁。本阶段没有页面运行/新截图/全站真实Draft呈现；不借旧图或本地mock宣称真实内容已展示。未手动运行完整verify/多套浏览器，自动Linux CI以本轮PR的实际head另报。
+
+参考协议仅用于受控写入计划，工具若不支持所需非覆盖/并发保护或拒绝保存不完整Draft，必须报告并停止，不绕过。
+
+### 提交前Windows检查：实际结果
+
+| 检查 | 本轮结果及范围 |
+|---|---|
+| `python -X utf8 scripts/check_repository.py` | PASSED：文档链接、原始资料/素材哈希、路由和概念/渠道/analytics门禁、常见凭证排除与必要检查先于上传顺序；不是浏览器或云端写入验证 |
+| `python -X utf8 -m unittest discover -s tests -p test_*.py -v` | **未通过**：报告22项中20通过、2失败。`test_public_visibility_blocks_push`和`test_success_uses_private_and_verifies_real_local_push`的子进程解析到 `C:\Windows\System32\bash.exe`，WSL缺少 `/bin/bash`；不能据20个返回通过将整套Windows测试标绿，负例也不能替代实际脚本运行。保留原测试/CI，不扩大修复 |
+| `D:\Git\bin\bash.exe -n scripts/publish-github.sh` | 通过；显式使用已安装Git Bash做语法核对，没有执行发布脚本，也没有重跑22项探测成绩 |
+| 一次性只读内容结构断言 | 通过：11个对象章节、MOQ的7个H2/1个H3/2表、三行分别60且合计180、既定pageKey/source code存在；不是Portable Text载荷或published验证 |
+| `git diff --check` | 首次发现两份追加文档EOF空行，已清理；最终命令结果随PR提交前核验报告，不以命令链最后一个exit 0冒充首次通过 |
+| 应用 / 浏览器 / 真实草稿呈现 | 本轮未手动运行完整verify或浏览器、未生成新页面截图、未扩大预览 |
+| 自动Linux CI / 附件 | 由本轮PR的真实run/head单独报告；不复用PR #13结果，不手动反复重跑探测配额，不改变artifact/账单/保护规则 |
+
+提交范围仅9份Markdown（1新增英文稿、8份对应文档）；未改变应用、schema、配置、测试、依赖、CI、素材、env或既有ignored证据。最终Git head/PR、远端分支和Windows完整porcelain以交付时实查为准，不在提交内伪造自身SHA；云端新增/编辑仍为0。
