@@ -145,3 +145,26 @@ PR #10 阶段验收随后在 head `5000ad3983172611062272717437ecd71f519052` 发
 最终 `npm audit --audit-level=high` exit 0，仍只有 Sanity CLI → `typeid-js` → `uuid <11.1.1` 的 **4 moderate**，没有 high/critical，未执行 breaking `npm audit fix --force`。`python -X utf8 scripts/check_repository.py` 通过；Windows bootstrap unittest 仍为历史一致的 **18/20**，仅两项因系统 `C:\Windows\System32\bash.exe` 指向没有已安装发行版的 WSL；显式 `D:\Git\bin\bash.exe -n scripts/publish-github.sh` 与 `git diff --check` 通过。所有 DEV-05E CMS 数据均为 offline synthetic fixture；测试进程显式忽略真实 dotenv，并拦截外部 image/query 请求。没有真实全站 Sanity read/write、内容或媒体变更、publish/unpublish、schema/Studio/site deploy、Webhook、Cloudflare 或生产发布。
 
 本机测试会生成分离标注的 1440/390 mock/offline 截图，但本节**不声称已完成独立人工像素/视觉批准**。PR CI 的 `collect-site-review.mjs` 会要求 exact PR head、actual PR base、445/445 browser JSON，再分别打包 base / current mock / offline synthetic PNG；该 CI 与截图人工复核必须在推送后的 Draft PR 上另行核对。
+
+## PR #11 · CI 检查顺序补修 / 2026-09-20
+
+本轮只修 CI 检查顺序、遗漏检查与留存体积，没有修改页面、CMS 业务实现、真实内容或运行门禁。DEV-05E 业务实现此前已审阅于 `5f81214e950a0fd8682b6216f252ffe323d92251`；本轮 CI-only 提交为 `2b76c815f25ec8b7e59909d0b3428c93695a00cd`，实际 PR base/main 仍为 `a83a01822a4310597dc2e8106a1a0c04339506e1`。修复把 bootstrap 的文档/资产检查、Bash 语法检查、Python 离线安全测试全部移到 source artifact 上传之前，并新增离线顺序回归，禁止以后把这些必要校验重新排到 artifact 服务之后；没有用 `continue-on-error`、`|| true`、删测或硬编码成功掩盖失败。
+
+精确新 head 的 GitHub Actions run `35486937513` attempt 1（bootstrap job `106014927733`，foundation job `106014927594`）实际在 Linux 执行并得到：`python3 scripts/check_repository.py` **通过**；`bash -n scripts/publish-github.sh` **通过**；`python3 -m unittest discover -s tests -p 'test_*.py' -v` **22/22 通过**（含新增的两项 CI 顺序测试）。随后 tracked source package **成功生成**；只有 `Retain private exact tracked source` 在 CreateArtifact 阶段因 GitHub Actions artifact storage quota 失败。因此这三项不再是 skipped，也不能把 source package 已生成写成远端附件已保存。
+
+同一 exact head 的 foundation 保持原有验收：Node **24.21.0** / npm **11.19.1**、npm ci、类型/设计变量、根单元/schema/CMS/build-isolation **241/241**、11 HTML 静态构建、19 个 browser text artifact 的 CMS boundary、actual-base 与 PR #6 前置基线均通过；第一轮 Chromium **445/445**（约 7.8 分钟），aggregate `npm run verify` 成功并再次 **241/241 + 445/445**（浏览器约 7.7 分钟）。`npm audit --audit-level=high` 步骤成功，仍是既有 Sanity CLI → `typeid-js` → `uuid <11.1.1` 的 **4 moderate**、没有 high/critical，没有执行 breaking `npm audit fix --force`。
+
+两个 collector 也在新 head 实际执行成功：CMS editorial evidence 对应 head `2b76c815...` / tree `e1b645a5aec89e0fb41f7709921bf315107d6461`，22 张截图、6 张要求的整页图、`browserPassed=445`；Home/Category site evidence 对应 head `2b76c815...`、base `a83a018...`，18 张截图并明确区分 actual base / current mock / offline synthetic CMS，`SITE_EVIDENCE=success`。这些 collector 成功与 `review/outcomes.json` 的 success 只证明生成/校验过程成功，**不证明远端 artifact 上传成功**。
+
+本轮将 source artifact retention 缩短为 3 天，两个聚焦截图包缩短为 5 天，并把原来包含全部 review、Playwright 报告、全部 test-results、`web/dist` 和重复文档/素材的大包改为 5 天的 compact diagnostics：只保留 head/base/source/outcomes、必要日志、audit/evidence JSON、browser results 与失败 trace/error-context 等。该优化减少未来留存体积，但不宣称会立即恢复 GitHub 账户配额。run `35486937513` 中三个 foundation retention 步骤仍均被 quota 拒绝；API 在运行后仍显示当前仓库只有 4 个既有未过期 artifacts、总计 **28,666,588 bytes**，且新 head `2b76c815...` **没有任何可下载 artifact**。因此本次没有附件链接或哈希可交付，也不伪造留存成功。
+
+五种状态必须分开理解：
+- **核心检查**：Linux bootstrap 三项、foundation、verify、audit 均通过。
+- **源码打包**：exact-head tracked source package 已生成；远端留存失败。
+- **截图生成**：两个 collector 成功，22 张 editorial + 18 张 DEV-05E site evidence 已在 runner 中生成并校验；远端留存失败。
+- **人工确认**：用户此前已确认 `5f81214...` 对应的 18 张 Home / T-shirts / Hoodies 比较图视觉无实质问题；本轮只改 CI/测试/记录，不改页面/CMS 行为，因此不重新打开视觉验收。
+- **远端留存**：source、两个截图包及 compact diagnostics 均因同一 GitHub artifact quota 失败；本轮没有可下载新附件。
+
+Windows 侧也保持平台限制的准确口径：本轮 `python -X utf8 scripts/check_repository.py`、新增 CI 顺序聚焦测试 **2/2**、显式 `D:\\Git\\bin\\bash.exe -n scripts/publish-github.sh`、YAML 解析和 `git diff --check` 均通过；完整 Python discover 因新增两项顺序测试变为 **20/22**，仍只有历史相同的两项 bootstrap 测试因系统 `C:\\Windows\\System32\\bash.exe` 落到无已安装发行版的 WSL 而失败。旧的 18/20 与现在 20/22 是同一个 Windows/WSL 限制，不替代本轮 Linux **22/22**。
+
+本轮未读取或修改真实全站 Sanity、未读取/修改环境文件、文章或图片、未启用真实联系渠道，也未发布/撤回内容、部署 schema/Studio/site、Webhook、Cloudflare 或生产环境。PR #11 保持 Draft；若分支保护把 artifact retention 失败视为 required check，仍应如实报告阻塞，不绕过。
