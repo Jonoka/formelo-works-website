@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-PR #9 / DEV-05C 已由用户合并至 `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`。DEV-05D 使用 `feat/cms-site-provider` 建立 siteSettings、六个固定 page、两个 category 的 strict published provider 基础；不向 main 直接写入、不强制推送、不自动合并、发布或部署。
-`web/` 默认仍是十页 mock 静态工程；文章局部可显式选择 mock、授权 Draft 预览或 strict published。新的全站 reader 尚未接入 `loadContent`，固定页 templateContent 也未迁移，因此 `CONTENT_MODE=sanity` 继续明确失败。真实 Studio/CMS 没有全站读取授权、publish、媒体上传、schema/Studio/site deploy 或 Webhook。启动和检查命令见根 README。
+PR #11 / DEV-05E 已由用户合并至 `main@53604896f5a554231389455596489eb22d9fabb4`。DEV-05F 使用 `feat/cms-fixed-page-integration` 将另外五个固定正文接到既有 site reader/delivery 和原模板；不向 main 直接写入、不强制推送、不自动 Ready、合并、发布或部署。
+默认仍是十内容 URL + 404 的 mock 静态工程。HOME_CATEGORY 开关只管既有三页，FIXED_PAGE 开关成组管理五页；合法组合见下方。`CONTENT_MODE=sanity` 和 production 继续失败关闭。真实全站读取、内容/媒体写入、发布/撤回、schema/Studio/site deploy 与 Webhook 均未获准。历史阶段说明保留原时点含义。
 
 ## 本地获取与检查
 
@@ -12,7 +12,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/feat/cms-site-provider
+git switch --track origin/feat/cms-fixed-page-integration
 npm ci
 npm exec -- playwright install chromium
 npm run verify
@@ -87,6 +87,16 @@ Draft 预览的 build 隔离继续执行：根 build、workspace build、直接 
 这一阶段**不启用** `CONTENT_MODE=sanity`。Manufacturing / Factory / Contact / Privacy 等现有模板仍依赖本地 presentation/template 数据，尚未建成完整 CMS templateContent 映射；把共同元数据 query 成功不能当成这些页面已迁移。普通 `loadContent('mock')`、十内容 URL + 404、production block、concept/noindex、空联系方式和 analytics off 必须保持。
 
 所有 DEV-05D 自动测试使用 OFFLINE synthetic fixture 与 groq-js 内存 dataset；不得把这些假品牌、联系人、日期、MOQ、样品或许可写入 Sanity。既有单篇 `SANITY_READ_TOKEN` 授权也不能自动推定为 siteSettings/page/category 的真实读取许可；环境 helper 还要求显式 `SANITY_SITE_READ_ENABLED=1`。该开关当前保持未启用，真实全站读取须另行明确授权范围后再做。
+
+## DEV-05F 五页来源与离线验证
+
+合法 `HOME_CATEGORY_CONTENT_MODE` / `FIXED_PAGE_CONTENT_MODE` 组合只有 `mock/mock`（默认）、`published/mock`（旧三页模式）、`published/published`（三页及五页都读取同一 bundle）。`mock/published` 是 `SITE_SOURCE_CONFLICT`，在读取任何 token/网络前拒绝。`ARTICLE_CONTENT_MODE` 继续独立；CMS 品类有 relatedArticles 时必须匹配 strict published 文章，不因新开关建立另一套文章查询。
+
+正常 mock 不请求全站 CMS，也不需要环境文件。只有测试 harness 可为本轮注入 `FORMELO_ENV_FILES=ignore`、假 project/dataset/token、fake SANITY_SITE_READ_ENABLED 和全拦截 transport；它们不改变本机配置。禁止把这些设置抄入 `.env.local`，也不得执行 `verify:cms-draft-live` 冒充五页验证。单次 build 使用受保护快照，新 build ID 和 dev 刷新重新读取；缺字段、坏引用、无许可媒体、危险正文、401/403/timeout/转换失败必须明确报错，无旧结果或 mock 回退。
+
+先确认运行时及本项目端口/进程，再串行执行 `npm ci`、完整 `npm run verify`、`npm audit --audit-level=high`、仓库/Python/Bash检查。不要同时启动第二套 build/verify，也不结束不明进程。五页聚焦用例是 `tests/fixed-delivery.test.ts`、`tests/fixed-delivery-build.test.ts`、`tests/browser/fixed-delivery-offline.spec.ts`；隔离构建写入新建 `.local/site-delivery-offline-*`，review/fixed-delivery 保存专用合成证据，普通 web/dist 仍是 mock。
+
+截图对照绑定实际 base/head，分 before/mock/offline 三组。CI 必要检查继续先于附件上传；上传失败照实报告，不使用 continue-on-error、删除历史证据或修改账单/保护。自动截图或 collector 通过不等于人工目视或文件已交付。Windows 原生 Python 的 WSL 两项历史限制与 Linux 全套独立记录。最小材料与分级授权见同一份 [工厂资料清单](../content/factory-materials-checklist.md)。
 
 ## 后续发布与恢复
 

@@ -43,6 +43,7 @@ jobs:
       DEPLOY_ENV: local
       CONTENT_MODE: mock
       HOME_CATEGORY_CONTENT_MODE: mock
+      FIXED_PAGE_CONTENT_MODE: mock
       ARTICLE_CONTENT_MODE: mock
       DEV_CMS_DRAFT_PREVIEW: '0'
       FORMELO_ENV_FILES: ignore
@@ -77,10 +78,10 @@ jobs:
               'checkoutTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
               'comparisonSha': os.environ['PR_BASE'],
               'moqTableBeforeSha': 'c02116e38b17f61323090b2ba5eaa8cf43c4db31',
-              'scope': 'DEV-05E Home and two Category CMS-to-template integration: fixed GROQ, Query HTTP envelope, strict conversion, shared site snapshot, actual route builds and synthetic browser checks. DEV-05C articles and default ten mock URLs plus 404 are retained. Full-site Sanity and production remain blocked.',
+              'scope': 'DEV-05F five fixed-page bodies through controlled pageKey content, existing GROQ/reader/converter, shared snapshot and original templates; 9 actual-build tests and 16 five-page browser regressions. DEV-05E Home/Category and DEV-05C articles retained; ten content URLs plus 404. Real full-site Sanity and production remain unauthorized.',
               'cmsBoundary': 'This CI run uses synthetic/offline CMS fixtures, fake test tokens and injected transport only. It has no Sanity secret and performs no live Sanity cloud request. The separately authorized one-Draft local review is recorded outside CI and is not reproduced by this workflow.',
-              'browserScope': 'Pinned Chromium on Linux. Current default mock plus isolated DEV-05E published Home/Category inputs and existing DEV-05C article fixtures. Before comparison is this PR actual base, not PR #5. No live Sanity or physical-device claim.',
-              'notExecuted': ['Real Sanity cloud read/write in this CI run', 'Author/editor authentication', 'Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Remaining fixed-page CMS body migration and live full-site CMS validation', 'Production deployment'],
+              'browserScope': 'Pinned Chromium on Linux. Default mock plus isolated synthetic Home/Category/five fixed-page and existing article inputs. Five-page before comparison uses actual PR base; generated screenshots are not human approval, real Sanity or physical-device evidence.',
+              'notExecuted': ['Real Sanity cloud read/write in this CI run', 'Author/editor authentication', 'Physical devices', 'Safari', 'Firefox', 'Edge', 'Real-device/browser UI zoom', 'Real replacement garment photography quality/crops/loading', 'Email or WhatsApp delivery', 'Real full-site CMS validation and content publication/withdrawal', 'Production deployment'],
               'assetLimit': 'The same three registered garment concepts are unchanged. T-shirt/hoodie images are explicitly reused in editorial cards and articles; two dedicated covers remain pending. No factory evidence or production-approved imagery.',
               'assets': [{'id': a['id'], 'status': a['status'], 'path': a['path']} for a in json.loads(Path('assets/manifest.json').read_text())['assets'] if a['id'] in ['HERO-001', 'CAT-TS-001', 'CAT-HD-001', 'JOURNAL-QUOTE-001', 'JOURNAL-MOQ-001', 'FACTORY-001']]
           }, indent=2))
@@ -175,6 +176,13 @@ jobs:
         id: site_evidence
         if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.baseline.outcome == 'success' }}
         run: node scripts/collect-site-review.mjs
+      - name: Collect five fixed-page actual-base mock and offline evidence
+        id: fixed_evidence
+        if: ${{ !cancelled() && steps.verify.outcome == 'success' && steps.baseline.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          node scripts/capture-home-baseline.mjs --fixed-current 2>&1 | tee review/fixed-capture.txt
+          node scripts/collect-fixed-review.mjs 2>&1 | tee review/fixed-evidence.txt
       - name: Record outcomes, including skipped checks and evidence collection
         if: always()
         env:
@@ -191,12 +199,13 @@ jobs:
           MOQ_BASELINE: ${{ steps.moq_baseline.outcome }}
           EVIDENCE: ${{ steps.evidence.outcome }}
           SITE_EVIDENCE: ${{ steps.site_evidence.outcome }}
+          FIXED_EVIDENCE: ${{ steps.fixed_evidence.outcome }}
         run: |
           mkdir -p review
           python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
-          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE', 'EVIDENCE', 'SITE_EVIDENCE']
+          keys = ['RUNTIME', 'INSTALL', 'TYPES', 'UNIT', 'BUILD', 'CHROMIUM', 'BROWSER', 'VERIFY', 'AUDIT', 'BASELINE', 'MOQ_BASELINE', 'EVIDENCE', 'SITE_EVIDENCE', 'FIXED_EVIDENCE']
           Path('review/outcomes.json').write_text(json.dumps({key.lower(): os.environ.get(key) or 'not_executed' for key in keys}, indent=2))
           PYCODE
       - name: Retain the focused private 1440-390 editorial screenshot pack
@@ -217,6 +226,17 @@ jobs:
           name: cms-home-category-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             review/site-integration/
+            review/source.json
+            review/outcomes.json
+          if-no-files-found: error
+          retention-days: 5
+      - name: Retain private fixed-page base mock offline screenshots
+        if: ${{ !cancelled() && steps.fixed_evidence.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cms-fixed-page-screenshots-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            review/fixed-integration/
             review/source.json
             review/outcomes.json
           if-no-files-found: error
@@ -246,6 +266,9 @@ jobs:
             review/moq-before-capture.txt
             review/cms-editorial/evidence.json
             review/site-integration/evidence.json
+            review/fixed-integration/evidence.json
+            review/fixed-capture.txt
+            review/fixed-evidence.txt
             test-results/results.json
             test-results/**/trace.zip
             test-results/**/error-context.md

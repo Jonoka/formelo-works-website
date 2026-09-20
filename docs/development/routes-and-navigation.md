@@ -42,6 +42,12 @@ Manufacturing 保留 #options、#moq、#prepare、#sampling、#production、#faq
 
 商业六页和 Journal 有页首/页脚/移动三组禁用联系控件；Article 只有页脚/移动两组；Legal / 404 零组，不输出营销来源码或营销行。所有有效控件来源码与页面匹配，品牌后缀统一拼接。
 
+## DEV-05F 来源变化，不扩展路由
+
+五页正文通过同一 site-delivery 的 fixedPages 接到原路由；页面结构和来源码不变，Journal 两篇卡片仍统一 article-delivery。HOME_CATEGORY / FIXED_PAGE 合法来源组合为 mock/mock、published/mock、published/published，冲突先于网络失败。上表图片清单为默认 mock 策略；明确 published 时仅 Our Factory 可呈现经原许可转换的可选 heroImage/gallery，无图维持非摄影待补，缺图不补本地 AI 图。Manufacturing/Contact/Privacy 保持无页面图片，Journal封面继续由文章契约管理。
+
+CMS 固定相关内链须强引用并保留原目标：Manufacturing → Factory/Contact；Factory → Manufacturing#prepare/Contact；Contact → Manufacturing#prepare；共用品类卡来自同批 category。六个 Manufacturing 锚点由代码固定，编辑标题不改目的地。Privacy/404 referenceCode=null，没有营销区/移动联系条；所有页仍 noindex、无虚构 canonical。
+
 ## 移动与降级
 
 菜单仍是非模态原生 details；无 JS 可访问全部已实现页面。启用增强时 Escape 关闭并恢复触发点焦点，链接点击不被阻止。菜单展开隐藏底部联系条，安全区和末尾内容避让继续保留。空渠道只能看到禁用按钮和明确说明，本站没有主动发送、自动复制或客户资料收集功能；手动选择文章模板是浏览器原生文本操作。不要把这一概念状态扩写成对所有浏览器/服务环境“从不处理数据”的政策承诺。

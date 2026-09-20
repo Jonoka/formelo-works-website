@@ -37,3 +37,4 @@ review-source.tar.gz
 
 # Exact historical source checked out only inside private CI.
 .review-baseline/
+.review-moq-baseline/

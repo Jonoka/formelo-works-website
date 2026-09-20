@@ -16,7 +16,8 @@
 | DEV-05B | 一篇真实 Draft：Studio 保存 → revisions → 服务器只读 → 本地既有正文呈现 | DEV-05A；用户授权真实项目/单篇 Draft/read token | Studio save 前后 revision、draft/published 隔离、build/dev 隔离、本地 1440/390 真实 CMS 证据、安全负例与最终回归 | 已由用户合并 PR #8；accepted head `5ef5ae3a7ca82c64ec238e7b329c78a0faebde5c`，main merge `83dec3f23f264ac034d1b7775eff6ca2b71a8d27`；真实 Draft 保持 `41ad5f...b8a7`，默认站仍 mock |
 | DEV-05C | 文章统一交付：Home Journal / Journal / Article 共用受控集合与详情入口 | 已合并 PR #8；保留 mock / 单篇授权 Draft / strict published 三类来源 | 三处同一记录派生卡片与详情、显式来源/封面状态、失败无静默回退、默认 11 HTML 不变、离线 published/draft 与浏览器回归 | 已由用户合并 PR #9；main `64e881acd04b4c7ae7269d111dd1d3ea51c22044`；真实 Draft 三位置 1440/390 已由用户目视通过，仍不等于全站 `CONTENT_MODE=sanity` |
 | DEV-05D | 全站 published provider 基础：siteSettings + 六个固定 page + 两个 category | 已合并 PR #9；不依赖真实全站写入或发布授权 | 固定 published/no-store 查询、严格 bundle 转换、MOQ/样品/能力行/证据图/公开图片许可校验、Studio 前置校验、离线 GROQ/网络负例；mock 默认不变 | 已由用户合并 PR #10；accepted `eac1e27191c576cdb960a3effbe2a133d4d9322c`，merge `a83a01822a4310597dc2e8106a1a0c04339506e1`；历史 foundation 限制见旧日志，真实全站读取仍未授权 |
-| DEV-05E | Home / 两品类 CMS 字段到既有模板接线 | 已合并 PR #10；仅离线 transport 授权 | 受控首页字段、严格投影/转换、完整样品/MOQ/证据、共享品牌导航与独立渠道门禁、实际路由构建及 1440/390 私有证据 | 实现与用户视觉复核已完成；CI-only head `2b76c815...` 的 Linux bootstrap 22/22、foundation 241/241、445/445×2、verify/audit/collectors 均通过；远端 artifact retention 仍被 GitHub quota 阻塞，PR #11 保持 Draft 等用户决定，不关闭其余固定页、真实内容或上线验收 |
+| DEV-05E | Home / 两品类 CMS 字段到既有模板接线 | 已合并 PR #10；仅离线 transport 授权 | 受控首页字段、严格投影/转换、完整样品/MOQ/证据、共享品牌导航与独立渠道门禁、实际路由构建及 1440/390 私有证据 | 已由用户合并 PR #11；accepted head `dd269089...`，merge/main `53604896f5a554231389455596489eb22d9fabb4`。最新 Review 已关闭漏跑问题，Linux 22/22、241/241、445/445 与 verify 通过；远端 artifact quota 例外仍单独保留，不宣称 CI 全绿 |
+| DEV-05F | 五个固定页 CMS 字段 → 既有模板 | 已由用户合并 PR #11；仅离线合成授权 | 五页完整受控正文、原 reader/delivery/模板、双修订构建、失败无回退与响应式证据；[映射](cms-editorial-mapping.md) / [验证](../operations/cms-editorial-verification.md) | 实现已接入五页；首轮类型、34 项定向单测和 9 项实际构建检查通过。全量结果、人工截图确认及远端留存按当前 PR 证据独立核对；真实全站联调与发布仍未完成 |
 | DEV-06 | SEO、联系逻辑、可访问性与完整检查 | DEV-04、DEV-05 | 对应 T / UI-V 测试日志；统计关闭 | 待开始 |
 | CONTENT-01 | 正式品牌 / 能力 / 图片 / 联系 / 两文审核 | 工厂资料 | 审核记录、替换台账、真实设备收发 | 待工厂 |
 | DEV-07 | 授权受控预览、正式发布与恢复 | 用户单独授权、CONTENT-01、质量验收 | 平台访问保护验证、部署 ID、回滚演练 | 未授权发布 |
@@ -74,7 +75,13 @@ Draft 预览每次 dev 请求重新读取，不长期缓存旧 revision；单次
 
 DEV-05C 完成后，文章链路的发布 / 撤回 / 重建演练仍需要用户另行明确授权；现有测试稿不得为了制造 published 成功而补假作者、日期、审核或封面许可。DEV-05D 在此之前先补全站 published provider 的**离线工程基础**，但不创建真实全站文档、不读取未授权内容、不接 `loadContent`、不创建 Webhook，也不部署 Studio/schema/site。
 
-## 当前 DEV-05E 交付边界
+## 当前 DEV-05F 交付边界
+
+从实际 PR #11 merge `53604896...` 安全快进 main 后建立 `feat/cms-fixed-page-integration`。五页技术映射不再留作另一轮 provider/schema 准备：完整业务字段进入各自原模板，默认本地副本仅用于明确 mock 模式；界面标签、状态说明、来源码、稳定锚点和布局仍由代码管理。旧 HOME_CATEGORY 开关语义不变，新增一个 FIXED_PAGE 成组开关，冲突组合先于网络失败。
+
+下一主线是取得真实英文内容、工厂事实与图片许可、明确全站读取范围，然后本地核对真实页面；编辑/发布/撤回/重建、联系收发、正式 SEO 和获准部署分别取得授权。技术接线不代替真实内容审核，不扩大当前单篇询价 Draft 权限。PR #11 已确认的三页视觉不重新开审；本轮五页截图生成、人工目视与远端留存分别报告。
+
+## 历史 DEV-05E 交付边界
 
 复用 DEV-05D reader/bundle/image contract，不重复做 provider 基础。显式三页 published 选择与独立文章来源并存；其余五个固定 page 的正文仍本地，但六页两品类 bundle 完整性校验不删除。默认站十内容 URL + 404 不变；production、真实账号、素材许可、事实审核、Privacy、发布/部署均不因接线而放行。PR #8/#9 已完成真实 Draft 目视不重开。
 

@@ -171,6 +171,67 @@ HomePreview / CategoryPreview 从未强转为正式文档。`websitePublication:
 
 本轮工程测试用假配置、内存 GROQ 和注入 Query HTTP transport。合成数据完整包含六页两品类，测试图请求只在本机拦截，PNG 为 TEST 检查图，不挪用三张服装概念图作 CMS 许可证明。隔离进程不读真实 dotenv；HTML/screenshot/脱敏日志位于专用目录。真实 PR #8/#9 Draft 目视已完成，不重新列为缺失。
 
+## DEV-05F · 另外五个固定页的完整模板交付
+
+PR #11 已由用户在 2026-09-20 合并；accepted `dd2690892826384548ab24a4dfb33e09c0290ba6`，实际 main/base `53604896f5a554231389455596489eb22d9fabb4`。上方 A–E 为对应时点历史，不能把“当时未迁移”误读为本轮结果。下表是当前实现的逐页技术映射；没有新 URL、第三篇文章或通用 builder。
+
+```text
+page.pageKey + page.templateContent: pageTemplateContent
+  → existing siteBundleQuery (pageKey-controlled projection)
+  → createSiteReader / convertCmsSiteBundle / convertCmsFixedTemplate
+  → deliverPublishedFixedPages → same site-delivery snapshot → Astro.locals
+  → manufacturing / our-factory / contact / blog/index / privacy
+  → existing Information / Journal / Legal layouts and shared components
+```
+
+### 共用字段和来源
+
+`page.title/intro/seo.seoTitle/seo.seoDescription` 都必填并进入页面 H1、简介和独立 SEO；根文档 identity、slug/pageKey、routeCount、contentUpdatedAt、事实日期规则延续 DEV-05D。`templateContent._type=pageTemplateContent` 且其 `pageKey` 必须与外层完全相符，未知业务字段失败。Studio 的 hidden 仅用于编辑体验，不能替代转换校验；切换 pageKey 后残留其他页字段会被拒绝。新 Studio 注册一个受控对象，不增加主要文档类型。旧 Home `homeTemplateContent` 仍通过 reader 转为同一 Home 契约；新 Home 对象使用 pageKey=home，未自动迁移云端文档或部署模型。
+
+三个信息页的 `eyebrow/contextNote` 必填，前者进入页首眉题，后者进入事实/采购说明；正文为通用采购指南还是已确认工厂承诺必须由真实编辑资料区分，不由技术 published 判定。`sections` 中下列固定键的 eyebrow/title/description 必填，进入原 SectionHeading 与对应说明。行对象继续为有长度上限的 title/description，无任意 HTML/CSS/JS/iframe；站内链接为 label + strong page reference + 受控 fragment，错误引用/未知目标/重复链接失败，不接受任意 URL。
+
+| 页面 / 原模块与渲染位置 | CMS 字段（templateContent 下，另注明根字段） | 必需/可选与校验 |
+|---|---|---|
+| Manufacturing 页首/目录 | eyebrow、contextNote、guideTitle；根 title/intro/seo | 全部必填；目录目的地由代码固定为六锚点，CMS 只编辑文案 |
+| `#options` 定制方式 | sections.options、options | 标题/说明必填，2–6 行；不自动变成工厂承诺 |
+| `#moq` MOQ 说明 | sections.moq、moqFactors；同一 siteSettings.defaultMoq | 2–12 因素行；实际 MOQ 只从统一规则派生，projectBased 无固定数量，品类 override 仍在各自 category 生效 |
+| `#prepare` 资料准备 | sections.prepare、preparation、preparationLead、preparationNote | 3–12 行和两段说明必填；不新增表单，不要求必须具备 Tech Pack/注册品牌 |
+| `#sampling` 打样 | sections.sampling、sampling | 2–6 行必填，不编造费用、交期、免费或轮次 |
+| `#production` 流程 | sections.production、productionSteps | 3–6 行，原 process-grid；不生成订单状态 |
+| `#faq` / 相关入口 | sections.faq、根 faqItems；sections.related、relatedLinks | FAQ 继续根规则至少3条；链接恰好 Factory 与 Contact 各一次；品类卡来自同批 category |
+| Factory 页首 | eyebrow/contextNote；可选根 heroImage | 标题/事实说明必填；无图显示原非摄影待补状态，不使用 AI 车间或图库作证据 |
+| 工厂介绍 | sections.overview、overview、overviewNote | 必填；缺介绍整个读取失败，不省略必需正文 |
+| `#arrangements` 制造安排 | sections.arrangements、arrangements | 2–12 行必填，须说明实际厂内/外协范围，不默认全厂内 |
+| `#quality` 质量说明 | sections.quality、qualityDiscussion | 2–6 行，保留不同卡片布局，不能自动认定为已获质量认证 |
+| 可选图片/资质与相关入口 | gallery、credentials；sections.related、relatedLinks | gallery 缺省或空数组省略，最多4图且逐张原 approvedImage 校验；credentials 缺省/空数组省略、最多6说明行，不产生证书图片或 Logo。链接恰为 Manufacturing#prepare 与 Contact |
+| Contact 页首/营业资料 | eyebrow/contextNote；同一 siteSettings | 身份、联系人、工作时段、时区、地址、email、whatsappDigits 不在 page 复制；未配置明确待补，已配置值仍被网站阶段门禁遮蔽，不生成可执行账号 |
+| Contact `#your-brief` / 相关入口 | sections.prepare、preparation、preparationNote、relatedLinks；sections.related | 3–12 准备行及说明必填；强引用仅 Manufacturing#prepare；品类卡与 shell 同源，无表单/客户上传/发送复制状态 |
+| Journal 栏目页首及说明 | eyebrow、columnNote；根 title/intro/seo | 必填；不包含 article 数组、分页、排序或作者字段 |
+| Journal 两张文章卡片 | 原 loadArticlePage/loadArticleCollection | 标题/摘要/封面/顺序/状态/revision 继续来自既有 article-delivery；不是新的 CMS page 内容副本 |
+| Privacy 页首/受控政策 | eyebrow、body；根 title/intro/seo | 必填；至少3个 H2 和实际段落，复用原 Portable Text → EditorialBlock → EditorialBody，支持原列表/表格/callout；拒绝任意 HTML/脚本/嵌入和 template 询盘模块 |
+| Privacy 法律审核 | legalReviewStatus、legalReviewedAt | pending/reviewed 二选一；pending 不得带日期，reviewed 必须真实有效且不早于内容更新日，技术字段通过不等于工厂/法律责任人真实审核 |
+| Privacy 生效与运营事实 | policyStatus、effectiveAt、legalEntity、privacyContact、providers、retention | 只允许 draft_not_in_effect；其余当前必须空，不生成日期/主体/邮箱/服务商/期限/承诺。正文中的实际事实仍需人工审核，转换器不声称可判定法律正确性 |
+
+### 没有未迁移的选定业务正文
+
+| 固定页 | 技术接线路径 | 在 published 模式下仍使用本地业务正文？ |
+|---|---|---|
+| Manufacturing | 受控页字段 + 同批 MOQ → Information 原模板 | 否 |
+| Our Factory | 受控页字段 + 可选许可图片 → Factory 原分区 | 否 |
+| Contact | 受控页字段 + 同一 siteSettings → Contact 原分区 | 否 |
+| Journal | 栏目字段 → 原列表；文章另由既有 article-delivery | 否；文章不是列表页的待迁移正文 |
+| Privacy | 受控政策及独立状态 → Legal / EditorialBody | 否 |
+
+**有意保留的本地代码**：`shared/fixed-page-copy.ts` 只保存默认 mock 的原文案；`web/src/content/*-preview` 为 mock 原业务记录。published 固定页不从它们取缺省内容。导航动作/面包屑标签、错误及来源说明、联系门禁文案、FAQ 展开行为、字段/图片/资质通用标签、卡片编号/图标、法律未生效提示、锚点/来源码、模板 CSS/视觉变量由代码管理，不是另一套工厂事实。FactoryPhotographyPending 根据 unchanged manifest 展示明确无真实图状态。品类公共卡片和品牌/导航来自同一 bundle，不在五页维护副本。
+
+### 最小来源配置与失败规则
+
+`HOME_CATEGORY_CONTENT_MODE` 仍只负责 Home/两 Category。`FIXED_PAGE_CONTENT_MODE`（默认 mock）只负责上述五页，不加逐页/逐模块开关。合法组合只有 mock/mock、published/mock、published/published；mock/published 在网络前 `SITE_SOURCE_CONFLICT`。旧三页模式中五页正文明确本地；但 published bundle 完整性始终要求六页两品类全部有效。`CONTENT_MODE=sanity` 仍拒绝，`ARTICLE_CONTENT_MODE` 及文章引用兼容规则不变。
+
+来源、技术 published、事实日期记录、图片许可、法律审核、政策生效和网站发布分别记录。FixedPageDelivery 不强转 concept；CMS 状态为 cms_published / recorded_not_verified / productionAllowed:false。同次 build 的受保护快照包含模式，变更模式失败；新 build ID 重新读，dev 每请求新读。缺必需字段、pageKey/type 错配、重复路由、坏引用、未许可图、危险正文/协议、401/403/timeout、非法 envelope 或转换错误：dev 安全503，build失败，不丢条目、不返回上次数据、不回退 mock。
+
+实际离线验证通过真实 GROQ、HTTP envelope（含 ms/可选syncTags）、reader、converter、原路由/模板，双修订修改标题之外的正文；不是把测试 HTML 塞到页面。测试审批字段仅为 synthetic，真实请求为零，图片本机拦截。所有真实文档和发布授权仍待另行明确，当前不能由技术接线自动解除生产门禁。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。
