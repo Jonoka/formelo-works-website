@@ -168,3 +168,25 @@ PR #10 阶段验收随后在 head `5000ad3983172611062272717437ecd71f519052` 发
 Windows 侧也保持平台限制的准确口径：本轮 `python -X utf8 scripts/check_repository.py`、新增 CI 顺序聚焦测试 **2/2**、显式 `D:\\Git\\bin\\bash.exe -n scripts/publish-github.sh`、YAML 解析和 `git diff --check` 均通过；完整 Python discover 因新增两项顺序测试变为 **20/22**，仍只有历史相同的两项 bootstrap 测试因系统 `C:\\Windows\\System32\\bash.exe` 落到无已安装发行版的 WSL 而失败。旧的 18/20 与现在 20/22 是同一个 Windows/WSL 限制，不替代本轮 Linux **22/22**。
 
 本轮未读取或修改真实全站 Sanity、未读取/修改环境文件、文章或图片、未启用真实联系渠道，也未发布/撤回内容、部署 schema/Studio/site、Webhook、Cloudflare 或生产环境。PR #11 保持 Draft；若分支保护把 artifact retention 失败视为 required check，仍应如实报告阻塞，不绕过。
+
+## DEV-05F · 五个固定正文实际模板交付 / 2026-09-20
+
+本节为新阶段；前面 PR #11 的 Draft/CI 记录保持历史原意。用户随后完成合并，gh 实际返回 PR #11 MERGED、mergedAt=`2026-09-20T06:02:42Z`、mergeCommit=`53604896f5a554231389455596489eb22d9fabb4`，head=`dd2690892826384548ab24a4dfb33e09c0290ba6`。最新 Review 的 Linux 文档/资产、Bash、Python22/22、241项单元/CMS和445项Chromium为已验收历史；遗漏检查已关闭，artifact留存配额仍不能写作修复或CI全绿。
+
+开工时 Windows 旧分支 HEAD 为 dd269089，完整 porcelain（含所有未跟踪）为空。安全 fetch/快进 main 到实际合并提交后新建 `feat/cms-fixed-page-integration`；没有复用已合并分支、reset、clean、force push、覆盖环境/历史证据。五页已接入 pageKey受控对象→固定GROQ→原reader/strict converter→同一site snapshot→Information/Journal/Legal原模板。字段/必填/省略规则和无遗留业务正文状态见当前[映射](../development/cms-editorial-mapping.md)；默认本地副本仅用于显式mock，Journal文章仍原article-delivery。
+
+### 提交前 Windows 工程检查（不是最终 head 的 Linux CI）
+
+证据目录 `review/dev-05f-windows-20260920-141839/`。精确 Node24.21.0/npm11.19.1，`FORMELO_ENV_FILES=ignore`，测试假配置+注入transport，全程无真实全站Sanity请求。`npm ci`成功（1160 packages，既有4 moderate保留）；首轮新增代码类型诊断修复后 Astro84文件零诊断、Studio和根tsc通过。五页定向单测34/34、实际双修订及坏内容构建9/9通过；随后完整 `npm test`284/284、默认静态11HTML/内链/片段及19browser-text产物CMS边界通过。
+
+五页聚焦Chromium首轮16项中13通过、1失败、2未执行：失败是测试将Privacy原有表格与新增长文本表格误当成一张，strict locator匹配到两处。修正为验证两张表且每张均可键盘聚焦，并定位新增表的明确caption；没有删除表格、跳过测试或改页面制造通过。随后长文本320/1440与独立法律审核门禁3/3复测通过。两次原日志、失败trace/error-context保留；完整新head回归需在最终提交及PR结果中另行核对，不拼接成完整套件通过。
+
+### 证据与 CI 接线
+
+既有两项 bootstrap 顺序回归保持；必要检查仍在任何artifact上传前执行。新五页浏览器16项加入原445项，总计划461，collector同步严格要求461且无失败/跳过/flaky，不拿历史445代替新回归。五页聚焦collector校验实际head/tree/base、干净源码、当前run时间、完整10张mock/10张base/10张offline PNG及hash，再生成`review/fixed-integration/evidence.json`和30张整页图；缺失/过期/错head不得打包成通过。只增加精简聚焦包和小型诊断，上传失败仍使步骤失败；不删除历史artifact、不改账单/保护/可见性、不全量重跑探测配额。
+
+截图实际生成、自动尺寸/边界检查、人工目视确认、远端留存分别记录；本节不预先宣称最终30张已生成、已人工批准或可下载。新head的完整verify/audit/Windows Python/Bash和Linux CI结果以该PR exact-head追加记录为准，不能用本节开发中间态冒充。无改动的旧Home/Category视觉沿用既有用户确认，不重新要求三页批准。
+
+### 真实边界与下一阶段
+
+无真实环境读取/修改、SANITY_SITE_READ_ENABLED启用、云端文档枚举/写入/媒体/发布/撤回、Schema/Studio/site/Webhook/Cloudflare部署或实际消息。测试事实/许可/法律审核字段只是synthetic，不代表真实经营证据；Privacy仍未生效，联系/复制/production/analytics/SEO门禁未解除。下一步须取得同一份[工厂资料清单](../content/factory-materials-checklist.md)中的最小真实资料与明确只读范围，再分别授权本地页面核对、编辑发布/撤回重建、收发渠道、正式SEO及部署；不再拆一轮只有provider/schema的准备。

@@ -1,12 +1,19 @@
 // Offline only. No factory claim, published seed, real contacts or real media.
 import { fixtureSiteBundle, fixtureApprovedImage, mutateSite } from './cms-site';
 import type { RecordValue } from '../../shared/cms-validation';
+import { fixtureFixedContent } from './cms-fixed';
+import { fixedPageKeys, type FixedPageKey } from '../../shared/cms-fixed';
 
 export function siteDeliveryFixture(revision = 'one', relatedArticles = true): RecordValue {
   const value = fixtureSiteBundle();
   mutateSite(value, ['settings', 0, 'brandName'], `OFFLINE STUDIO ${revision}`);
   const pages = value['pages'] as RecordValue[], home = pages.find(page => page['pageKey'] === 'home')!;
   Object.assign(home, { title: `Clothing made for your next chapter — offline ${revision}.`, intro: `OFFLINE ${revision}: fabric, fit and finishing for an independent collection.`, _rev: `offline-home-${revision}` });
+  for (const key of fixedPageKeys) {
+    const page = pages.find(page => page['pageKey'] === key)!;
+    Object.assign(page, { title: `OFFLINE ${key} title ${revision}`, intro: `OFFLINE ${key} introduction ${revision}. No real factory or legal claim.`, _rev: `offline-${key}-${revision}`, templateContent: fixtureFixedContent(key as FixedPageKey, revision) });
+    if (key === 'manufacturing') (page['faqItems'] as RecordValue[]).forEach((faq, index) => { faq['answer'] = `OFFLINE manufacturing FAQ ${index + 1} ${revision}. Project terms require separate confirmation.`; });
+  }
   const categories = value['categories'] as RecordValue[];
   categories.forEach((category, index) => {
     const slug = index ? 'hoodies' : 't-shirts';

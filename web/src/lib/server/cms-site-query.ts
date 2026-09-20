@@ -16,11 +16,35 @@ const moq = `_type, mode, quantity, unit, basis, sizeMixing, conditions, confirm
 const sample = `_type, _key, sampleCode, name, summary, images[]{${image}}, fabric, weightGsm, fit, techniqueNotes`;
 const capability = `_type, _key, name, description, limitNote`;
 const homeSection = `_type, eyebrow, title, description`;
-const homeTemplate = `_type, eyebrow, titleLineHints, sections{_type,
+const homeTemplate = `eyebrow, titleLineHints, sections{_type,
   capabilities{${homeSection}}, categories{${homeSection}}, factory{${homeSection}},
   process{${homeSection}}, journal{${homeSection}}, faq{${homeSection}}},
   capabilities[]{_type, _key, title, description}, manufacturingSummary{_type, customization, sampling},
   factorySummary, factoryImage{${image}}, processSteps[]{_type, _key, title, description}`;
+
+const informationRow = `_type, _key, title, description`;
+const fixedLink = `_type, _key, label, fragment, target{${ref}}`;
+const annotations = `_type, _key, _type == "editorialExternalLink" => {href}, _type == "editorialInternalLink" => {fragment, target{${ref}}}`;
+const block = `_type, _key, style, listItem, level, children[]{_type, _key, text, marks}, markDefs[]{${annotations}}`;
+const policyBody = `_type, _key,
+  _type == "block" => {style, listItem, level, children[]{_type, _key, text, marks}, markDefs[]{${annotations}}},
+  _type == "editorialTable" => {caption, columns, rows[]{_type, _key, cells}},
+  _type == "editorialCallout" => {title, content[]{${block}}},
+  _type == "editorialTemplate" => {title, text}`;
+// pageKey is part of the object discriminator. A mismatched parent/object is rejected by conversion.
+// Legacy Home objects retain their unchanged field layout and discriminator.
+const pageTemplate = `_type, pageKey,
+  (_type == "homeTemplateContent" || pageKey == "home") => {${homeTemplate}},
+  pageKey == "manufacturing" => {eyebrow, contextNote, guideTitle, preparationLead, preparationNote,
+    sections{_type, options{${homeSection}}, moq{${homeSection}}, prepare{${homeSection}}, sampling{${homeSection}}, production{${homeSection}}, faq{${homeSection}}, related{${homeSection}}},
+    options[]{${informationRow}}, moqFactors[]{${informationRow}}, preparation[]{${informationRow}}, sampling[]{${informationRow}}, productionSteps[]{${informationRow}}, relatedLinks[]{${fixedLink}}},
+  pageKey == "factory" => {eyebrow, contextNote, overview, overviewNote,
+    sections{_type, overview{${homeSection}}, arrangements{${homeSection}}, quality{${homeSection}}, related{${homeSection}}},
+    arrangements[]{${informationRow}}, qualityDiscussion[]{${informationRow}}, gallery[]{${image}}, credentials[]{${informationRow}}, relatedLinks[]{${fixedLink}}},
+  pageKey == "contact" => {eyebrow, contextNote, preparationNote,
+    sections{_type, prepare{${homeSection}}, related{${homeSection}}}, preparation[]{${informationRow}}, relatedLinks[]{${fixedLink}}},
+  pageKey == "blogIndex" => {eyebrow, columnNote},
+  pageKey == "privacy" => {eyebrow, body[]{${policyBody}}, legalReviewStatus, legalReviewedAt, policyStatus, effectiveAt, legalEntity, privacyContact, providers, retention}`;
 
 export const siteBundleQuery = `{
   "settings": *[_type == "siteSettings" && ${publishedFilter}]{
@@ -33,7 +57,7 @@ export const siteBundleQuery = `{
   "pages": *[_type == "page" && pageKey in $pageKeys && ${publishedFilter}]{
     _type, _id, _rev, _originalId, pageKey,
     "pageKeyCount": count(*[_type == "page" && pageKey == ^.pageKey && ${publishedFilter}]),
-    title, intro, heroImage{${image}}, faqItems[]{${faq}}, templateContent{${homeTemplate}}, seo{_type, seoTitle, seoDescription}, contentUpdatedAt, factConfirmedAt
+    title, intro, heroImage{${image}}, faqItems[]{${faq}}, templateContent{${pageTemplate}}, seo{_type, seoTitle, seoDescription}, contentUpdatedAt, factConfirmedAt
   },
   "categories": *[_type == "category" && slug.current in $categorySlugs && ${publishedFilter}]{
     _type, _id, _rev, _originalId, name, slug{_type, current},
