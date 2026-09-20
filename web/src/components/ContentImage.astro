@@ -1,0 +1,18 @@
+---
+import type { PageImage } from '../../../shared/site-delivery';
+import PreviewImage from './PreviewImage.astro';
+import { cmsImagePresentation } from '../lib/cms-image-presentation';
+interface Props { image: PageImage; priority?: boolean; shape?: 'square' | 'landscape'; label: string; sizes: string }
+const { image, priority = false, shape = 'landscape', label, sizes } = Astro.props;
+const presented = image.source === 'sanity' ? cmsImagePresentation(image) : null;
+---
+{image.source === 'local' ? <PreviewImage image={image} priority={priority} shape={shape} label={label} sizes={sizes} /> : presented &&
+  <figure class:list={['preview-image', 'published-image', `media-${shape}`]} data-cms-asset-id={image.assetId} data-public-use-approved="true">
+    <div class="media-frame">
+      <div class="media-fallback" aria-hidden="true"><span class="eyebrow">Image unavailable</span><span class="serif">{label}</span></div>
+      <picture><img src={presented.src} srcset={presented.srcset} sizes={sizes} alt={image.alt} width={presented.width} height={presented.height}
+        loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : 'auto'} decoding="async" style={{ objectPosition: presented.position }} data-preview-image /></picture>
+    </div>
+    <figcaption>{image.caption ?? 'Public-use approval is recorded in the content source; website release is not verified.'}<span data-image-error hidden> Image could not be loaded.</span></figcaption>
+  </figure>
+}

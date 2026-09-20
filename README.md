@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前为 **十个内容 URL、八类模板与工程 404 的本地概念结构**。PR #9 / DEV-05C 已由用户合并至 `main@64e881acd04b4c7ae7269d111dd1d3ea51c22044`。本轮 `feat/cms-site-provider` 推进 DEV-05D：为 siteSettings、六个固定 page 与两个 category 建立严格 published-only provider 基础；默认全站仍是 mock，尚未把固定页模板内容迁入 CMS，也不读取真实全站数据。production、analytics、真实联系与部署门禁保留，不自动合并或部署。
+> 当前仍为 **十个内容 URL + 工程 404 的非生产网站**。PR #10 已由用户合并（accepted `eac1e271...`，merge/main `a83a018...`）。当前 `feat/cms-home-category-integration` 推进 DEV-05E：只把首页与两个品类的 CMS 内容接入既有 Astro 模板，并统一全站公共品牌、品类导航和禁用联系状态。验证只使用隔离合成数据，不扩大真实 Sanity 授权，不代表整站 CMS 或上线验收。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 
@@ -26,7 +26,7 @@ FORMELO WORKS 为临时品牌，T-shirts / Hoodies 为演示品类。工厂负�
 **查看图为 768×1152，来自用户选定的 1024×1536 PNG，经过缩小及有损压缩。** PNG 原图和两份 Word 导出仍在原会话的 `formelo-works-website-bootstrap.zip`，未重复上传到 Git；原始及查看版哈希见 [导入清单](docs/reference/import-manifest.json)。Markdown 是后续维护依据。
 
 `web/` 为可运行的 Astro + TypeScript 静态工程；`studio/` 保留四类主要文档及受控正文对象。DEV-05C 只统一两篇文章的交付：默认两篇本地 editorial draft；授权 Draft 模式下仅询价文章来自现有 `iajvl7ka/production` 草稿、MOQ 仍明确来自本地；strict published 模式复用原 published-only 查询和严格转换，缺文档/坏引用/缺作者日期审核封面等直接失败。真实 Draft 当前仍无 CMS 封面，因此三处统一显示无图状态，不冒用本地概念图。字段、状态、刷新与失败策略见 [CMS 映射](docs/development/cms-editorial-mapping.md)，真实 revision 与各阶段检查见 [CMS 验证](docs/operations/cms-editorial-verification.md)。
-DEV-05D 新增的全站 provider 仍是**离线工程基础**：固定查询只接受 1 个 siteSettings、6 个规划 pageKey、2 个规划 category slug，严格检查 published 身份、日期、MOQ、样品、能力行、证据图、引用、联系方式与公开图片许可；共享图片转换同时供文章封面使用。该 reader 尚未接入 `loadContent`，普通 build/preview 不会调用它；环境读取还要求单独的 `SANITY_SITE_READ_ENABLED=1`，当前单篇 Draft 授权不会自动扩大为读取真实全站内容的授权。
+DEV-05D 新增的全站 provider 仍是**离线工程基础**：固定查询只接受 1 个 siteSettings、6 个规划 pageKey、2 个规划 category slug，严格检查 published 身份、日期、MOQ、样品、能力行、证据图、引用、联系方式与公开图片许可；共享图片转换同时供文章封面使用。DEV-05E 通过服务器交付层和 middleware 复用该 reader；默认 mock build/preview 不调用它。显式三页 published 读取仍要求单独的 `SANITY_SITE_READ_ENABLED=1`，当前单篇 Draft 授权不会自动扩大为读取真实全站内容的授权。
 
 在原六页基础上增加 `/blog/`、`/blog/what-to-send-for-a-clothing-quote/`、`/blog/moq-per-style-per-color/`、`/privacy/`；输出十内容 URL 加 404，共 11 个 HTML。三张服装概念图文件保持不变；两文暂复用已登记品类图，独立封面仍待完成。Privacy 为未生效草稿，没有营销联系区、移动联系条或假联系人。本轮见 [Journal / Privacy 验证](docs/operations/journal-privacy-verification.md)、[设计衔接](docs/design/journal-article-legal-handoff.md)、[路由说明](docs/development/routes-and-navigation.md) 与 [工厂资料清单](docs/content/factory-materials-checklist.md)。[PR #5 核心内页记录](docs/operations/core-information-verification.md)、[PR #4 记录](docs/operations/pr-4-category-review.md) 和更早日志保留为历史，不改成当前 head 的结果。
 
@@ -37,18 +37,18 @@ DEV-05D 新增的全站 provider 仍是**离线工程基础**：固定查询只�
 ```bash
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
-# 在新克隆中审阅本轮 DEV-05D 分支；先确认远端分支存在：
+# 在新克隆中审阅本轮 DEV-05E 分支；先确认远端分支存在：
 git fetch origin
-git switch --track origin/feat/cms-site-provider
+git switch --track origin/feat/cms-home-category-integration
 npm ci
 npm run dev
 # 打开终端打印的本机地址，默认 http://127.0.0.1:4321
 # 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
-main 已包含 PR #9 的 DEV-05C 文章统一交付；本轮 PR 合并前在 `feat/cms-site-provider` 审阅。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+main 已包含 PR #10 的 DEV-05D 严格 provider 及 Query envelope 修复；本轮 PR 合并前在 `feat/cms-home-category-integration` 审阅。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
 
-使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；本轮没有升级运行时或包版本图，只将已锁定的 groq-js 1.30.3 显式声明为测试依赖，lockfile 由 npm 正常更新。
+使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；groq-js 1.30.3 在此前阶段已显式声明。DEV-05E 没有升级运行时、依赖或修改 lockfile。
 
 ## 检查与静态预览
 
@@ -63,9 +63,9 @@ npm audit --audit-level=high
 npm run preview
 ```
 
-`verify` 包含 Astro / Studio / 测试代码类型检查、单元与离线 schema 编译、实际 GROQ 内存查询/严格转换、隔离原组件渲染、Draft-build 隔离、实际 production 构建阻断、HTML/内链/服务器信息泄漏检查，以及开发 / 静态服务器的 Chromium 回归。Draft-build 隔离会用假 token + 本地 fetch canary 实际调用根 build、workspace build、直接 `astro build` 及 `astro build --mode development`，要求在任何 Draft fetch / HTML 输出前明确拒绝；该测试不接触 Sanity 云端。普通站点输出仅在 `web/dist/`；测试专用 HTML 证据在隔离目录，不是普通页面，Studio 不自动参与构建。
+`verify` 包含 Astro / Studio / 測試代码类型检查、单元与离线 schema 编译、实际 GROQ 内存查询/严格转换、隔离原组件渲染、Draft-build 隔离、实际 production 构建阻断、HTML/内链/服务器信息泄漏检查，以及开发 / 静态服务器的 Chromium 回归。Draft-build 隔离会用假 token + 本地 fetch canary 实际调用根 build、workspace build、直接 `astro build` 及 `astro build --mode development`，要求在任何 Draft fetch / HTML 输出前明确拒绝；该测试不接触 Sanity 云端。普通站点输出仅在 `web/dist/`；测试专用 HTML 证据在隔离目录，不是普通页面，Studio 不自动参与构建。
 
-`loadContent` 继续以 mock 负责 Home / Category / 固定页和 legal preview；文章三处展示由独立 `loadArticleCollection` / `loadArticlePage` 统一交付。DEV-05D 的 `cms-site-query` 是未接线的 published-only 基础，普通页面和 build 不调用它；formal `CONTENT_MODE=sanity` 仍未实现。受控正文仅支持当前所需节点；>=3 个 H2 自动生成去重目录；允许有效站内链接及 `config/editorial-sources.json` 精确审核的 HTTPS 文本来源链接，不放开第三方资源。`config/page-context.ts` 集中九个营销来源码，Article 仅页脚/移动联系组，Privacy / 404 为 null 且无营销区。SEO 品牌尾缀统一生成；十页逐页图片策略固定。Journal 导航为 `/blog/`、Privacy 页脚有效；原 `/#journal` 与 Manufacturing 六锚点保留。
+`loadContent` 保留本地内容契约；新增服务器 `site-delivery` / middleware 将所选来源传给既有 Home / Category，并为十页布局提供同一品牌、品类导航和网站阶段联系门禁。默认 `HOME_CATEGORY_CONTENT_MODE=mock` 不调用 site reader；显式 `published` 只切换这三个正文，其他五个固定页正文仍是本地概念。文章继续用 PR #9 的 `loadArticleCollection` / `loadArticlePage`，不重复查询；全站 `CONTENT_MODE=sanity` 仍拒绝。受控正文仅支持当前所需节点；>=3 个 H2 自动生成去重目录；允许有效站内链接及 `config/editorial-sources.json` 精确审核的 HTTPS 文本来源链接，不放开第三方资源。`config/page-context.ts` 集中九个营销来源码，Article 仅页脚/移动联系组，Privacy / 404 为 null 且无营销区。SEO 品牌尾缀统一生成；十页逐页图片策略固定。Journal 导航为 `/blog/`、Privacy 页脚有效；原 `/#journal` 与 Manufacturing 六锚点保留。
 
 Windows 可使用现有 `.local/runtime-review-20260913/node-v24.21.0-win-x64` 便携运行时，并把该目录置于当前命令 PATH 前部；它不改变全局 Node。生成的 tokens.css 固定 LF，避免 Windows 换行转换造成字节一致性检查误报。真实浏览器 UI 缩放、真机和真实收发仍需另行授权验证。
 
@@ -90,6 +90,16 @@ bash -n scripts/publish-github.sh
 Sanity 必须由账号持有人提供真实授权的环境配置后才可启动，见 [Studio 说明](studio/README.md)。不要把 token 写入任何 `SANITY_STUDIO_` 前缀变量。完整架构见 [技术边界](docs/development/architecture.md)。
 
 `scripts/publish-github.sh` 是旧启动包的新建仓库工具；**本仓库已经存在，不要再运行它建仓**。
+
+## DEV-05E 三页接线与隔离检查
+
+`HOME_CATEGORY_CONTENT_MODE` 与 `ARTICLE_CONTENT_MODE` 分别声明页面/文章来源。CMS 品类 `relatedArticles` 非空时必须能在 strict published 文章集合中解析；与本地/草稿来源不兼容就明确失败，不能补假卡片。首页卡片名称、摘要（已有 `intro`）、主图和路径来自同一 Category，按 `featuredCategories` 顺序排列。CMS 样品保留全部图片、编号与有值规格；MOQ 使用转换后的 `effectiveMoq`，不把 project-based 条件变成固定起订量。
+
+**当前不要在真实环境文件设置三页 published 或 `SANITY_SITE_READ_ENABLED`。** 本轮只由 tests 中的隔离 harness 注入假配置与真实形态 `{ms, syncTags?, result}`，在内存执行正式 GROQ，经真实 reader/converter/路由/模板构建。`FORMELO_ENV_FILES=ignore` 同时禁用项目 dotenv 和 Vite envDir；合成图像是本机拦截的 TEST 检查图，非概念服装图、非真实授权照片。专用输出在 `.local/site-delivery-offline-*` / `review/site-delivery`，普通 `web/dist` 不受污染，普通 scanner 会拒绝合成输出。
+
+一次实际 build 共享一个站点快照；新 build ID 重新读取，dev 每次请求重新读取。公开配置中的邮箱/号码及启用位保留原值，但独立 `contactReleasePolicy` 禁止本阶段生成联系链接或复制/发送反馈；Contact 只说明配置受网站阶段门禁限制，不输出测试账号。
+
+完整 `npm run verify` 包含新增 unit、实际双修订构建、失败路径和三页响应式浏览器检查。当前运行结果与截图必须读取 [本轮验证记录](docs/operations/cms-editorial-verification.md) 和 exact-head CI；测试代码存在不等于执行通过。聚焦私有截图包区分 actual PR base / current mock / offline CMS，不能把离线画面写成真实 Sanity 全站联调。
 
 ## 协作与发布
 

@@ -18,7 +18,13 @@ export const page = defineType({
       const key = (context.parent as { pageKey?: string } | undefined)?.pageKey;
       return !['home', 'manufacturing', 'factory', 'contact'].includes(key ?? '') || value ? true : 'Business pages require a fact-confirmation date.';
     }) }),
-    // Template-specific content groups remain deferred to a later DEV-05 integration increment.
+    defineField({ name: 'templateContent', type: 'homeTemplateContent',
+      hidden: ({ document }) => document?.['pageKey'] !== 'home',
+      validation: rule => rule.custom((value, context) => {
+        const isHome = context.document?.['pageKey'] === 'home';
+        return isHome ? (value ? true : 'Home requires complete template content.') : (value ? 'Only Home supports this content group in DEV-05E.' : true);
+      }),
+    }),
   ],
   preview: { select: { title: 'title', subtitle: 'pageKey' } },
 });

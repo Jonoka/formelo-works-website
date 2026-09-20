@@ -12,6 +12,9 @@ export interface RuntimeConfig {
 
 /** Local files are optional; existing shell/CI variables always win. */
 export function loadLocalEnvironment(): void {
+  // Offline verification must never inspect the user's real environment files.
+  if (process.env['FORMELO_ENV_FILES'] === 'ignore') return;
+  if (process.env['FORMELO_ENV_FILES'] && process.env['FORMELO_ENV_FILES'] !== 'load') throw new Error('ENV_FILE_POLICY_INVALID');
   for (const relative of ['../.env.local', '../.env']) {
     const path = fileURLToPath(new URL(relative, import.meta.url));
     if (existsSync(path)) loadEnvFile(path);
@@ -28,7 +31,7 @@ export function readRuntime(env: Environment = process.env): RuntimeConfig {
     throw new Error('DEPLOY_ENV must be local, preview or production.');
   }
   if ((env['CONTENT_MODE'] ?? 'mock') !== 'mock') {
-    throw new Error('CONTENT_MODE: Sanity reading is not implemented. No fallback to mock is allowed.');
+    throw new Error('CONTENT_MODE: Full-site Sanity reading is not implemented. No fallback to mock is allowed.');
   }
   if ((env['CONCEPT_MODE'] ?? 'true') !== 'true') {
     throw new Error('CONCEPT_MODE must remain true until the production release gate is implemented.');

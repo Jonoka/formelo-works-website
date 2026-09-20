@@ -46,3 +46,9 @@ Privacy 只记录本地概念现状，状态为 Draft privacy notice — not in 
 | 品类/制造 MOQ、联系方式与 Privacy 事实 | 继续沿用上表原有收集项 | 全站内容、渠道、隐私与生产发布；本轮没有改值或解除阻断 |
 
 当前十页默认仍使用原 mock 和明确登记的概念图复用。DEV-05B 只对一篇真实询价 Draft 做本地 Studio 保存、服务器只读与本地预览；该 Draft 仍为 `factReviewStatus=pending`，没有作者、公开日期、事实确认、封面或素材许可，不能转成正式内容。已授权的 Draft 编辑不扩大为其他真实内容写入；媒体上传、publish/unpublish、远端 schema/Studio/site deploy、全站 provider 及工厂消息收发仍必须单独授权。完整字段和失败策略见 [CMS 映射](../development/cms-editorial-mapping.md)。
+
+## DEV-05E 材料状态（不是云端补料）
+
+Home 与两品类的模板接线只使用隔离合成输入。新增首页区块标题/简介、能力、制造摘要、工厂摘要和流程字段需要对应真实英文终稿；六组真实样品、多图/规格、品类能力/限制、MOQ及证据图仍按上表由工厂提供审核与授权。测试中的联系方式/日期/许可标记不是已获批准的材料，不创建云端文档补齐 bundle。
+
+后续真实全站联调必须另行明确 siteSettings、六个固定 page、两个 category 及必要引用/资产元数据的读取范围；现有单篇 Draft 权限不覆盖它。完成剩余固定页内容迁移后，才进入获授权的发布/重建和真实联系方式验收。网站阶段联系门禁与 CMS 账号配置分别保留。

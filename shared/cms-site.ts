@@ -2,7 +2,8 @@ import { pageContexts } from '../config/page-context';
 import { pageKeys, type Faq, type MoqPolicy, type Seo } from './content';
 import { convertCmsApprovedImage, type CmsApprovedImage } from './cms-image';
 import { resolveCmsReference, type CmsReadContext } from './cms-article';
-import { array, date, fail, id, record, string, type RecordValue } from './cms-validation';
+import { array, date, fail, id, record, type RecordValue } from './cms-validation';
+import { convertCmsHomeContent, sitePlainText as string, type CmsHomeTemplateContent } from './cms-home';
 
 export const cmsPagePaths = {
   home: '/', manufacturing: '/manufacturing/', factory: '/our-factory/',
@@ -30,6 +31,7 @@ export interface CmsPageData {
   cmsPerspective: 'published'; websitePublication: 'not_verified'; productionAllowed: false;
   pageKey: CmsPageKey; path: string; title: string; intro: string; seo: Seo;
   faqItems: Faq[]; heroImage: CmsApprovedImage | null; contentUpdatedAt: string; factConfirmedAt: string | null;
+  templateContent: CmsHomeTemplateContent | null;
 }
 export interface CmsCapabilityRow { name: string; description: string; limitNote: string | null }
 export interface CmsSampleData {
@@ -39,7 +41,7 @@ export interface CmsSampleData {
 export interface CmsCategoryData {
   kind: 'cms_category'; source: 'sanity'; documentId: string; revision: string;
   cmsPerspective: 'published'; websitePublication: 'not_verified'; productionAllowed: false;
-  slug: CmsCategorySlug; path: string; name: string; categoryCode: string; referenceCode: string;
+  slug: CmsCategorySlug; path: string; name: string; categoryCode: string; referenceCode: (typeof cmsCategoryScopes)[CmsCategorySlug]['referenceCode'];
   title: string; intro: string; heroImage: CmsApprovedImage; samples: CmsSampleData[];
   capabilityRows: CmsCapabilityRow[]; evidenceImages: CmsApprovedImage[];
   moqMode: 'inherit' | 'override'; effectiveMoq: MoqPolicy;
@@ -118,7 +120,7 @@ export function convertCmsSiteBundle(value: unknown, context: CmsReadContext): C
   const pages = pagesInput.map((value, index): CmsPageData => {
     const field = `site.pages[${index}]`, doc = record(value, field, [
       '_type', '_id', '_rev', '_originalId', 'pageKey', 'pageKeyCount', 'title', 'intro', 'heroImage',
-      'faqItems', 'seo', 'contentUpdatedAt', 'factConfirmedAt',
+      'faqItems', 'seo', 'contentUpdatedAt', 'factConfirmedAt', 'templateContent',
     ]);
     if (doc['_type'] !== 'page') fail(field, 'CMS_DOCUMENT_TYPE');
     const key = pageKey(doc['pageKey'], `${field}.pageKey`);
@@ -134,11 +136,13 @@ export function convertCmsSiteBundle(value: unknown, context: CmsReadContext): C
     const faqItems = faq(doc['faqItems'], `${field}.faqItems`, key === 'home' || key === 'manufacturing' ? 3 : 0);
     const heroImage = doc['heroImage'] == null ? null : convertCmsApprovedImage(doc['heroImage'], `${field}.heroImage`, context);
     if (key === 'home' && !heroImage) fail(`${field}.heroImage`, 'CMS_INCOMPLETE_PAGE');
+    if (key !== 'home' && doc['templateContent'] != null) fail(`${field}.templateContent`, 'CMS_TEMPLATE_SCOPE');
+    const templateContent = key === 'home' ? convertCmsHomeContent(doc['templateContent'], `${field}.templateContent`, context) : null;
     return {
       kind: 'cms_page', source: 'sanity', documentId: publishedIdentity(doc, field), revision: id(doc['_rev'], `${field}._rev`),
       cmsPerspective: 'published', websitePublication: 'not_verified', productionAllowed: false,
       pageKey: key, path: cmsPagePaths[key], title: string(doc['title'], `${field}.title`), intro: string(doc['intro'], `${field}.intro`),
-      seo: pageSeo, faqItems, heroImage, contentUpdatedAt, factConfirmedAt,
+      seo: pageSeo, faqItems, heroImage, contentUpdatedAt, factConfirmedAt, templateContent,
     };
   });
   for (const key of pageKeys) if (!seenPages.has(key)) fail('site.pages', 'CMS_INCOMPLETE_COLLECTION');

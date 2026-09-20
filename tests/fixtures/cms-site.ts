@@ -4,6 +4,7 @@ import { cmsCategoryScopes, type CmsCategorySlug } from '../../shared/cms-site';
 import type { CmsReadContext } from '../../shared/cms-article';
 import { record, type RecordValue } from '../../shared/cms-validation';
 import { fixtureReference } from './cms-articles';
+import { homeSectionKeys } from '../../shared/cms-home';
 
 export const fixtureSiteContext: CmsReadContext = { projectId: 'offline1', dataset: 'offline-fixture', perspective: 'published', now: Date.parse('2026-09-18T12:00:00Z') };
 const confirmation = '2026-09-17', update = '2026-09-17T00:00:00Z';
@@ -26,9 +27,19 @@ export function fixtureSiteSettings(): RecordValue {
     channelStatus: { _type: 'object', emailEnabled: true, whatsappEnabled: true }, defaultMoq: fixtureMoq(), logo: fixtureApprovedImage('b'), defaultOgImage: fixtureApprovedImage('c'),
     featuredCategories: [fixtureReference('/clothing/t-shirts/'), fixtureReference('/clothing/hoodies/')], factConfirmedAt: confirmation };
 }
+export function fixtureHomeContent(): RecordValue {
+  return { _type: 'homeTemplateContent', eyebrow: 'Offline manufacturing study', titleLineHints: ['An obsolete title hint'],
+    sections: Object.fromEntries(homeSectionKeys.map(key => [key, { _type: 'object', eyebrow: `Offline ${key}`, title: `${key[0]!.toUpperCase()}${key.slice(1)}`, description: `OFFLINE ${key} section description` }])),
+    capabilities: ['Development', 'Sampling', 'Production', 'Quality'].map((title, i) => ({ _key: `cap-${i}`, title, description: `OFFLINE capability ${i + 1} business description` })),
+    manufacturingSummary: { customization: 'OFFLINE customization overview', sampling: 'OFFLINE sampling overview' },
+    factorySummary: 'OFFLINE factory summary. Synthetic content for template verification, not a claim about a real factory.', factoryImage: null,
+    processSteps: ['Brief', 'Sample', 'Production', 'Dispatch'].map((title, i) => ({ _key: `step-${i}`, title, description: `OFFLINE process ${i + 1} business description` })),
+  };
+}
 export function fixturePages(): RecordValue[] {
   return pageKeys.map((key, index) => ({ _type: 'page', _id: `offline.page.${key}`, _rev: `offline-page-revision-${index}`, _originalId: null, pageKey: key, pageKeyCount: 1,
     title: `OFFLINE ${key} title`, intro: `OFFLINE ${key} intro`, heroImage: key === 'home' ? fixtureApprovedImage('d') : null,
+    templateContent: key === 'home' ? fixtureHomeContent() : null,
     faqItems: key === 'home' || key === 'manufacturing' ? faqs(key) : [], seo: { _type: 'seo', seoTitle: `OFFLINE ${key} SEO`, seoDescription: `OFFLINE ${key} SEO description` },
     contentUpdatedAt: update, factConfirmedAt: key === 'blogIndex' || key === 'privacy' ? null : confirmation }));
 }
@@ -51,7 +62,7 @@ export function fixtureCategories(): RecordValue[] {
 export function fixtureSiteBundle(): RecordValue { return { settings: [fixtureSiteSettings()], pages: fixturePages(), categories: fixtureCategories() }; }
 
 /** Convert projected fixtures into a raw in-memory GROQ dataset. Computed counts/document projections are removed. */
-export function fixtureSiteDataset(): RecordValue[] {
+export function fixtureSiteDataset(projected: RecordValue = fixtureSiteBundle()): RecordValue[] {
   const targets = new Map<string, RecordValue>();
   function strip(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(strip);
@@ -62,7 +73,7 @@ export function fixtureSiteDataset(): RecordValue[] {
     }
     return Object.fromEntries(Object.entries(obj).filter(([key, item]) => !['document', 'singletonCount', 'pageKeyCount', 'slugCount', 'routeCount'].includes(key) && item !== undefined).map(([key, item]) => [key, strip(item)]));
   }
-  const projected = fixtureSiteBundle(), roots = [...(projected['settings'] as RecordValue[]), ...(projected['pages'] as RecordValue[]), ...(projected['categories'] as RecordValue[])].map(doc => strip(doc) as RecordValue);
+  const roots = [...(projected['settings'] as RecordValue[]), ...(projected['pages'] as RecordValue[]), ...(projected['categories'] as RecordValue[])].map(doc => strip(doc) as RecordValue);
   for (const doc of roots) targets.set(String(doc['_id']), doc);
   return [...targets.values()];
 }

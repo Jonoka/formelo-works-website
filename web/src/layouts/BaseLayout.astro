@@ -1,12 +1,16 @@
 ---
 import '../styles/global.css';
 import '../styles/contact.css';
+import '../styles/site-content.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import type { ReferenceCode } from '../../../config/page-context';
 import { titleWithBrand } from '../lib/seo';
 interface Props { title: string; description: string; brandName: string; showMobileContact?: boolean; referenceCode: ReferenceCode | null }
-const { title, description, brandName, showMobileContact = false, referenceCode } = Astro.props;
+const { title, description, showMobileContact = false, referenceCode } = Astro.props;
+const site = Astro.locals.siteDelivery;
+const { brandName, source, offlineTest } = site.shell;
+const localBody = source === 'sanity' && !['/', '/clothing/t-shirts/', '/clothing/hoodies/'].includes(Astro.url.pathname) && !Astro.url.pathname.startsWith('/blog/');
 if (showMobileContact && referenceCode === null) throw new Error('Content pages need an explicit contact reference.');
 ---
 <!doctype html>
@@ -20,10 +24,13 @@ if (showMobileContact && referenceCode === null) throw new Error('Content pages 
   </head>
   <body class:list={{ 'has-mobile-contact': showMobileContact }}>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="preview-notice">Concept preview · Provisional brand &amp; unconfirmed capabilities.</div>
-    <Header brandName={brandName} />
-    <main id="main" tabindex="-1"><slot /></main>
-    <Footer brandName={brandName} showMobileContact={showMobileContact} referenceCode={referenceCode} />
+    <div class="preview-notice" data-site-source={source}>
+      {offlineTest && <strong>OFFLINE SYNTHETIC RESPONSE — NOT REAL SANITY CONTENT. </strong>}
+      {source === 'local' ? 'Concept preview · Provisional brand & unconfirmed capabilities.' : 'Home and categories: published CMS records. Other fixed-page text: local. Website release is not verified.'}
+    </div>
+    <Header brandName={brandName} categories={site.cards} source={source} />
+    <main id="main" tabindex="-1">{localBody && <p class="shell local-body-notice" data-body-source="local">This page body remains a local concept. Shared brand, navigation and inactive contact state use the selected site settings.</p>}<slot /></main>
+    <Footer brandName={brandName} source={source} showMobileContact={showMobileContact} referenceCode={referenceCode} />
     <script>import '../scripts/navigation';</script>
   </body>
 </html>

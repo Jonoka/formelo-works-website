@@ -54,7 +54,7 @@ test('all real Astro build entries reject draft preview before any draft fetch o
   assert.ok(existsSync(npmCli), 'The current Node runtime must provide npm-cli.js to exercise the real root/workspace build entries.');
   writeFileSync(preload, `const fs=require('node:fs'); globalThis.fetch=async()=>{fs.appendFileSync(process.env.DRAFT_FETCH_COUNT,'1\\n'); throw new Error('OFFLINE_DRAFT_NETWORK_CANARY');};\n`);
   const canary = `OFFLINE_DRAFT_${randomUUID()}`;
-  const baseEnv = { ...process.env, DEV_CMS_DRAFT_PREVIEW: '1', DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off',
+  const baseEnv = { ...process.env, FORMELO_ENV_FILES: 'ignore', HOME_CATEGORY_CONTENT_MODE: 'mock', DEV_CMS_DRAFT_PREVIEW: '1', DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off',
     SANITY_PROJECT_ID: dev05bDraftScope.projectId, SANITY_DATASET: dev05bDraftScope.dataset, SANITY_READ_TOKEN: canary,
     SANITY_ARTICLE_READ_IDS: dev05bDraftScope.documentId, SANITY_API_VERSION: '2025-02-19', DRAFT_FETCH_COUNT: countFile,
     NODE_OPTIONS: `${process.env['NODE_OPTIONS'] ? process.env['NODE_OPTIONS'] + ' ' : ''}--require=${preload}` };

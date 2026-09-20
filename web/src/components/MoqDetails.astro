@@ -1,0 +1,15 @@
+---
+import type { MoqPolicy } from '../../../shared/content';
+interface Props { policy: MoqPolicy; inheritance?: 'inherit' | 'override' }
+const { policy, inheritance } = Astro.props;
+---
+<div class="moq-details" data-moq-mode={policy.mode} data-moq-source={inheritance}>
+  {inheritance && <p class="small-copy">{inheritance === 'inherit' ? 'Uses the shared MOQ policy.' : 'Category-specific MOQ policy.'}</p>}
+  <dl>
+    <div><dt>{policy.mode === 'confirmedQuantity' ? 'Minimum quantity' : 'Assessment'}</dt><dd>{policy.mode === 'confirmedQuantity' ? `${policy.quantity} ${policy.unit}` : 'Project-based; no fixed minimum quantity is stated.'}</dd></div>
+    {policy.mode === 'projectBased' && <div><dt>Unit</dt><dd>{policy.unit}</dd></div>}
+    <div><dt>Basis</dt><dd>{policy.basis}</dd></div>
+    <div><dt>Size mixing</dt><dd>{policy.sizeMixing}</dd></div>
+    <div><dt>Conditions</dt><dd>{policy.conditions}</dd></div>
+  </dl>
+</div>

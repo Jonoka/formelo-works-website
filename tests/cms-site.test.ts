@@ -153,7 +153,7 @@ test('site reader sanitizes invalid JSON, oversized bodies, transport errors and
   await assert.rejects(read(async () => new Promise<Response>(() => undefined), 10), errorCode('CMS_TIMEOUT'));
 });
 
-test('site provider foundation remains offline and cannot silently activate CONTENT_MODE=sanity', async () => {
+test('full-site mode remains blocked; the default mock entry does not directly import a CMS transport', async () => {
   const before = await loadContent('mock');
   await assert.rejects(loadContent('sanity'), /refusing to fall back/);
   assert.throws(() => readRuntime({ CONTENT_MODE: 'sanity' }), /No fallback/);

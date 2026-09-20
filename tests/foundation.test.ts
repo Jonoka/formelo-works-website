@@ -57,8 +57,8 @@ test('Studio dev and build fail before loading the CLI when configuration is mis
   for (const command of ['dev', 'build']) {
     const result = spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/run-tool.mjs', import.meta.url)), 'sanity', command], {
       cwd: `${root}/studio`,
-      // Empty existing values prevent a local .env from activating a real account in this negative test.
-      env: { ...process.env, SANITY_STUDIO_PROJECT_ID: '', SANITY_STUDIO_DATASET: '', CI: 'true' },
+      // Do not read local account files at all in this negative test.
+      env: { ...process.env, FORMELO_ENV_FILES: 'ignore', SANITY_STUDIO_PROJECT_ID: '', SANITY_STUDIO_DATASET: '', CI: 'true' },
       encoding: 'utf8', timeout: 5000,
     });
     assert.equal(result.error, undefined);
@@ -70,7 +70,7 @@ test('Studio dev and build fail before loading the CLI when configuration is mis
 test('the real Astro build command rejects a production attempt', { timeout: 30000 }, () => {
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/run-tool.mjs', import.meta.url)), 'astro', 'build'], {
     cwd: `${root}/web`,
-    env: { ...process.env, DEPLOY_ENV: 'production', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off', CI: 'true' },
+    env: { ...process.env, FORMELO_ENV_FILES: 'ignore', DEPLOY_ENV: 'production', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off', CI: 'true' },
     encoding: 'utf8', timeout: 25000,
   });
   assert.equal(result.error, undefined);

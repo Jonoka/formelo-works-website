@@ -5,7 +5,7 @@ import { validateCategoryPreviews } from './category-preview';
 import { validateManufacturingPreview, validateFactoryPreview, validateContactPreview } from './fixed-preview';
 
 export async function loadContent(mode: string): Promise<ContentSnapshot> {
-  if (mode !== 'mock') throw new Error('Sanity provider is pending DEV-05; refusing to fall back to mock.');
+  if (mode !== 'mock') throw new Error('Full-site Sanity provider is pending DEV-05; refusing to fall back to mock.');
   const content = structuredClone(mockContent);
   const settings = content.siteSettings;
   if (settings.email !== null || settings.whatsappDigits !== null ||
