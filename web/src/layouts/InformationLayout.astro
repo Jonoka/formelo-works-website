@@ -1,15 +1,15 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
-import { pageContexts, type CorePageKey } from '../../../config/page-context';
-import type { FixedPagePreview } from '../../../shared/content';
+import { pageContexts } from '../../../config/page-context';
+import type { InformationPageDelivery } from '../../../shared/fixed-delivery';
 import '../styles/information.css';
-interface Props { preview: FixedPagePreview<CorePageKey>; brandName: string }
+interface Props { preview: InformationPageDelivery; brandName: string }
 const { preview, brandName } = Astro.props;
 ---
 <BaseLayout title={preview.seo.seoTitle} description={preview.seo.seoDescription} brandName={brandName} showMobileContact referenceCode={preview.referenceCode}>
   <Breadcrumb label={pageContexts[preview.pageKey].label} />
-  <div class:list={['information-page', `information-${preview.pageKey}`]} data-page-key={preview.pageKey} data-preview-status={preview.status} data-facts-status={preview.factsStatus} data-production-allowed="false">
+  <div class:list={['information-page', `information-${preview.pageKey}`]} data-page-key={preview.pageKey} data-page-source={preview.source} data-page-status={preview.status} data-page-revision={preview.revision} data-preview-status={preview.status} data-facts-status={preview.factsStatus} data-production-allowed="false">
     <slot />
   </div>
 </BaseLayout>

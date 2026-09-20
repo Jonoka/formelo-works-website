@@ -18,7 +18,7 @@ export interface OfflineSiteState {
   bundle?: RecordValue; status?: number; delayMs?: number;
   resultPatch?: { path: (string | number)[]; value: unknown };
 }
-export function createOfflineSiteHarness(articleMode: 'mock' | 'published' = 'published', siteMode: 'mock' | 'published' = 'published') {
+export function createOfflineSiteHarness(articleMode: 'mock' | 'published' = 'published', siteMode: 'mock' | 'published' = 'published', fixedMode: 'mock' | 'published' = 'mock') {
   mkdirSync('.local', { recursive: true });
   const directory = mkdtempSync(resolve('.local', 'site-delivery-offline-'));
   const statePath = join(directory, 'state.json'), callsPath = join(directory, 'calls.jsonl'), preload = join(directory, 'transport.mjs');
@@ -64,7 +64,7 @@ globalThis.fetch = async (input, init = {}) => {
   // Only OS/process basics are inherited. No real Sanity settings, tokens, dotenv files or user preloads.
   const safeProcess = Object.fromEntries(['PATH', 'Path', 'SystemRoot', 'ComSpec', 'TMP', 'TEMP', 'HOME', 'USERPROFILE', 'LOCALAPPDATA', 'APPDATA', 'CI'].flatMap(key => process.env[key] === undefined ? [] : [[key, process.env[key]!]]));
   const env = { ...safeProcess, FORMELO_ENV_FILES: 'ignore', FORMELO_OFFLINE_SITE_TEST: siteMode === 'published' ? '1' : '0',
-    DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', HOME_CATEGORY_CONTENT_MODE: siteMode, ARTICLE_CONTENT_MODE: articleMode, DEV_CMS_DRAFT_PREVIEW: '0',
+    DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', HOME_CATEGORY_CONTENT_MODE: siteMode, FIXED_PAGE_CONTENT_MODE: fixedMode, ARTICLE_CONTENT_MODE: articleMode, DEV_CMS_DRAFT_PREVIEW: '0',
     CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off', ASTRO_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1',
     SANITY_SITE_READ_ENABLED: '1', SANITY_PROJECT_ID: 'offline1', SANITY_DATASET: 'offline-fixture', SANITY_READ_TOKEN: token, SANITY_API_VERSION: '2025-02-19',
     SANITY_ARTICLE_READ_IDS: ids.join(','), NODE_OPTIONS: `--import=${pathToFileURL(preload).href}` };
@@ -78,8 +78,8 @@ async function stopChild(child: ChildProcess) {
     child.once('exit', () => { clearTimeout(timer); done(); }); child.kill('SIGTERM');
   });
 }
-export async function startOfflineSiteServer(articleMode: 'mock' | 'published' = 'published') {
-  const harness = createOfflineSiteHarness(articleMode), probe = createServer();
+export async function startOfflineSiteServer(articleMode: 'mock' | 'published' = 'published', fixedMode: 'mock' | 'published' = 'mock') {
+  const harness = createOfflineSiteHarness(articleMode, 'published', fixedMode), probe = createServer();
   await new Promise<void>((done, fail) => { probe.once('error', fail); probe.listen(0, '127.0.0.1', done); });
   const port = (probe.address() as AddressInfo).port;
   await new Promise<void>((done, fail) => probe.close(error => error ? fail(error) : done()));

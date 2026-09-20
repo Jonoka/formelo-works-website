@@ -5,6 +5,7 @@ import type { CmsApprovedImage } from './cms-image';
 import type { CategoryPreview, ContentSnapshot, Faq, HomeCapability, LocalPreviewImage, MoqPolicy, Seo, SiteSettings } from './content';
 import { homeSectionKeys, type HomeSectionCopy } from './cms-home';
 import { CmsContentError } from './cms-validation';
+import { deliverLocalFixedPages, type FixedPageDeliveries } from './fixed-delivery';
 
 export type HomeCategoryMode = 'mock' | 'published';
 export type PageImage = LocalPreviewImage | CmsApprovedImage;
@@ -23,7 +24,7 @@ export interface HomeDelivery {
   defaultMoq: MoqPolicy | null; factorySummary: string | null; factoryImage: CmsApprovedImage | null;
 }
 /** This site-stage policy is independent of CMS channel configuration or technical publish state. */
-export const contactReleasePolicy = Object.freeze({ phase: 'DEV-05E', activationAllowed: false, copyingAllowed: false } as const);
+export const contactReleasePolicy = Object.freeze({ phase: 'DEV-05F', activationAllowed: false, copyingAllowed: false } as const);
 export function contactPresentation(settings: Pick<SiteSettings, 'email' | 'whatsappDigits' | 'channelStatus'>) {
   return {
     state: 'disabled_by_website_stage' as const,
@@ -34,7 +35,8 @@ export function contactPresentation(settings: Pick<SiteSettings, 'email' | 'what
   };
 }
 export interface SiteDelivery {
-  mode: HomeCategoryMode; home: HomeDelivery; categories: CategoryDelivery[]; cards: CategoryCard[];
+  mode: HomeCategoryMode; fixedMode: HomeCategoryMode; fixedPages: FixedPageDeliveries;
+  home: HomeDelivery; categories: CategoryDelivery[]; cards: CategoryCard[];
   shell: { brandName: string; source: 'local' | 'sanity'; offlineTest: boolean; contact: ReturnType<typeof contactPresentation> };
   /** Server-only original validated bundle, never serialized wholesale to a browser. */
   cms: CmsSiteBundle | null;
@@ -44,6 +46,13 @@ export function readHomeCategoryMode(env: Record<string, string | undefined>): H
   if (mode !== 'mock' && mode !== 'published') throw new CmsContentError('SITE_SOURCE_CONFIG', 'HOME_CATEGORY_CONTENT_MODE');
   return mode;
 }
+export function readSiteModes(env: Record<string, string | undefined>): { homeCategory: HomeCategoryMode; fixed: HomeCategoryMode } {
+  const homeCategory = readHomeCategoryMode(env), fixed = env['FIXED_PAGE_CONTENT_MODE'] ?? 'mock';
+  if (fixed !== 'mock' && fixed !== 'published') throw new CmsContentError('SITE_SOURCE_CONFIG', 'FIXED_PAGE_CONTENT_MODE');
+  // A CMS fixed-page body must not link into a parallel local category/settings snapshot.
+  if (fixed === 'published' && homeCategory !== 'published') throw new CmsContentError('SITE_SOURCE_CONFLICT', 'FIXED_PAGE_CONTENT_MODE');
+  return { homeCategory, fixed };
+}
 export function categoryCardData(category: CategoryDelivery): CategoryCard {
   return category.kind === 'category_preview'
     ? { slug: category.slug, path: `/clothing/${category.slug}/`, name: category.name, summary: category.cardSummary, image: category.image, source: 'local', revision: null }
@@ -52,7 +61,7 @@ export function categoryCardData(category: CategoryDelivery): CategoryCard {
 export function deliverLocalSite(content: ContentSnapshot): SiteDelivery {
   const { home, homepagePreview: preview } = content;
   return {
-    mode: 'mock', cms: null, categories: content.categoryPreviews, cards: content.categoryPreviews.map(categoryCardData),
+    mode: 'mock', fixedMode: 'mock', fixedPages: deliverLocalFixedPages(content), cms: null, categories: content.categoryPreviews, cards: content.categoryPreviews.map(categoryCardData),
     shell: { brandName: content.siteSettings.brandName, source: 'local', offlineTest: false, contact: contactPresentation(content.siteSettings) },
     home: {
       source: 'local', status: 'concept_only', revision: null, websitePublication: 'not_published', productionAllowed: false,
@@ -63,7 +72,7 @@ export function deliverLocalSite(content: ContentSnapshot): SiteDelivery {
     },
   };
 }
-export function deliverPublishedSite(bundle: CmsSiteBundle, offlineTest = false): SiteDelivery {
+export function deliverPublishedSite(bundle: CmsSiteBundle, fixedPages: FixedPageDeliveries, fixedMode: HomeCategoryMode, offlineTest = false): SiteDelivery {
   const home = bundle.pages.find(page => page.pageKey === 'home');
   if (!home?.heroImage || !home.templateContent) throw new CmsContentError('CMS_INCOMPLETE_PAGE', 'home.templateContent');
   const content = home.templateContent;
@@ -76,7 +85,7 @@ export function deliverPublishedSite(bundle: CmsSiteBundle, offlineTest = false)
   const sections = {} as HomeDelivery['sections'];
   for (const key of homeSectionKeys) sections[key] = { ...content.sections[key], lines: [content.sections[key].title] };
   return {
-    mode: 'published', cms: bundle, categories: bundle.categories, cards,
+    mode: 'published', fixedMode, fixedPages, cms: bundle, categories: bundle.categories, cards,
     shell: { brandName: bundle.siteSettings.brandName, source: 'sanity', offlineTest, contact: contactPresentation(bundle.siteSettings) },
     home: {
       source: 'sanity', status: 'cms_published', revision: home.revision, websitePublication: home.websitePublication, productionAllowed: false,

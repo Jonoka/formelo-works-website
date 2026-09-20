@@ -7,7 +7,7 @@ const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).tr
 const source = JSON.parse(readFileSync('review/source.json', 'utf8'));
 if (source.headSha !== head || source.checkoutSha !== head) throw new Error('SITE_EVIDENCE_SOURCE');
 const report = JSON.parse(readFileSync('test-results/results.json', 'utf8'));
-if (report.stats.expected !== 445 || report.stats.unexpected || report.stats.skipped || report.stats.flaky) throw new Error('SITE_EVIDENCE_BROWSER');
+if (report.stats.expected !== 461 || report.stats.unexpected || report.stats.skipped || report.stats.flaky) throw new Error('SITE_EVIDENCE_BROWSER');
 const attachments = new Map();
 function visit(value) {
   if (!value || typeof value !== 'object') return;

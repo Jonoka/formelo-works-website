@@ -18,12 +18,8 @@ export const page = defineType({
       const key = (context.parent as { pageKey?: string } | undefined)?.pageKey;
       return !['home', 'manufacturing', 'factory', 'contact'].includes(key ?? '') || value ? true : 'Business pages require a fact-confirmation date.';
     }) }),
-    defineField({ name: 'templateContent', type: 'homeTemplateContent',
-      hidden: ({ document }) => document?.['pageKey'] !== 'home',
-      validation: rule => rule.custom((value, context) => {
-        const isHome = context.document?.['pageKey'] === 'home';
-        return isHome ? (value ? true : 'Home requires complete template content.') : (value ? 'Only Home supports this content group in DEV-05E.' : true);
-      }),
+    defineField({ name: 'templateContent', type: 'pageTemplateContent', validation: rule => rule.required(),
+      description: 'Required controlled content for this pageKey. Technical CMS publication never approves facts, contact activation, policy effectiveness or website release.',
     }),
   ],
   preview: { select: { title: 'title', subtitle: 'pageKey' } },

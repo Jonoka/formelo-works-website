@@ -10,7 +10,7 @@ interface Props { title: string; description: string; brandName: string; showMob
 const { title, description, showMobileContact = false, referenceCode } = Astro.props;
 const site = Astro.locals.siteDelivery;
 const { brandName, source, offlineTest } = site.shell;
-const localBody = source === 'sanity' && !['/', '/clothing/t-shirts/', '/clothing/hoodies/'].includes(Astro.url.pathname) && !Astro.url.pathname.startsWith('/blog/');
+const localBody = source === 'sanity' && site.fixedMode === 'mock' && ['/manufacturing/', '/our-factory/', '/contact/', '/blog/', '/privacy/'].includes(Astro.url.pathname);
 if (showMobileContact && referenceCode === null) throw new Error('Content pages need an explicit contact reference.');
 ---
 <!doctype html>
@@ -26,7 +26,7 @@ if (showMobileContact && referenceCode === null) throw new Error('Content pages 
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="preview-notice" data-site-source={source}>
       {offlineTest && <strong>OFFLINE SYNTHETIC RESPONSE — NOT REAL SANITY CONTENT. </strong>}
-      {source === 'local' ? 'Concept preview · Provisional brand & unconfirmed capabilities.' : 'Home and categories: published CMS records. Other fixed-page text: local. Website release is not verified.'}
+      {source === 'local' ? 'Concept preview · Provisional brand & unconfirmed capabilities.' : `Home and categories: published CMS records. Other fixed-page text: ${site.fixedMode === 'published' ? 'published CMS records' : 'local'}. Website release is not verified.`}
     </div>
     <Header brandName={brandName} categories={site.cards} source={source} />
     <main id="main" tabindex="-1">{localBody && <p class="shell local-body-notice" data-body-source="local">This page body remains a local concept. Shared brand, navigation and inactive contact state use the selected site settings.</p>}<slot /></main>

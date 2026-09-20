@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { loadSiteDelivery, safeSiteErrorCode } from './lib/server/site-delivery';
 
-/** Shared shell for all ten pages; only Home and Category bodies are migrated in DEV-05E. */
+/** Shared shell for all ten pages; Home/Category and the five fixed bodies use explicit source groups; articles keep their existing delivery. */
 export const onRequest = defineMiddleware(async (context, next) => {
   const command = import.meta.env['FORMELO_ASTRO_COMMAND'];
   try {

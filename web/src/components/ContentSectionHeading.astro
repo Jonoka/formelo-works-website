@@ -1,0 +1,7 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import type { HomeSectionCopy } from '../../../shared/cms-home';
+interface Props { id: string; copy: HomeSectionCopy; showDescription?: boolean }
+const { id, copy, showDescription = true } = Astro.props;
+---
+<SectionHeading id={id} eyebrow={copy.eyebrow} lines={[copy.title]} note={showDescription ? copy.description : ''} />

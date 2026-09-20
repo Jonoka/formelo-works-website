@@ -4,27 +4,34 @@ import InformationHero from '../components/InformationHero.astro';
 import InformationRows from '../components/InformationRows.astro';
 import FactoryPhotographyPending from '../components/FactoryPhotographyPending.astro';
 import RelatedCategories from '../components/RelatedCategories.astro';
-import SectionHeading from '../components/SectionHeading.astro';
-import { loadContent } from '../lib/content';
-import { readRuntime } from '../../../config/runtime';
-const { factoryPreview: preview, categoryPreviews, siteSettings } = await loadContent(readRuntime().contentMode);
+import ContentSectionHeading from '../components/ContentSectionHeading.astro';
+import ContentImage from '../components/ContentImage.astro';
+const site = Astro.locals.siteDelivery;
+const preview = site.fixedPages.factory;
 ---
-<InformationLayout preview={preview} brandName={siteSettings.brandName}>
-  <InformationHero preview={preview} eyebrow="Our factory / Behind the garment"><FactoryPhotographyPending /></InformationHero>
+<InformationLayout preview={preview} brandName={site.shell.brandName}>
+  <InformationHero preview={preview} eyebrow={preview.eyebrow}>{preview.heroImage ? <ContentImage image={preview.heroImage} label={preview.title} sizes="(min-width: 1024px) 42vw, 100vw" priority /> : <FactoryPhotographyPending />}</InformationHero>
   <section class="section-row section-grid shell" aria-labelledby="factory-overview-heading">
-    <SectionHeading id="factory-overview-heading" eyebrow="A direct conversation" lines={['Know the arrangements.']} />
-    <div class="factory-overview"><p class="serif">{preview.overview}</p><p class="section-note">The factory name and public location have not yet been confirmed for this profile. Original photographs and details of the actual work will be added only after factory review.</p></div>
+    <ContentSectionHeading id="factory-overview-heading" copy={preview.sections.overview} />
+    <div class="factory-overview"><p class="serif">{preview.overview}</p><p class="section-note">{preview.overviewNote}</p></div>
   </section>
   <section class="section-row section-grid shell" id="arrangements" tabindex="-1" aria-labelledby="arrangements-heading">
-    <SectionHeading id="arrangements-heading" eyebrow="Manufacturing responsibilities" lines={['Ask how the work is organised.']} note="Discussion points for your project, not a declaration that all processes are available or carried out on site." />
+    <ContentSectionHeading id="arrangements-heading" copy={preview.sections.arrangements} />
     <InformationRows rows={preview.arrangements} />
   </section>
   <section class="section-row shell factory-quality" id="quality" tabindex="-1" aria-labelledby="quality-heading">
-    <div class="section-grid"><SectionHeading id="quality-heading" eyebrow="Quality / A discussion framework" lines={['Agree what to check.']} /><p class="intro">Quality expectations need a shared reference. These are questions to discuss with our factory, not a confirmed inspection procedure, certification or guarantee.</p></div>
+    <div class="section-grid"><ContentSectionHeading id="quality-heading" copy={preview.sections.quality} showDescription={false} /><p class="intro">{preview.sections.quality.description}</p></div>
     <div class="information-cards">{preview.qualityDiscussion.map((row, index) => <article><p class="eyebrow">0{index + 1} / Review point</p><h3>{row.title}</h3><p>{row.description}</p></article>)}</div>
   </section>
+  {preview.gallery.length > 0 && <section class="section-row shell" aria-labelledby="factory-material-heading" data-factory-gallery>
+    <h2 class="serif" id="factory-material-heading">Supporting photographs</h2>
+    <div class="evidence-grid">{preview.gallery.map(image => <ContentImage image={image} label="Factory supporting photograph" sizes="(min-width: 768px) 45vw, 100vw" />)}</div>
+  </section>}
+  {preview.credentials.length > 0 && <section class="section-row section-grid shell" aria-labelledby="factory-credentials-heading" data-factory-credentials>
+    <h2 class="serif" id="factory-credentials-heading">Recorded credentials</h2><InformationRows rows={preview.credentials} />
+  </section>}
   <section class="section-row section-grid shell" aria-labelledby="factory-related-heading">
-    <SectionHeading id="factory-related-heading" eyebrow="Bring the questions to your brief" lines={['Start with the garment.']} note="The two garment concepts frame different questions. They are not physical factory samples." />
-    <div><RelatedCategories categories={categoryPreviews} /><div class="information-next-links"><a class="text-link" href="/manufacturing/#prepare">Prepare a manufacturing brief <span aria-hidden="true">↗</span></a><a class="text-link" href="/contact/">View contact options <span aria-hidden="true">↗</span></a></div></div>
+    <ContentSectionHeading id="factory-related-heading" copy={preview.sections.related} />
+    <div><RelatedCategories /><div class="information-next-links">{preview.relatedLinks.map(link => <a class="text-link" href={link.href}>{link.label} <span aria-hidden="true">↗</span></a>)}</div></div>
   </section>
 </InformationLayout>

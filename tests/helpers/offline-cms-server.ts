@@ -62,7 +62,7 @@ globalThis.fetch = async (input, init = {}) => {
   const manifestPath = require.resolve('astro/package.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const cli = resolve(dirname(manifestPath), typeof manifest.bin === 'string' ? manifest.bin : manifest.bin.astro);
-  const env = { ...process.env, FORMELO_ENV_FILES: 'ignore', HOME_CATEGORY_CONTENT_MODE: 'mock', DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off',
+  const env = { ...process.env, FORMELO_ENV_FILES: 'ignore', HOME_CATEGORY_CONTENT_MODE: 'mock', FIXED_PAGE_CONTENT_MODE: 'mock', DEPLOY_ENV: 'local', CONTENT_MODE: 'mock', CONCEPT_MODE: 'true', ANALYTICS_MODE: 'off',
     ARTICLE_CONTENT_MODE: mode, DEV_CMS_DRAFT_PREVIEW: mode === 'draft-preview' ? '1' : '0',
     SANITY_PROJECT_ID: projectId, SANITY_DATASET: dataset, SANITY_API_VERSION: '2025-02-19', SANITY_READ_TOKEN: token,
     SANITY_ARTICLE_READ_IDS: documentIds.join(','), ASTRO_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1',

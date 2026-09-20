@@ -5,6 +5,7 @@ import type { CmsReadContext } from '../../shared/cms-article';
 import { record, type RecordValue } from '../../shared/cms-validation';
 import { fixtureReference } from './cms-articles';
 import { homeSectionKeys } from '../../shared/cms-home';
+import { fixtureFixedContent } from './cms-fixed';
 
 export const fixtureSiteContext: CmsReadContext = { projectId: 'offline1', dataset: 'offline-fixture', perspective: 'published', now: Date.parse('2026-09-18T12:00:00Z') };
 const confirmation = '2026-09-17', update = '2026-09-17T00:00:00Z';
@@ -39,7 +40,7 @@ export function fixtureHomeContent(): RecordValue {
 export function fixturePages(): RecordValue[] {
   return pageKeys.map((key, index) => ({ _type: 'page', _id: `offline.page.${key}`, _rev: `offline-page-revision-${index}`, _originalId: null, pageKey: key, pageKeyCount: 1,
     title: `OFFLINE ${key} title`, intro: `OFFLINE ${key} intro`, heroImage: key === 'home' ? fixtureApprovedImage('d') : null,
-    templateContent: key === 'home' ? fixtureHomeContent() : null,
+    templateContent: key === 'home' ? fixtureHomeContent() : fixtureFixedContent(key),
     faqItems: key === 'home' || key === 'manufacturing' ? faqs(key) : [], seo: { _type: 'seo', seoTitle: `OFFLINE ${key} SEO`, seoDescription: `OFFLINE ${key} SEO description` },
     contentUpdatedAt: update, factConfirmedAt: key === 'blogIndex' || key === 'privacy' ? null : confirmation }));
 }

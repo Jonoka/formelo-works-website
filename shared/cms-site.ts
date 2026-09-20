@@ -4,6 +4,7 @@ import { convertCmsApprovedImage, type CmsApprovedImage } from './cms-image';
 import { resolveCmsReference, type CmsReadContext } from './cms-article';
 import { array, date, fail, id, record, type RecordValue } from './cms-validation';
 import { convertCmsHomeContent, sitePlainText as string, type CmsHomeTemplateContent } from './cms-home';
+import { convertCmsFixedTemplate, type CmsFixedContentMap } from './cms-fixed';
 
 export const cmsPagePaths = {
   home: '/', manufacturing: '/manufacturing/', factory: '/our-factory/',
@@ -26,13 +27,14 @@ export interface CmsSiteSettingsData {
   defaultMoq: MoqPolicy; logo: CmsApprovedImage; defaultOgImage: CmsApprovedImage;
   featuredCategories: string[]; factConfirmedAt: string;
 }
-export interface CmsPageData {
+export interface CmsPageBase {
   kind: 'cms_page'; source: 'sanity'; documentId: string; revision: string;
   cmsPerspective: 'published'; websitePublication: 'not_verified'; productionAllowed: false;
-  pageKey: CmsPageKey; path: string; title: string; intro: string; seo: Seo;
+  path: string; title: string; intro: string; seo: Seo;
   faqItems: Faq[]; heroImage: CmsApprovedImage | null; contentUpdatedAt: string; factConfirmedAt: string | null;
-  templateContent: CmsHomeTemplateContent | null;
 }
+export type CmsTemplateMap = CmsFixedContentMap & { home: CmsHomeTemplateContent };
+export type CmsPageData = { [K in CmsPageKey]: CmsPageBase & { pageKey: K; templateContent: CmsTemplateMap[K] } }[CmsPageKey];
 export interface CmsCapabilityRow { name: string; description: string; limitNote: string | null }
 export interface CmsSampleData {
   sampleCode: string; name: string; summary: string; images: CmsApprovedImage[];
@@ -136,13 +138,15 @@ export function convertCmsSiteBundle(value: unknown, context: CmsReadContext): C
     const faqItems = faq(doc['faqItems'], `${field}.faqItems`, key === 'home' || key === 'manufacturing' ? 3 : 0);
     const heroImage = doc['heroImage'] == null ? null : convertCmsApprovedImage(doc['heroImage'], `${field}.heroImage`, context);
     if (key === 'home' && !heroImage) fail(`${field}.heroImage`, 'CMS_INCOMPLETE_PAGE');
-    if (key !== 'home' && doc['templateContent'] != null) fail(`${field}.templateContent`, 'CMS_TEMPLATE_SCOPE');
-    const templateContent = key === 'home' ? convertCmsHomeContent(doc['templateContent'], `${field}.templateContent`, context) : null;
+    if (key !== 'home' && key !== 'factory' && heroImage) fail(`${field}.heroImage`, 'CMS_TEMPLATE_SCOPE');
+    const template = key === 'home'
+      ? { pageKey: key, templateContent: convertCmsHomeContent(doc['templateContent'], `${field}.templateContent`, context) } as const
+      : convertCmsFixedTemplate(key, doc['templateContent'], `${field}.templateContent`, context, contentUpdatedAt);
     return {
       kind: 'cms_page', source: 'sanity', documentId: publishedIdentity(doc, field), revision: id(doc['_rev'], `${field}._rev`),
       cmsPerspective: 'published', websitePublication: 'not_verified', productionAllowed: false,
-      pageKey: key, path: cmsPagePaths[key], title: string(doc['title'], `${field}.title`), intro: string(doc['intro'], `${field}.intro`),
-      seo: pageSeo, faqItems, heroImage, contentUpdatedAt, factConfirmedAt, templateContent,
+      ...template, path: cmsPagePaths[key], title: string(doc['title'], `${field}.title`), intro: string(doc['intro'], `${field}.intro`),
+      seo: pageSeo, faqItems, heroImage, contentUpdatedAt, factConfirmedAt,
     };
   });
   for (const key of pageKeys) if (!seenPages.has(key)) fail('site.pages', 'CMS_INCOMPLETE_COLLECTION');

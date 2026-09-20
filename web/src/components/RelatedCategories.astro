@@ -1,6 +1,6 @@
 ---
 import type { CategoryPreview } from '../../../shared/content';
-interface Props { categories: CategoryPreview[] }
+interface Props { categories?: CategoryPreview[] }
 const categories = Astro.locals.siteDelivery.cards;
 ---
 <div class="information-category-links">{categories.map(category => <a href={category.path}><span><strong>{category.name}</strong><span>{category.summary}</span></span><span aria-hidden="true">↗</span></a>)}</div>

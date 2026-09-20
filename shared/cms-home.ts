@@ -22,8 +22,9 @@ export function sitePlainText(value: unknown, field: string): string {
   return text;
 }
 export function convertCmsHomeContent(value: unknown, field: string, context: CmsAssetContext): CmsHomeTemplateContent {
-  const input = record(value, field, ['_type', 'eyebrow', 'titleLineHints', 'sections', 'capabilities', 'manufacturingSummary', 'factorySummary', 'factoryImage', 'processSteps']);
-  if (input['_type'] !== 'homeTemplateContent') fail(field, 'CMS_TEMPLATE_SCOPE');
+  const input = record(value, field, ['_type', 'pageKey', 'eyebrow', 'titleLineHints', 'sections', 'capabilities', 'manufacturingSummary', 'factorySummary', 'factoryImage', 'processSteps']);
+  // Legacy DEV-05E Home objects remain readable; new Studio objects identify their page explicitly.
+  if (!(input['_type'] === 'homeTemplateContent' && input['pageKey'] == null) && !(input['_type'] === 'pageTemplateContent' && input['pageKey'] === 'home')) fail(field, 'CMS_TEMPLATE_SCOPE');
   const sectionsInput = record(input['sections'], `${field}.sections`, ['_type', ...homeSectionKeys]);
   const sections = {} as CmsHomeTemplateContent['sections'];
   for (const key of homeSectionKeys) {
