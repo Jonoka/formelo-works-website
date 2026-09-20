@@ -31,7 +31,7 @@ export function readRuntime(env: Environment = process.env): RuntimeConfig {
     throw new Error('DEPLOY_ENV must be local, preview or production.');
   }
   if ((env['CONTENT_MODE'] ?? 'mock') !== 'mock') {
-    throw new Error('CONTENT_MODE: Full-site Sanity selection is not enabled. Use the explicit authorized source groups; no fallback to mock is allowed.');
+    throw new Error('CONTENT_MODE: Full-site Sanity selection is not enabled. Use the explicit authorized source groups. No fallback to mock is allowed.');
   }
   if ((env['CONCEPT_MODE'] ?? 'true') !== 'true') {
     throw new Error('CONCEPT_MODE must remain true until the production release gate is implemented.');
