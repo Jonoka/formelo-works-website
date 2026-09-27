@@ -2,6 +2,10 @@
 
 ## 当前状态
 
+**2026-09-27 更新：** PR #14已由用户合并至 `4d6680ad2912e853f116704aecf20a211da1f27b`，已获原字段表的限定写入批准，并实际完成10条Draft创建、原询价excerpt-only修订保护修改及11条读回。详见[保存记录](cms-editorial-verification.md)。不重建/重复保存，不再索要这项已执行许可。记录分支为 `content/cms-draft-entry`；无应用、schema、环境、预览、门禁或部署变更。下面PR #13/14拟稿阶段的“未获准/未执行”按原时点保留，不覆盖本次窄范围执行结果。
+
+新增记录仍不完整，正式reader规则不变。工具schema发现返回“未部署”，但已连接Sanity的create_documents和带ifRevisionId的patch_documents实际接受本批Draft；没有因此部署schema或切换无保护写入路径。当前无需重复测试写入能力。
+
 PR #13 / DEV-05G 已由用户合并，本阶段从实际 `main@b8624a0fba90a4442dc3cbe45c47112e428b23f8` 建立 `content/cms-launch-drafts`。DEV-05H交付[英文待审稿及字段表](../content/cms-launch-drafts.en.md)，同一[工厂清单](../content/factory-materials-checklist.md)保留中文确认问题。本批云端Draft写入未获准、未执行；不向main直接提交，不自动Ready/合并/部署。
 默认仍是十内容URL+404的mock站点；既有三页/五页/文章来源模式及全部校验保持。2026-09-20用户“批准”只增加指定settings/6pageKey/2category slug/2article slug及必要引用/媒体元数据的读权限，允许必要正文与现有loopback核对。真实写入/媒体上传/发布撤回/扩展草稿预览/渠道/政策生效/SEO/生产/部署均未获准。以下A–F说明保留历史含义，不能覆盖当前有限只读批准。
 

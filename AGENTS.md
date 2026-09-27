@@ -11,7 +11,7 @@ Repository Markdown is the working documentation; imported v1 documents are snap
 - Factory-owned identity, English public site; website team owns web / SEO, factory owns sales and fulfillment.
 - Ten content URLs / eight templates. Use `config/routes.json`.
 - No inquiry forms, customer uploads, customer database, CRM, checkout, payments, order portal, chatbot API, or extra SEO pages without an explicit scope change.
-- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). PR #9–#13 / DEV-05C–G are user-merged; all planned CMS template paths exist. DEV-05H prepares launch copy on content/cms-launch-drafts; the approved limited read scope remains valid, but batch cloud Draft writes still require separate approval. Default content remains mock; the existing one-Draft preview remains actual-dev/local/loopback-only.
+- Astro + TypeScript static site and a separate Sanity Studio use root npm workspaces. Current concept structure is ten content URLs in config/routes.json plus engineering 404 (11 HTML files). PR #9–#14 are user-merged; all planned CMS template paths exist. The DEV-05H field batch was explicitly approved and saved as Drafts; see the current receipt and do not repeat creates. The limited read scope remains valid; unrelated writes still require separate approval. Default content remains mock; the existing one-Draft preview remains actual-dev/local/loopback-only.
 - Preserve the chosen serif editorial headings, warm off-white, charcoal, brick-red CTA, thin dividers, garment photography and dark footer. Fine spacing / contrast / mobile refinements are allowed; unrelated redesigns are not.
 
 ## Source and truth rules
@@ -50,7 +50,15 @@ Use Node 24.21.0 and npm 11.19.1 (upgrade the bundled npm explicitly), exact dep
 `npm run verify` covers type checking, unit/schema tests, an actual production-build rejection, static-output checks and Chromium tests of both dev and preview. Keep Python bootstrap tests runnable on Linux CI. Never treat these as full PRD or production acceptance.
 `DEPLOY_ENV=production`, unsupported content modes and analytics fail closed. Ordinary CI/builds use no Sanity secret and no live cloud request; tests may exercise invalid/synthetic CMS input through injected transport. Preserve DEV-05A / PR #7 and PR #6 / #5 verification as historical evidence. Do not claim browser, CI, contact delivery or live Sanity integration tests ran unless they actually did.
 
-## Current DEV-05H launch-copy boundary
+## Current DEV-05H approved Draft entry / 2026-09-27
+
+PR #14 was user-merged at `2026-09-27T07:20:02Z`; accepted head `5475c00f543b86583c06a9f6d90324965e67dd3b`, actual merge/base `4d6680ad2912e853f116704aecf20a211da1f27b`, identical source tree. The user explicitly approved only the existing manuscript's ten still-missing Draft creates and the original quote excerpt-only revision-guarded patch in `iajvl7ka/production`.
+
+That batch has now been executed: ten Drafts created, one original quote excerpt edited; all eleven read back, no matching published versions or duplicate logical keys. Exact IDs/revisions and remaining gaps are in `docs/operations/cms-editorial-verification.md`. Do not ask for the same completed-batch authorization or create/save the records again. Future work must reread current content/revisions and respect the original field scope; this receipt is not new permission to rewrite existing pages or fill facts/references/media.
+
+Git receipt work uses `content/cms-draft-entry` from the actual merged main; do not append work to merged `content/cms-launch-drafts`. Only existing Markdown records changed. No application/schema/query/runtime/preview or dependency changes. Keep unknown facts, MOQ, samples, images, author and content/fact/public/legal dates unset; automatic Content Lake timestamps do not approve facts or establish publication dates. Contacts remain disabled and Privacy remains pending / draft_not_in_effect. No publish/unpublish/delete, media, messages, deployment, production changes or full-site Draft preview. Historical no-write statements below describe their original phases, not this completed narrowly authorized batch.
+
+## Historical DEV-05H launch-copy boundary
 
 PR #13 was user-merged at `2026-09-20T11:41:09Z`, reviewed head `2af2e2a7e56f832fba1e7314c8c94ac10b20a83a`, actual merge/base `b8624a0fba90a4442dc3cbe45c47112e428b23f8`. Continue `content/cms-launch-drafts`, not merged `chore/cms-live-readiness`. Recheck latest main, PRs and Windows status before further work; the recorded base is historical, not a permanent development starting point.
 
