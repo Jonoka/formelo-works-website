@@ -256,6 +256,18 @@ PR #12 已由 Jonoka 于 `2026-09-20T08:10:40Z` 合并；actual base `1515560898
 
 公开协议依据于本轮再次核对：[Query HTTP API](https://www.sanity.io/docs/http-reference/query) 和 [Perspectives](https://www.sanity.io/docs/content-lake/perspectives)。raw 只用于当前批准的诊断；正式 reader 仍 published-only、错误脱敏、无重试/旧内容/mock回退。
 
+## DEV-05H · 内容稿到现有字段的交接
+
+[英文待审稿](../content/cms-launch-drafts.en.md)逐页列出字面字段路径、完整客户文案、正文块映射和批次allowlist；[原工厂清单](../content/factory-materials-checklist.md)保留所有事实缺口/中文确认问题。本轮没有新增应用内容源、自动导入程序、schema字段、页面或预览系统。
+
+新page使用当前 `pageTemplateContent` 及相同pageKey，Home仍为六个固定sections，没有第七个manufacturing section；两个manufacturingSummary子字段另存。Category `categoryCode` 等于既定slug，`referenceCode` 为 `WEB-TSHIRTS` / `WEB-HOODIES`；没有把mock的concept/discussion/cardSummary字段写入schema。Journal只写栏目字段，不复制文章卡片；Privacy用原editorialBody和pending/not-in-effect状态，禁填运营字段不变。
+
+本批拟写值刻意不含日期、作者、实际联系方式、MOQ政策、图片、样品、能力行或未就绪引用。Home能力/工厂摘要、Factory实情/实际工序仍缺；不能把通用采购问题放进这些字段冒充已审核工厂信息。`projectBased`与`inherit`不作为不知道MOQ时的占位默认值。图片对象整个未设，不能只编造asset引用或publicUseApproved；缺样品不建立三组fixture。
+
+新MOQ稿是原定第二篇文章的待审正文：7 H2、1 H3、2表、1假设说明、1纯文本模板。60/180算例仅是教学条件。Portable Text编码尚待获准录入时按原契约检查，正式published完整性仍不满足。原询价已重读实际19块短稿；仅提议删excerpt中的联调前缀，不把本地长稿覆盖云端正文，其他字段保留。
+
+批次授权尚未获得，云端新增/编辑均为0。具体非覆盖create、revision保护patch、冲突和保存后复核规则见[runbook](../operations/runbook.md#dev-05h--先审稿再受控录入)。字段表中的拟用ID不是已保存ID；写前发现已有对应slug/pageKey时不按旧缺失清单创建或覆盖。Git稿件不意味着云端已同步。
+
 ## 官方依据 / 2026-09-16 核对
 
 本仓库安装 Sanity / @sanity/schema **5.31.2**，锁图内 @sanity/client **7.27.0**，groq-js **1.30.3**。客户端仅是 Studio 的既有间接依赖，本轮 HTTP 读取不使用它。

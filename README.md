@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前仍为 **十个内容 URL + 工程 404 的非生产网站**。PR #12 已由用户合并，实际 main/base `15155608981d0c092de928e319e717dd7f7af731`；五页模板接线及用户视觉确认已完成。`chore/cms-live-readiness` 推进 DEV-05G：用户已批准指定全站对象的有限只读盘点。本次真实查询仅找到原询价 Draft，其余十个逻辑记录未查到，尚无可交付的 published 集合；不是全站 CMS 上线。逐页缺口见同一份[工厂资料清单](docs/content/factory-materials-checklist.md)，权限/方法见[映射](docs/development/cms-editorial-mapping.md)和[验证记录](docs/operations/cms-editorial-verification.md)。不包含云端写入、发布、渠道或部署授权；artifact 留存例外不等于 CI 全绿。
+> 当前仍为 **十个内容 URL + 工程 404 的非生产网站**。PR #13 已由用户合并，本阶段实际起点 `b8624a0fba90a4442dc3cbe45c47112e428b23f8`。`content/cms-launch-drafts` 推进 DEV-05H：[首发英文待审稿](docs/content/cms-launch-drafts.en.md)已按现有模块整理，包含逐字段候选写入表；中文确认问题仍在同一份[工厂资料清单](docs/content/factory-materials-checklist.md)。仅沿用有限只读许可核对变化，**尚无本批云端Draft写入批准，实际新增0、编辑0**。既有视觉/模板不重做，正式事实、图片、发布与部署门禁不解除。方法见[映射](docs/development/cms-editorial-mapping.md)和[验证记录](docs/operations/cms-editorial-verification.md)；PR #13必要检查与artifact留存/合并例外分开，不能写成CI全绿。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 
@@ -37,16 +37,16 @@ DEV-05D 新增的全站 provider 仍是**离线工程基础**：固定查询只�
 ```bash
 git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
-# 在新克隆中审阅 DEV-05G 文档分支；先确认远端分支存在：
+# 在新克隆中审阅 DEV-05H 内容分支；先确认远端分支存在：
 git fetch origin
-git switch --track origin/chore/cms-live-readiness
+git switch --track origin/content/cms-launch-drafts
 npm ci
 npm run dev
 # 打开终端打印的本机地址，默认 http://127.0.0.1:4321
 # 端口被占用时可能自动使用下一端口；不要假定仍为 4321。
 ```
 
-main 已包含 PR #12 的五页接线及此前首页/品类/文章链路、Query envelope 修复和 CI 顺序保护；本轮仅在 `chore/cms-live-readiness` 记录真实盘点，不复用已合并分支。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
+main 已包含 PR #13 的限定读取记录及此前全部模板接线、Query envelope 修复和 CI 顺序保护；本轮仅在 `content/cms-launch-drafts` 交付英文待审稿与对应文档，不复用已合并分支。已有工作区切换前先检查 git status（含未跟踪文件），目标分支存在时保留并继续；同步仅 fast-forward，分叉先报告，不 reset、clean 或 force push。运行时固定为 Node **24.21.0**、npm **11.19.1**（`.nvmrc` / `.node-version` / `packageManager`）；直接依赖用精确版本，只有根 `package-lock.json`。不要混用其他包管理器或编辑 lockfile。正常本地开发不需要环境文件、Sanity 凭证或任何真实联系资料。
 
 使用版本管理器或 Node 官方发行包切换到上述精确版本后，先检查 `node --version` / `npm --version`。Node 24.21.0 官方包随附 npm 11.19.0；本项目改用含后续依赖修复的 npm 11.19.1，执行 `npm install --global npm@11.19.1` 后再运行 `npm ci`（便携版应指定自己的安装前缀）。不要通过关闭 `engine-strict` 绕过版本不符。`npm run check:runtime` 会核对实际运行版本、两个版本文件、engines、packageManager 与 lockfile 元数据，完整 `verify` 会先执行此检查。旧验证日志按对应运行时和提交保留；groq-js 1.30.3 在此前阶段已显式声明。DEV-05E 没有升级运行时、依赖或修改 lockfile。
 

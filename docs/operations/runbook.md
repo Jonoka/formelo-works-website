@@ -2,10 +2,24 @@
 
 ## 当前状态
 
-PR #12 / DEV-05F 已由用户合并至 `main@15155608981d0c092de928e319e717dd7f7af731`。DEV-05G 在 `chore/cms-live-readiness` 做获准的限定真实只读盘点，当前已查到1个询价Draft、其余10个逻辑记录未查到；同一[工厂清单](../content/factory-materials-checklist.md)是逐页缺口来源。不向main直接提交，不自动Ready/合并/部署。
+PR #13 / DEV-05G 已由用户合并，本阶段从实际 `main@b8624a0fba90a4442dc3cbe45c47112e428b23f8` 建立 `content/cms-launch-drafts`。DEV-05H交付[英文待审稿及字段表](../content/cms-launch-drafts.en.md)，同一[工厂清单](../content/factory-materials-checklist.md)保留中文确认问题。本批云端Draft写入未获准、未执行；不向main直接提交，不自动Ready/合并/部署。
 默认仍是十内容URL+404的mock站点；既有三页/五页/文章来源模式及全部校验保持。2026-09-20用户“批准”只增加指定settings/6pageKey/2category slug/2article slug及必要引用/媒体元数据的读权限，允许必要正文与现有loopback核对。真实写入/媒体上传/发布撤回/扩展草稿预览/渠道/政策生效/SEO/生产/部署均未获准。以下A–F说明保留历史含义，不能覆盖当前有限只读批准。
 
 盘点先读受控元数据，不输出密钥/原始私密内容；使用本机既有服务器凭证不修改env，诊断结果与截图保存在ignored `.local/cms-live-readiness/`或`.local/cms-draft-review/`。正式reader不改为raw或宽松转换；不存在/仅草稿分别报告，不补mock。仅原询价Draft可临时以actual-dev/local/loopback运行，HOME_CATEGORY/FIXED仍mock，单篇卡片成功不等于全站CMS。具体查询范围、UTC时间、revision与证据口径见[验证](cms-editorial-verification.md)。文档变更只跑相应仓库/顺序检查，下面完整安装/verify命令用于需要它们的工程任务，不为只读盘点重复多套浏览器。
+
+## DEV-05H · 先审稿，再受控录入
+
+当前交付只含Markdown，不是已执行的导入。先审阅英文稿的字段表；除明确列出的值外，不把内部备注、中文问题、mock专有字段或待办写入CMS。最多10个新逻辑记录仅在写前仍缺失时创建；既有询价仅改 `excerpt`，不扩展成整文档编辑许可。
+
+获准后先通过现有授权连接重读限定逻辑选择器和拟用ID的draft/published两版，核对type/key/重复及当前revision。使用支持指定ID且已存在即失败的create，或不覆盖且能分辨未创建结果的createIfNotExists；不使用createOrReplace。逻辑slug可能在另一ID存在，单纯固定ID防重不能代替逻辑查询，写后也须再核对。发现竞争写入或不同键先停，不能为了继续而另建替代文档。
+
+原询价更新须是新鲜revision保护的field patch（Sanity mutation的 `ifRevisionID` 语义），只set批准的 `excerpt`。冲突后重读比较并报告，不能移除条件重试。工具若没有需要的非覆盖/版本保护能力，或拒绝不完整Draft，说明未保存；不得换无保护接口绕过工具或授权。本文不是批准采用其他写入路径。
+
+本批不填写未就绪引用，不发布目标、不造 `_ref`、不改weak。字段缺失可保留为Draft缺口，不降低Studio发布或正式reader完整性/事实/图片检查。正文机械编码按现有editorialBody检查；不得把可保存误报成published转换通过。日期、作者、经营主体、渠道和政策字段按英文稿明确留空规则处理。
+
+实际保存后才做只读回查：目标ID、type/key、revision、主要字段、缺失值、仍为draft及无意外published；再按新增/编辑/保持不变/未完成/失败分别记录。不要预填成功，不靠反复保存测试稿证明写入。凭证/原始响应/私密正文/授权原件不进Git或普通CI附件。云端状态与Git提交独立，默认站点不因草稿录入切换来源。
+
+2026-09-20仅查阅协议依据：[Mutation](https://www.sanity.io/docs/http-reference/mutation)、[Transactions / revision guard](https://www.sanity.io/docs/content-lake/transactions)、[Studio validation](https://www.sanity.io/docs/studio/validation)。这些滚动文档不证明连接器某项写入已执行或当前安装版本具有新预览能力；本轮未升级依赖，未执行mutation。
 
 ## 本地获取与检查
 
@@ -14,7 +28,7 @@ git clone https://github.com/Jonoka/formelo-works-website.git
 cd formelo-works-website
 git fetch origin
 # 本轮 PR 尚未合并、且远端目标分支确实存在时：
-git switch --track origin/chore/cms-live-readiness
+git switch --track origin/content/cms-launch-drafts
 npm ci
 npm exec -- playwright install chromium
 npm run verify
