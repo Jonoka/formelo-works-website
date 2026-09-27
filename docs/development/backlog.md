@@ -19,7 +19,7 @@
 | DEV-05E | Home / 两品类 CMS 字段到既有模板接线 | 已合并 PR #10；仅离线 transport 授权 | 受控首页字段、严格投影/转换、完整样品/MOQ/证据、共享品牌导航与独立渠道门禁、实际路由构建及 1440/390 私有证据 | 已由用户合并 PR #11；accepted head `dd269089...`，merge/main `53604896f5a554231389455596489eb22d9fabb4`。最新 Review 已关闭漏跑问题，Linux 22/22、241/241、445/445 与 verify 通过；远端 artifact quota 例外仍单独保留，不宣称 CI 全绿 |
 | DEV-05F | 五个固定页 CMS 字段 → 既有模板 | 已由用户合并 PR #11；当时仅离线合成授权 | 五页完整受控正文、原 reader/delivery/模板、双修订构建、失败无回退与响应式证据；[映射](cms-editorial-mapping.md) / [验证](../operations/cms-editorial-verification.md) | PR #12 已由用户合并；accepted `d3b4de2...`、merge `15155608981d0c092de928e319e717dd7f7af731`。同 head 五页视觉确认有效；288/461/Linux22 为该阶段实跑结果，quota/留存例外保留；不是全站上线 |
 | DEV-05G | 真实内容就绪与受控联调 | 已合并 PR #12；2026-09-20 明确有限只读批准 | 限定真实读取、同一工厂清单、原询价Draft reader及精确head证据 | PR #13已由用户合并；accepted `2af2e2a7e56f832fba1e7314c8c94ac10b20a83a`、merge `b8624a0fba90a4442dc3cbe45c47112e428b23f8`。必要检查通过与artifact留存/合并例外分别记录，不称CI全绿；不关闭全站/发布验收 |
-| DEV-05H | 首发英文内容与受控CMS草稿录入 | 已合并PR #13；沿用限定读取，写入须另批 | [英文待审稿](../content/cms-launch-drafts.en.md)、同一工厂清单的中文问题、字段表、原询价excerpt最小改稿、仓库检查与Draft PR | 英文稿已写成，字段/图片/引用缺口已分开；本批云端写入未获准、未执行：新增0/编辑0。等待编辑审阅和具体Draft授权；真实事实与正式上线未完成 |
+| DEV-05H | 首发英文内容与受控CMS草稿录入 | PR #14已由用户合并；2026-09-27明确批准原字段表的限定Draft写入 | 原[英文稿](../content/cms-launch-drafts.en.md)、同一工厂清单、[实际保存ID/revision及读回](../operations/cms-editorial-verification.md) | 已创建10条未发布Draft、原询价excerpt带修订保护编辑1次；全部读回，批准字段保存未完成0。Git记录独立；工厂事实/图片/样品/引用/日期与正式上线仍开放，不扩展全站草稿预览 |
 | DEV-06 | SEO、联系逻辑、可访问性与完整检查 | DEV-04、DEV-05 | 对应 T / UI-V 测试日志；统计关闭 | 待开始 |
 | CONTENT-01 | 正式品牌 / 能力 / 图片 / 联系 / 两文审核 | 工厂资料 | 审核记录、替换台账、真实设备收发 | 待工厂 |
 | DEV-07 | 授权受控预览、正式发布与恢复 | 用户单独授权、CONTENT-01、质量验收 | 平台访问保护验证、部署 ID、回滚演练 | 未授权发布 |

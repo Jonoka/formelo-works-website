@@ -2,7 +2,7 @@
 
 英文服装工厂 B2B 独立站：时尚编辑式视觉、SEO 内容、邮箱 / WhatsApp 直接联系。
 
-> 当前仍为 **十个内容 URL + 工程 404 的非生产网站**。PR #13 已由用户合并，本阶段实际起点 `b8624a0fba90a4442dc3cbe45c47112e428b23f8`。`content/cms-launch-drafts` 推进 DEV-05H：[首发英文待审稿](docs/content/cms-launch-drafts.en.md)已按现有模块整理，包含逐字段候选写入表；中文确认问题仍在同一份[工厂资料清单](docs/content/factory-materials-checklist.md)。仅沿用有限只读许可核对变化，**尚无本批云端Draft写入批准，实际新增0、编辑0**。既有视觉/模板不重做，正式事实、图片、发布与部署门禁不解除。方法见[映射](docs/development/cms-editorial-mapping.md)和[验证记录](docs/operations/cms-editorial-verification.md)；PR #13必要检查与artifact留存/合并例外分开，不能写成CI全绿。
+> 当前仍为 **十个内容 URL + 工程 404 的非生产网站**。PR #14 已由用户于2026-09-27合并，实际main为 `4d6680ad2912e853f116704aecf20a211da1f27b`。用户明确批准后，按既有[英文稿字段表](docs/content/cms-launch-drafts.en.md)实际创建 **10个未发布Draft**，并仅修改原询价Draft的excerpt；11条已逐项读回，限定范围无published或重复逻辑记录。[保存记录](docs/operations/cms-editorial-verification.md)与Git交付独立；`content/cms-draft-entry`仅更新记录，不改文案方案或应用。真实工厂事实、MOQ、图片、样品、署名/日期及未就绪引用仍未设，待办继续使用同一[工厂清单](docs/content/factory-materials-checklist.md)。默认mock、禁用联系、Privacy未生效和生产门禁不变，不代表全站Draft预览或上线。历史CI检查与artifact失败分别记录，不能称CI全绿。
 
 ![用户选定的首页方向：压缩查看版](assets/reference/homepage-selected-v1.webp)
 

@@ -256,3 +256,49 @@ Windows实际项目 `D:\独立站\formelo-works-website` 开工分支 `chore/cms
 | 自动Linux CI / 附件 | 由本轮PR的真实run/head单独报告；不复用PR #13结果，不手动反复重跑探测配额，不改变artifact/账单/保护规则 |
 
 提交范围仅9份Markdown（1新增英文稿、8份对应文档）；未改变应用、schema、配置、测试、依赖、CI、素材、env或既有ignored证据。最终Git head/PR、远端分支和Windows完整porcelain以交付时实查为准，不在提交内伪造自身SHA；云端新增/编辑仍为0。
+
+## DEV-05H draft entry / 2026-09-27
+
+### 本次批准、合并与安全边界
+
+用户明确批准仅在 `iajvl7ka/production` 按原英文稿字段表创建仍缺失的最多10个逻辑记录为未发布Draft，并仅更新原询价Draft的excerpt，必须修订保护；未知事实、MOQ、图片、样品、作者、日期和未就绪引用不填。此次许可已实际执行，不是沿用只读许可推断写权限。
+
+PR #14实际mergedAt=`2026-09-27T07:20:02Z`，accepted head=`5475c00f543b86583c06a9f6d90324965e67dd3b`；[最终Review](https://github.com/Jonoka/formelo-works-website/pull/14#pullrequestreview-5263445094)已读。最新main/merge=`4d6680ad2912e853f116704aecf20a211da1f27b`，tree与accepted head同为 `b42c1f25f30e29770d198d7cd7054d018268cb25`，diff为空，未发现后续文案变化。历史PR #14 Linux必要检查通过与artifact quota失败继续区分，不作为本轮成绩。
+
+Windows开工为 `content/cms-launch-drafts@5475c00`，完整porcelain含全部未跟踪为空。fetch后保留原工作区，用main的 `merge --ff-only origin/main` 同步到4d6680a，再新建不存在且无关联PR的 `content/cms-draft-entry` 记录结果。不reset/clean/force，不复用已合并任务分支；未读写env内容、未删除ignored历史证据。首次工具可选参数不兼容在执行前被拒绝，去掉该可选参数后正常启动；一次PowerShell未引用花括号的rev-parse观察报错，随后使用正确引用重新核对，不把命令链exit0当作该失败观察成功。
+
+### 实际写入与逐项读回
+
+写前通过已连接Sanity按原限定逻辑键和22个draft/base候选ID做有界raw查询，排除versions，初始仍只有原询价Draft。各创建批次前再次核对对应逻辑键/ID没有记录；使用create_documents和精确draft ID，不调用createOrReplace或整文档替换。新记录分5次创建调用，数量1+3+3+2+1=10，无失败或重试创建；没有替代ID。schema发现返回“未部署”，但受支持的Draft创建/patch操作实际成功；没有部署schema，也未寻找本机写token或绕过工具保护。
+
+原询价写前精确读取，`patch_documents`携带 `ifRevisionId=41ad5fd0-211a-4ea2-89e8-433c2906b8a7`，patch只set excerpt，去掉已批准的DEV-05B联调前缀。写后重新读取完整目标并比较：19个正文块及key、标题、slug、来源码、SEO、pending、linkToManufacturing=false和其余现有字段保持；仅excerpt和系统revision/更新时间改变。没有为证明成功重复保存，未发生修订冲突。
+
+| 动作 / 逻辑对象 | 实际Draft ID | 写后读回revision | Content Lake保存UTC（系统元数据） |
+|---|---|---|---|
+| 新增 settings | `drafts.siteSettings` | `07FXIGlct93Kr6MVn5ODc5` | 2026-09-27T07:26:25Z |
+| 新增 Home | `drafts.page.home` | `07FXIGlct93Kr6MVn5OIUh` | 2026-09-27T07:29:12Z |
+| 新增 Manufacturing | `drafts.page.manufacturing` | `isi8jxzUAbHpFyBa6mR5rH` | 2026-09-27T07:29:12Z |
+| 新增 Factory | `drafts.page.factory` | `AwSaqyQgRRLyrrt9Z1qzw3` | 2026-09-27T07:29:12Z |
+| 新增 Contact | `drafts.page.contact` | `isi8jxzUAbHpFyBa6mRE3X` | 2026-09-27T07:30:35Z |
+| 新增 Journal | `drafts.page.blogIndex` | `isi8jxzUAbHpFyBa6mRDyV` | 2026-09-27T07:30:35Z |
+| 新增 Privacy | `drafts.page.privacy` | `07FXIGlct93Kr6MVn5ORGN` | 2026-09-27T07:30:35Z |
+| 新增 T-shirts | `drafts.category.t-shirts` | `isi8jxzUAbHpFyBa6mRiKZ` | 2026-09-27T07:33:06Z |
+| 新增 Hoodies | `drafts.category.hoodies` | `07FXIGlct93Kr6MVn5OVoT` | 2026-09-27T07:33:06Z |
+| 新增 MOQ文章 | `drafts.article.moq-per-style-per-color` | `07FXIGlct93Kr6MVn5OcqR` | 2026-09-27T07:34:20Z |
+| 仅编辑原询价excerpt | `drafts.1d86cc37-7f67-47e0-b29a-3eac5aa0a3ae` | `AwSaqyQgRRLyrrt9Z1opAJ` | 2026-09-27T07:25:59Z |
+
+每条均在保存后另行get_document或限定query读回，而非仅引用mutation返回。逐页核对title/intro/SEO、templateContent/pageKey、已批准数组与FAQ；两品类分别核对slug/code/独立正文，未设moqMode/override、capabilityRows、samples或媒体。Privacy实际13个body块，pending / draft_not_in_effect，受限运营/审核/生效字段未设。MOQ实际30个body块，7H2、1H3、2表、1假设说明、1纯文本模板；60/180保持教学假设，不进入业务MOQ。
+
+最终统一限定raw回查count=11且实际返回11条，全部drafts前缀、逻辑键各唯一，没有匹配published、重复逻辑记录或新增未知ID；revision与上表一致。所有投影的未授权事实/媒体/引用/内容-事实-公开日期存在标记均false。settings品牌仍临时FORMELO WORKS，两渠道enabled=false；两文factReviewStatus=pending；原询价excerpt与批准句子精确相等。结论仅限本次批准的选择器/ID可见范围，不宣称全库审计或无其他无关记录。
+
+**实际新增10，实际编辑1；获准保存未完成0，写入失败0。** 未完成的正式资料不是保存错误：真实工厂身份/能力/工序/MOQ、实物样品及图片许可、署名审核、联系与政策资料、日期和引用仍按同一[工厂清单H01–H11](../content/factory-materials-checklist.md)待补。此批次不授权继续改已创建Draft的其他字段。
+
+### 验证与Git/云端分离
+
+录入前在当前Windows精确Node24.21.0运行一次性只读机械编码，直接读取原稿并调用未修改的 `validateCmsBodyInput`，Privacy13块与MOQ30块都通过；不生成应用脚本或新内容方案。该检查不调用云端、不读取env、不build、不生成网页或截图、不验证published集合。逐项云端读取与人工字段/正文对照另行完成，不把本地编码hash冒称云端全量hash。
+
+本轮不修改应用、schema、查询/转换、runtime、依赖、lockfile、测试、CI、素材、原客户文案或字段级方案；只更新现有Markdown中的执行收据/当前状态。正式published完整性与审核/图片检查保留，不因为Draft保存成功强制预览。默认mock、原单篇Draft隔离、contact disabled、Privacy未生效、analytics off、noindex及production阻断不变。未上传媒体、发布/撤回/删除、发消息、部署或设置Webhook。
+
+Git只记录上述脱敏ID/revision/范围/结果和资料待办；未提交token、原始接口响应、云端整篇原文备份、内部报价/客户资料或授权原件。Git合并不等于云端写入，云端已保存也不表示本记录PR已合并。旧288/461/22、WSL20/22和quota记录只保留历史含义。
+
+提交前Windows实际检查：`python -X utf8 scripts/check_repository.py`通过；既有 `test_ci_workflow.py` 两项回归2/2通过，未修改测试或CI；只读差异断言确认排除新增收据段后原525行英文稿及字段表逐字不变、仅7份既有Markdown变化且无新增未跟踪文件；`git diff --check`通过，实际便携Node版本读为v24.21.0。没有手动重跑完整verify、22项Windows/WSL套件、浏览器或audit；没有页面新截图。最终Git base/head、PR和Windows终态在交付时实查，自动Linux CI另按本次真实run报告，不冒称全绿或附件已留存。
